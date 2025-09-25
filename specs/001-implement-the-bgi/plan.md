@@ -1,8 +1,8 @@
 
-# Implementation Plan: [FEATURE]
+# Implementation Plan: Complete BGI Graphics.h API Implementation
 
-**Branch**: `[###-feature-name]` | **Date**: [DATE] | **Spec**: [link]
-**Input**: Feature specification from `/specs/[###-feature-name]/spec.md`
+**Branch**: `001-implement-the-bgi` | **Date**: 2025-09-26 | **Spec**: [spec.md](./spec.md)
+**Input**: Feature specification from `/specs/001-implement-the-bgi/spec.md`
 
 ## Execution Flow (/plan command scope)
 ```
@@ -31,18 +31,18 @@
 - Phase 3-4: Implementation execution (manual or via tools)
 
 ## Summary
-[Extract from feature spec: primary requirement + technical approach from research]
+Complete implementation of the classic Borland Graphics Interface (BGI) API in modern Rust with extensible backend architecture. Primary requirement: pixel-perfect compatibility with original BGI functions while enabling multiple rendering backends through compile-time feature selection. Technical approach: Backend trait abstraction with winit-based initial implementation, software emulation for complete feature parity, and hybrid error handling maintaining BGI semantics.
 
 ## Technical Context
-**Language/Version**: [e.g., Python 3.11, Swift 5.9, Rust 1.75 or NEEDS CLARIFICATION]  
-**Primary Dependencies**: [e.g., FastAPI, UIKit, LLVM or NEEDS CLARIFICATION]  
-**Storage**: [if applicable, e.g., PostgreSQL, CoreData, files or N/A]  
-**Testing**: [e.g., pytest, XCTest, cargo test or NEEDS CLARIFICATION]  
-**Target Platform**: [e.g., Linux server, iOS 15+, WASM or NEEDS CLARIFICATION]
-**Project Type**: [single/web/mobile - determines source structure]  
-**Performance Goals**: [domain-specific, e.g., 1000 req/s, 10k lines/sec, 60 fps or NEEDS CLARIFICATION]  
-**Constraints**: [domain-specific, e.g., <200ms p95, <100MB memory, offline-capable or NEEDS CLARIFICATION]  
-**Scale/Scope**: [domain-specific, e.g., 10k users, 1M LOC, 50 screens or NEEDS CLARIFICATION]
+**Language/Version**: Rust 1.80+ (Edition 2021)  
+**Primary Dependencies**: winit 0.29, pixels 0.13, thiserror 1.0, bitflags 2.4  
+**Storage**: In-memory graphics state and pixel buffers (no persistent storage)  
+**Testing**: cargo test with unit tests, integration tests, and visual regression testing  
+**Target Platform**: Cross-platform (Windows, Linux, macOS) with additional backends possible
+**Project Type**: Single library crate with optional backend features  
+**Performance Goals**: 30 FPS for typical graphics operations matching retro hardware capabilities  
+**Constraints**: Zero-cost abstractions, pixel-perfect compatibility, BGI-only coordinate system  
+**Scale/Scope**: Complete graphics.h API surface (~100 functions), multiple graphics modes, extensible to additional backends
 
 ## Constitution Check
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
@@ -67,50 +67,46 @@ specs/[###-feature]/
 ```
 
 ### Source Code (repository root)
-<!--
-  ACTION REQUIRED: Replace the placeholder tree below with the concrete layout
-  for this feature. Delete unused options and expand the chosen structure with
-  real paths (e.g., apps/admin, packages/something). The delivered plan must
-  not include Option labels.
--->
 ```
-# [REMOVE IF UNUSED] Option 1: Single project (DEFAULT)
 src/
-├── models/
-├── services/
-├── cli/
-└── lib/
+├── lib.rs                 # Main library entry point with public API exports
+├── error.rs              # Error types and BGI error system
+├── types.rs              # BGI data types and enums  
+├── color.rs              # Color system and palette management
+├── constants.rs          # BGI constants and definitions
+├── context.rs            # Graphics context management
+├── graphics.rs           # Graphics initialization (initgraph, closegraph, etc.)
+├── drawing.rs            # Drawing primitives (line, circle, rectangle, etc.)
+├── shapes.rs             # Filled shapes (bar, bar3d, ellipse, polygon, etc.)
+├── fill.rs               # Fill patterns and flood fill
+├── text.rs               # Text rendering and font support
+├── input.rs              # Input handling (keyboard/mouse)
+├── viewport.rs           # Viewport and coordinate management
+├── image.rs              # Image operations (getimage, putimage, etc.)
+├── palette.rs            # Palette management functions
+├── window.rs             # Multi-window management
+├── performance.rs        # Performance control (fast/slow modes)
+└── backend/
+    ├── mod.rs            # Backend trait definition
+    └── winit.rs          # Winit backend implementation
 
 tests/
-├── contract/
-├── integration/
-└── unit/
+├── integration/          # Cross-backend integration tests
+│   ├── drawing_tests.rs
+│   ├── input_tests.rs
+│   └── compatibility_tests.rs
+└── unit/                 # Unit tests per module
+    ├── color_tests.rs
+    ├── drawing_tests.rs
+    └── backend_tests.rs
 
-# [REMOVE IF UNUSED] Option 2: Web application (when "frontend" + "backend" detected)
-backend/
-├── src/
-│   ├── models/
-│   ├── services/
-│   └── api/
-└── tests/
-
-frontend/
-├── src/
-│   ├── components/
-│   ├── pages/
-│   └── services/
-└── tests/
-
-# [REMOVE IF UNUSED] Option 3: Mobile + API (when "iOS/Android" detected)
-api/
-└── [same as backend above]
-
-ios/ or android/
-└── [platform-specific structure: feature modules, UI flows, platform tests]
+examples/
+├── simple.rs             # Basic BGI usage example
+├── mandelbrot.rs         # Complex graphics demonstration
+└── compatibility.rs      # BGI compatibility showcase
 ```
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+**Structure Decision**: Single library project structure selected. BGI is a graphics library, not a web or mobile application. The modular source structure separates BGI API concerns (drawing, colors, input) from backend abstraction, with comprehensive test coverage and practical examples demonstrating API usage.
 
 ## Phase 0: Outline & Research
 1. **Extract unknowns from Technical Context** above:
@@ -171,18 +167,37 @@ directories captured above]
 
 **Task Generation Strategy**:
 - Load `.specify/templates/tasks-template.md` as base
-- Generate tasks from Phase 1 design docs (contracts, data model, quickstart)
-- Each contract → contract test task [P]
-- Each entity → model creation task [P] 
-- Each user story → integration test task
-- Implementation tasks to make tests pass
+- Generate tasks from Phase 1 design docs (contracts in `/contracts/`, data-model.md, quickstart.md)
+- Each BGI API contract group → contract test task [P]
+  - Graphics init contract → test_graphics_init.rs [P]
+  - Drawing primitives contract → test_drawing_primitives.rs [P]
+  - Fill and color contract → test_fill_color.rs [P]
+  - Text rendering contract → test_text_rendering.rs [P]
+  - Input interaction contract → test_input_interaction.rs [P]
+  - Viewport coordinate contract → test_viewport_coordinate.rs [P]
+- Each entity from data-model.md → model creation task [P]
+  - GraphicsContext entity → src/context.rs [P]
+  - Backend trait → src/backend/mod.rs [P]
+  - Color system → src/color.rs [P]
+  - Error types → src/error.rs [P]
+- Quickstart examples → integration test tasks
+  - Basic drawing example → integration test
+  - Interactive graphics → integration test
+  - Text and font example → integration test
+- Implementation tasks to make contract tests pass (ordered by dependency)
 
 **Ordering Strategy**:
-- TDD order: Tests before implementation 
-- Dependency order: Models before services before UI
-- Mark [P] for parallel execution (independent files)
+- TDD order: Contract tests before implementation
+- Dependency order: Core types → Backend trait → Context → API implementations
+- Mark [P] for parallel execution (independent modules)
+- BGI initialization must come first (other APIs depend on GraphicsContext)
 
-**Estimated Output**: 25-30 numbered, ordered tasks in tasks.md
+**Estimated Output**: 35-40 numbered, ordered tasks covering:
+- 6 contract test tasks (parallel)
+- 9 core entity implementation tasks
+- 19 BGI API function groups implementation
+- 6 quickstart example validation tasks
+- Integration and performance validation tasks
 
 **IMPORTANT**: This phase is executed by the /tasks command, NOT by /plan
 
@@ -206,18 +221,20 @@ directories captured above]
 *This checklist is updated during execution flow*
 
 **Phase Status**:
-- [ ] Phase 0: Research complete (/plan command)
-- [ ] Phase 1: Design complete (/plan command)
-- [ ] Phase 2: Task planning complete (/plan command - describe approach only)
-- [ ] Phase 3: Tasks generated (/tasks command)
+
+- [x] Phase 0: Research complete (/plan command) - See research.md
+- [x] Phase 1: Design complete (/plan command) - See data-model.md, contracts/, quickstart.md, contract_tests.md
+- [x] Phase 2: Task planning complete (/plan command - describe approach only) - Strategy documented above
+- [x] Phase 3: Tasks generated (/tasks command) - See tasks.md with 51 numbered tasks
 - [ ] Phase 4: Implementation complete
 - [ ] Phase 5: Validation passed
 
 **Gate Status**:
-- [ ] Initial Constitution Check: PASS
-- [ ] Post-Design Constitution Check: PASS
-- [ ] All NEEDS CLARIFICATION resolved
-- [ ] Complexity deviations documented
+
+- [x] Initial Constitution Check: PASS - All principles respected in design
+- [x] Post-Design Constitution Check: PASS - Backend trait enables extensibility, BGI compatibility maintained
+- [x] All NEEDS CLARIFICATION resolved - Technical Context fully specified
+- [x] Complexity deviations documented - No violations requiring justification
 
 ---
 *Based on Constitution v1.0.0 - See `/memory/constitution.md`*

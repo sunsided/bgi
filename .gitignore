@@ -1,0 +1,9 @@
+/SDL3*
+/.git
+/target
+/SDL*
+/Cargo.lock
+*.backup
+/test_*
+/debug_*
+/*.rlib

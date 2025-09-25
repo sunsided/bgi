@@ -1,0 +1,5 @@
+# Clippy configuration for BGI project
+# BGI functions often have many parameters to match original API
+too-many-arguments-threshold = 8
+# BGI uses specific integer types and coordinate conversions
+allow-private-module-inception = true
