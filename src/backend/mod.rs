@@ -7,6 +7,17 @@ use crate::error::{BgiError, BgiResult};
 // Temporary placeholder for InputEvent
 #[derive(Debug, Clone)]
 pub enum InputEvent {
+    Key {
+        window_id: WindowId,
+        key_code: i32,
+        extended: bool,
+    },
+    Mouse {
+        window_id: WindowId,
+        x: i32,
+        y: i32,
+        buttons: u32,
+    },
     Placeholder,
 }
 use crate::types::{GraphicsMode, Point, Rect};
@@ -184,15 +195,22 @@ pub trait Backend {
 #[cfg(feature = "winit-backend")]
 pub mod winit;
 
+#[cfg(feature = "visual-backend")]
+pub mod minifb;
+
 pub mod pixel_buffer;
 
 /// Create default backend based on available features.
 pub fn create_default_backend() -> BgiResult<Box<dyn Backend>> {
-    #[cfg(feature = "winit-backend")]
+    #[cfg(feature = "visual-backend")]
+    {
+        Ok(Box::new(minifb::MiniFbBackend::new()))
+    }
+    #[cfg(all(feature = "winit-backend", not(feature = "visual-backend")))]
     {
         Ok(Box::new(winit::WinitBackend::new()?))
     }
-    #[cfg(not(feature = "winit-backend"))]
+    #[cfg(not(any(feature = "winit-backend", feature = "visual-backend")))]
     {
         // Use pixel buffer backend as fallback
         Ok(Box::new(pixel_buffer::PixelBufferBackend::new()))

@@ -2,11 +2,15 @@
 
 use crate::{Color, WindowState, DrawingState, FontSettings, InputEvent, GraphResult, constants::*};
 use crate::types::MouseState;
-use std::cell::RefCell;
 use std::collections::HashMap;
+use std::cell::RefCell;
+
+#[cfg(feature = "visual-backend")]
+use crate::backend::{Backend, create_default_backend};
+#[cfg(feature = "visual-backend")]
+use crate::window::WindowId;
 
 /// Global graphics context state.
-#[derive(Debug)]
 pub struct GraphicsState {
     /// Window management state
     pub window_state: WindowState,
@@ -20,6 +24,12 @@ pub struct GraphicsState {
     pub current_palette: Vec<Color>,
     /// Graphics pages for double buffering
     pub pages: HashMap<i32, Vec<u8>>,
+    /// Backend for visual rendering (when visual-backend feature is enabled)
+    #[cfg(feature = "visual-backend")]
+    pub backend: Option<Box<dyn Backend>>,
+    /// Current window for visual backend
+    #[cfg(feature = "visual-backend")]
+    pub current_window: Option<WindowId>,
 }
 
 impl Default for GraphicsState {
@@ -31,6 +41,10 @@ impl Default for GraphicsState {
             input_event: InputEvent::default(),
             current_palette: create_default_palette(),
             pages: HashMap::new(),
+            #[cfg(feature = "visual-backend")]
+            backend: None,
+            #[cfg(feature = "visual-backend")]
+            current_window: None,
         }
     }
 }
@@ -66,6 +80,43 @@ impl GraphicsState {
             self.pages.insert(page, vec![0; page_size]);
         }
         
+        // Initialize visual backend if feature is enabled
+        #[cfg(feature = "visual-backend")]
+        {
+            match create_default_backend() {
+                Ok(mut backend) => {
+                    if let Err(_) = backend.init() {
+                        // Backend initialization failed, continue without visual output
+                        self.backend = None;
+                        self.current_window = None;
+                    } else {
+                        // Create a window for BGI graphics
+                        match backend.create_window(
+                            width as u32,
+                            height as u32,
+                            Some("BGI Graphics"),
+                            crate::types::GraphicsMode::new(crate::types::GraphicsDriver::Vga, mode)
+                        ) {
+                            Ok(window_id) => {
+                                self.current_window = Some(window_id);
+                                self.backend = Some(backend);
+                            }
+                            Err(_) => {
+                                // Window creation failed, continue without visual output
+                                self.backend = None;
+                                self.current_window = None;
+                            }
+                        }
+                    }
+                }
+                Err(_) => {
+                    // Backend creation failed, continue without visual output
+                    self.backend = None;
+                    self.current_window = None;
+                }
+            }
+        }
+
         Ok(())
     }
 
@@ -73,6 +124,17 @@ impl GraphicsState {
     pub fn close_graphics(&mut self) {
         self.window_state.close_graphics();
         self.pages.clear();
+        
+        // Clean up visual backend
+        #[cfg(feature = "visual-backend")]
+        {
+            if let (Some(ref mut backend), Some(window_id)) = (&mut self.backend, self.current_window) {
+                let _ = backend.close_window(window_id);
+                let _ = backend.shutdown();
+            }
+            self.backend = None;
+            self.current_window = None;
+        }
     }
 
     /// Check if graphics is initialized.
@@ -386,6 +448,22 @@ pub fn cleardevice() {
                 // Fill page with background color (simplified)
                 page_data.fill(0); // Black for now
             }
+            
+            // Clear visual backend if available
+            #[cfg(feature = "visual-backend")]
+            {
+                if let (Some(ref mut backend), Some(window_id)) = (&mut graphics_state.backend, graphics_state.current_window) {
+                    use crate::backend::DrawCommand;
+                    let rgb_color = bg_color.to_rgb();
+                    let commands = vec![DrawCommand::Clear { color: rgb_color }];
+                    if let Err(_) = backend.draw(window_id, &commands) {
+                        // Ignore draw errors to maintain BGI compatibility
+                    }
+                    if let Err(_) = backend.present(window_id) {
+                        // Ignore present errors to maintain BGI compatibility
+                    }
+                }
+            }
         }
     });
 }
@@ -624,7 +702,22 @@ pub fn clearmouseclick(button: i32) {
 /// Check if a key was pressed.
 pub fn kbhit() -> bool {
     GRAPHICS_STATE.with(|state_ref| {
-        if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
+        if let Some(ref mut graphics_state) = state_ref.borrow_mut().as_mut() {
+            // Poll events from backend and feed them into input system
+            #[cfg(feature = "visual-backend")]
+            if let Some(ref mut backend) = graphics_state.backend {
+                let events = backend.poll_events();
+                for event in events {
+                    match event {
+                        crate::backend::InputEvent::Key { key_code, extended, .. } => {
+                            // Feed key event into input system
+                            graphics_state.input_event.add_key_event(key_code, extended);
+                        }
+                        _ => {} // Handle other events if needed
+                    }
+                }
+            }
+            
             graphics_state.input_event.has_key_event()
         } else {
             false
@@ -636,6 +729,21 @@ pub fn kbhit() -> bool {
 pub fn getch() -> Option<char> {
     GRAPHICS_STATE.with(|state_ref| {
         if let Some(ref mut graphics_state) = state_ref.borrow_mut().as_mut() {
+            // Poll events from backend and feed them into input system
+            #[cfg(feature = "visual-backend")]
+            if let Some(ref mut backend) = graphics_state.backend {
+                let events = backend.poll_events();
+                for event in events {
+                    match event {
+                        crate::backend::InputEvent::Key { key_code, extended, .. } => {
+                            // Feed key event into input system
+                            graphics_state.input_event.add_key_event(key_code, extended);
+                        }
+                        _ => {} // Handle other events if needed
+                    }
+                }
+            }
+            
             graphics_state.input_event.get_next_key().map(|event| {
                 // Convert key_code to character (simplified)
                 if event.key_code >= 32 && event.key_code <= 126 {
@@ -726,4 +834,34 @@ pub fn gettextsettings() -> crate::types::BgiTextSettings {
             }
         }
     })
+}
+
+/// Set batch mode to optimize bulk drawing operations.
+/// When batch mode is enabled, individual draw operations (like putpixel) 
+/// will not immediately present to the screen, allowing for much faster
+/// bulk operations. Call refresh() to present all changes at once.
+pub fn set_batch_mode(enabled: bool) {
+    with_graphics_state_mut(|state| {
+        state.drawing_state.batch_mode = enabled;
+    });
+}
+
+/// Check if batch mode is currently enabled.
+pub fn is_batch_mode() -> bool {
+    with_graphics_state(|state| {
+        state.drawing_state.batch_mode
+    }).unwrap_or(false)
+}
+
+/// Force a refresh/present of the current window.
+/// This is useful when in batch mode to present all accumulated changes.
+pub fn refresh() {
+    #[cfg(feature = "visual-backend")]
+    with_graphics_state_mut(|state| {
+        if let (Some(ref mut backend), Some(window_id)) = (&mut state.backend, state.current_window) {
+            if let Err(_) = backend.present(window_id) {
+                // Ignore present errors to maintain BGI compatibility
+            }
+        }
+    });
 }

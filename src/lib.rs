@@ -52,7 +52,7 @@ pub use image::*;
 pub use shapes::*;
 pub use optimizations::{BatchDrawer, DrawingPool, const_optimized};
 
-use backend::{Backend, create_pixel_buffer_backend, DrawCommand};
+use backend::{Backend, create_default_backend, DrawCommand};
 use window::WindowId;
 use line::{LineStyle as LineStyleInternal, draw_thick_line, draw_thick_circle, draw_rectangle_lines, draw_ellipse_arc};
 use optimizations::optimized_ctx;
@@ -70,7 +70,7 @@ pub struct GraphicsContext {
 
 impl GraphicsContext {
     pub fn new(mode: GraphicsMode) -> Result<Self, BgiError> {
-        let mut backend = create_pixel_buffer_backend()?;
+        let mut backend = create_default_backend()?;
         backend.init()?;
         
         let resolution = mode.resolution();
@@ -95,7 +95,7 @@ impl GraphicsContext {
     /// Create a context for testing - simpler constructor
     pub fn create_test_context() -> Self {
         let mode = GraphicsMode::new(GraphicsDriver::Vga, 2);
-        let mut backend = create_pixel_buffer_backend().unwrap();
+        let mut backend = create_default_backend().unwrap();
         backend.init().unwrap();
         
         let window_id = backend.create_window(800, 600, Some("Test"), mode).unwrap();
@@ -158,6 +158,18 @@ impl GraphicsContext {
 
     pub fn get_line_style(&self) -> LineStyleInternal {
         self.line_style
+    }
+    
+    pub fn get_current_window(&self) -> Option<WindowId> {
+        self.current_window
+    }
+    
+    pub fn present(&mut self) -> Result<(), BgiError> {
+        if let Some(window_id) = self.current_window {
+            self.backend.present(window_id)
+        } else {
+            Err(BgiError::InvalidWindow)
+        }
     }
 
     pub fn set_write_mode(&mut self, mode: i32) {
@@ -537,13 +549,11 @@ pub fn fillpoly(points: &[(i32, i32)]) {
 
 // Input handling functions
 pub fn getch() -> Option<char> {
-    // TDD stub - simulate no input available
-    None
+    crate::graphics::getch()
 }
 
 pub fn kbhit() -> bool {
-    // TDD stub - simulate no key pressed
-    false
+    crate::graphics::kbhit()
 }
 
 pub fn getmouse() -> MouseState {

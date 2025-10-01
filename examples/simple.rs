@@ -40,11 +40,19 @@ fn main() {
     // Add some text
     setcolor(Color::YELLOW);
     outtextxy(10, 300, "Simple BGI Graphics Demo");
+    outtextxy(10, 320, "Press any key to exit...");
 
-    println!("Drawing completed. Press any key to exit...");
+    println!("Drawing completed. Press any key in the graphics window to exit...");
     
-    // In a real application, you might wait for user input here
-    // For this example, we'll just close immediately
+    // Wait for key press from graphics window
+    loop {
+        if kbhit() {
+            let ch = getch();
+            println!("Key pressed: {:?}", ch);
+            break;
+        }
+        std::thread::sleep(std::time::Duration::from_millis(50));
+    }
     
     // Close graphics
     closegraph();

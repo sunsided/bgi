@@ -1,6 +1,7 @@
-//! Mandelbrot set demonstration using fast BGI graphics.
+//! Mandelbrot set demonstration using BGI batch mode for maximum performance.
 
 use bgi::*;
+use std::time::Instant;
 
 fn mandelbrot(c_re: f64, c_im: f64, max_iter: i32) -> i32 {
     let mut z_re = 0.0;
@@ -54,11 +55,15 @@ fn main() {
         return;
     }
 
-    println!("Mandelbrot Set Demonstration");
-
+    println!("🚀 Mandelbrot Set with Batch Mode Optimization");
+    
+    // Enable batch mode for maximum performance
+    set_batch_mode(true);
+    println!("✅ Batch mode enabled for bulk pixel operations");
+    
     let width = getmaxx() + 1;
     let height = getmaxy() + 1;
-
+    
     println!("Rendering {}x{} Mandelbrot set...", width, height);
 
     // Mandelbrot set parameters  
@@ -66,52 +71,34 @@ fn main() {
     let x_max = 1.0;
     let y_min = -1.25;
     let y_max = 1.25;
-    let max_iter = 100; // Higher quality since we're fast
+    let max_iter = 100; // High quality
 
     // Calculate scale factors
     let x_scale = (x_max - x_min) / width as f64;
     let y_scale = (y_max - y_min) / height as f64;
 
-    let start_time = std::time::Instant::now();
+    let start_time = Instant::now();
 
-    // Strategy: Use line-based rendering instead of individual pixels
-    // This reduces backend calls from 307,200 to 480 calls
+    // Draw using pixel-by-pixel with batch mode for performance
     for py in 0..height {
-        let mut last_color = Color::WHITE;
-        let mut line_start = 0;
-
         for px in 0..width {
             let x = x_min + px as f64 * x_scale;
             let y = y_min + py as f64 * y_scale;
 
             let iter = mandelbrot(x, y, max_iter);
-            let current_color = iter_to_color(iter, max_iter);
+            let color = iter_to_color(iter, max_iter);
 
-            // When color changes, draw the line segment
-            if current_color != last_color {
-                if px > line_start {
-                    // Draw line segment of previous color
-                    setcolor(last_color);
-                    line(line_start, py, px - 1, py);
-                }
-                line_start = px;
-                last_color = current_color;
-            }
+            putpixel(px, py, color);
         }
 
-        // Draw final segment of the line
-        if width > line_start {
-            setcolor(last_color);
-            line(line_start, py, width - 1, py);
-        }
-
-        // Print progress and check for interruption
-        if py % 50 == 0 {
+        // Update every 20 rows for visual progress
+        if py % 20 == 0 {
+            refresh(); // Present accumulated changes
             let elapsed = start_time.elapsed();
             let progress = (py * 100) / height;
             println!("Progress: {}% - {:.2}s elapsed", progress, elapsed.as_secs_f64());
 
-            // Check for key press to allow early exit
+            // Check for early exit
             if kbhit() {
                 println!("Rendering interrupted by user.");
                 break;
@@ -119,12 +106,22 @@ fn main() {
         }
     }
 
+    // Final refresh to show complete image
+    refresh();
+    
     let render_time = start_time.elapsed();
-    println!("Rendering completed in {:.2} seconds", render_time.as_secs_f64());
+    
+    // Disable batch mode
+    set_batch_mode(false);
+    
+    println!("🎯 Performance Results:");
+    println!("   Rendering time: {:.3}s", render_time.as_secs_f64());
+    println!("   Pixels drawn: {}", width * height);
+    println!("   Pixels/second: {:.0}", (width * height) as f64 / render_time.as_secs_f64());
 
     // Add title
     setcolor(Color::WHITE);
-    outtextxy(10, 10, "Mandelbrot Set");
+    outtextxy(10, 10, "Mandelbrot Set (Batch Mode)");
     outtextxy(10, 30, "Press any key to exit...");
     
     println!("Mandelbrot set rendered. Press any key in the graphics window to exit...");

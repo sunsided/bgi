@@ -15,19 +15,28 @@ categories = ["graphics", "multimedia", "game-development"]
 [features]
 default = []
 winit-backend = ["winit", "pixels"]
+visual-backend = ["minifb"]
+pgm-backend = []
 
 [dependencies]
 # Core dependencies
 thiserror = "1.0"
 bitflags = "2.4"
 
-# Winit backend dependencies
+# Visual backend dependencies
+minifb = { version = "0.25", optional = true }
+
+# Font rendering dependency
+bgi-stroked-fonts = "0.1"
+
+# Winit backend dependencies (legacy)
 winit = { version = "0.29", optional = true }
 pixels = { version = "0.13", optional = true }
 
 [dev-dependencies]
 # For examples and tests
 env_logger = "0.11"
+rand = "0.8"
 
 # Examples will be added later
 # [[example]]

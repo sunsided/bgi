@@ -11,6 +11,25 @@ pub fn line(x1: i32, y1: i32, x2: i32, y2: i32) {
 
         // Line drawing using Bresenham's algorithm with pattern support
         draw_line_to_page(&mut state.pages, active_page, x1, y1, x2, y2, color, pattern);
+        
+        // Present to visual backend if available
+        #[cfg(feature = "visual-backend")]
+        {
+            if let (Some(ref mut backend), Some(window_id)) = (&mut state.backend, state.current_window) {
+                use crate::backend::DrawCommand;
+                let rgb_color = color.to_rgb();
+                let commands = vec![DrawCommand::Line {
+                    x1, y1, x2, y2,
+                    color: rgb_color,
+                }];
+                if let Err(_) = backend.draw(window_id, &commands) {
+                    // Ignore draw errors to maintain BGI compatibility
+                }
+                if let Err(_) = backend.present(window_id) {
+                    // Ignore present errors to maintain BGI compatibility
+                }
+            }
+        }
     });
 }
 
@@ -45,6 +64,26 @@ pub fn circle(x: i32, y: i32, radius: i32) {
 
         // Simple circle drawing
         draw_circle_to_page(&mut state.pages, active_page, x, y, radius, color);
+        
+        // Present to visual backend if available
+        #[cfg(feature = "visual-backend")]
+        {
+            if let (Some(ref mut backend), Some(window_id)) = (&mut state.backend, state.current_window) {
+                use crate::backend::DrawCommand;
+                let rgb_color = color.to_rgb();
+                let commands = vec![DrawCommand::Circle {
+                    x, y, radius,
+                    color: rgb_color,
+                    filled: false,
+                }];
+                if let Err(_) = backend.draw(window_id, &commands) {
+                    // Ignore draw errors to maintain BGI compatibility
+                }
+                if let Err(_) = backend.present(window_id) {
+                    // Ignore present errors to maintain BGI compatibility
+                }
+            }
+        }
     });
 }
 
@@ -71,6 +110,26 @@ pub fn rectangle(left: i32, top: i32, right: i32, bottom: i32) {
         draw_line_to_page(&mut state.pages, active_page, right, top, right, bottom, color, pattern);
         draw_line_to_page(&mut state.pages, active_page, right, bottom, left, bottom, color, pattern);
         draw_line_to_page(&mut state.pages, active_page, left, bottom, left, top, color, pattern);
+        
+        // Present to visual backend if available
+        #[cfg(feature = "visual-backend")]
+        {
+            if let (Some(ref mut backend), Some(window_id)) = (&mut state.backend, state.current_window) {
+                use crate::backend::DrawCommand;
+                let rgb_color = color.to_rgb();
+                let commands = vec![DrawCommand::Rectangle {
+                    x1: left, y1: top, x2: right, y2: bottom,
+                    color: rgb_color,
+                    filled: false,
+                }];
+                if let Err(_) = backend.draw(window_id, &commands) {
+                    // Ignore draw errors to maintain BGI compatibility
+                }
+                if let Err(_) = backend.present(window_id) {
+                    // Ignore present errors to maintain BGI compatibility
+                }
+            }
+        }
     });
 }
 
@@ -90,6 +149,29 @@ pub fn putpixel(x: i32, y: i32, color: Color) {
     with_graphics_state_mut(|state| {
         let active_page = state.window_state.pages.active_page;
         set_pixel_in_page(&mut state.pages, active_page, x, y, color);
+        
+        // Present to visual backend if available and not in batch mode
+        #[cfg(feature = "visual-backend")]
+        {
+            if let (Some(ref mut backend), Some(window_id)) = (&mut state.backend, state.current_window) {
+                use crate::backend::DrawCommand;
+                let rgb_color = color.to_rgb();
+                let commands = vec![DrawCommand::Pixel {
+                    x, y,
+                    color: rgb_color,
+                }];
+                if let Err(_) = backend.draw(window_id, &commands) {
+                    // Ignore draw errors to maintain BGI compatibility
+                }
+                
+                // Only present if not in batch mode
+                if !state.drawing_state.batch_mode {
+                    if let Err(_) = backend.present(window_id) {
+                        // Ignore present errors to maintain BGI compatibility
+                    }
+                }
+            }
+        }
     });
 }
 

@@ -121,6 +121,8 @@ pub struct DrawingState {
     pub viewport: Viewport,
     /// Write mode for drawing operations
     pub write_mode: i32,
+    /// Batch mode flag - when true, skip presentation after each draw operation
+    pub batch_mode: bool,
 }
 
 impl Default for DrawingState {
@@ -134,6 +136,7 @@ impl Default for DrawingState {
             position: Position::default(),
             viewport: Viewport::default(),
             write_mode: COPY_PUT,
+            batch_mode: false,  // Default to normal mode with presentation
         }
     }
 }
