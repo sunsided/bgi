@@ -7,24 +7,26 @@
 use std::cell::RefCell;
 
 // Core module declarations - only include working modules for now
-pub mod constants;
-pub mod types;
 pub mod color;
+pub mod constants;
 pub mod error;
+pub mod types;
 // pub mod input; // Temporarily disabled due to byte literal issues
 
 // Re-export public API
-pub use error::{BgiError, BgiResult};
-pub use types::{GraphicsMode, GraphicsDriver, GraphResult, MouseState, BgiTextSettings};
-pub use types::colors::*;
 pub use color::{Color, RgbColor};
 pub use constants::*;
+pub use error::{BgiError, BgiResult};
+pub use types::colors::*;
+pub use types::{
+    BgiLineSettings, BgiTextSettings, GraphResult, GraphicsDriver, GraphicsMode, MouseState, Point,
+};
 
 // Include backend module
 pub mod backend;
-pub mod window;
 pub mod line;
 pub mod viewport;
+pub mod window;
 
 // Phase 3.3 entities - make public for unit testing
 pub mod drawing_state;
@@ -39,23 +41,26 @@ pub use window_state::*;
 
 // Phase 3.3 API modules
 mod graphics;
-mod palette;
 mod image;
+mod palette;
 mod shapes;
 
 // Optimizations module for zero-cost abstractions
 pub mod optimizations;
 
 pub use graphics::*;
-pub use palette::*;
 pub use image::*;
+pub use optimizations::{const_optimized, BatchDrawer, DrawingPool};
+pub use palette::*;
 pub use shapes::*;
-pub use optimizations::{BatchDrawer, DrawingPool, const_optimized};
 
-use backend::{Backend, create_default_backend, DrawCommand};
-use window::WindowId;
-use line::{LineStyle as LineStyleInternal, draw_thick_line, draw_thick_circle, draw_rectangle_lines, draw_ellipse_arc};
+use backend::{create_default_backend, Backend, DrawCommand};
+use line::{
+    draw_ellipse_arc, draw_rectangle_lines, draw_thick_circle, draw_thick_line,
+    LineStyle as LineStyleInternal,
+};
 use optimizations::optimized_ctx;
+use window::WindowId;
 
 // Graphics context with backend support
 pub struct GraphicsContext {
@@ -72,16 +77,16 @@ impl GraphicsContext {
     pub fn new(mode: GraphicsMode) -> Result<Self, BgiError> {
         let mut backend = create_default_backend()?;
         backend.init()?;
-        
+
         let resolution = mode.resolution();
         let window_id = backend.create_window(
-            resolution.0 as u32, 
-            resolution.1 as u32, 
-            Some("BGI Window"), 
-            mode
+            resolution.0 as u32,
+            resolution.1 as u32,
+            Some("BGI Window"),
+            mode,
         )?;
-        
-        Ok(GraphicsContext { 
+
+        Ok(GraphicsContext {
             initialized: true,
             mode,
             backend,
@@ -91,16 +96,16 @@ impl GraphicsContext {
             draw_mode: COPY_PUT,
         })
     }
-    
+
     /// Create a context for testing - simpler constructor
     pub fn create_test_context() -> Self {
         let mode = GraphicsMode::new(GraphicsDriver::Vga, 2);
         let mut backend = create_default_backend().unwrap();
         backend.init().unwrap();
-        
+
         let window_id = backend.create_window(800, 600, Some("Test"), mode).unwrap();
-        
-        GraphicsContext { 
+
+        GraphicsContext {
             initialized: false, // Start uninitialized for testing
             mode,
             backend,
@@ -110,12 +115,12 @@ impl GraphicsContext {
             draw_mode: COPY_PUT,
         }
     }
-    
+
     /// Initialize for testing
     pub fn initialize(&mut self, width: i32, height: i32, title: &str) {
         self.initialized = true;
     }
-    
+
     pub fn close_graph(&mut self) -> Result<(), BgiError> {
         if let Some(window_id) = self.current_window {
             self.backend.close_window(window_id)?;
@@ -125,7 +130,7 @@ impl GraphicsContext {
         self.current_window = None;
         Ok(())
     }
-    
+
     pub fn is_initialized(&self) -> bool {
         self.initialized
     }
@@ -140,7 +145,7 @@ impl GraphicsContext {
 
     pub fn set_line_style(&mut self, style: i32, pattern: u16, thickness: i32) {
         use crate::line::LINE_PATTERNS;
-        
+
         let actual_pattern = if style == USERBIT_LINE {
             pattern // Use the provided pattern for user-defined lines
         } else if style >= 0 && (style as usize) < LINE_PATTERNS.len() {
@@ -148,7 +153,7 @@ impl GraphicsContext {
         } else {
             LINE_PATTERNS[SOLID_LINE as usize] // Default to solid line
         };
-        
+
         self.line_style = LineStyleInternal {
             style,
             pattern: actual_pattern,
@@ -159,11 +164,11 @@ impl GraphicsContext {
     pub fn get_line_style(&self) -> LineStyleInternal {
         self.line_style
     }
-    
+
     pub fn get_current_window(&self) -> Option<WindowId> {
         self.current_window
     }
-    
+
     pub fn present(&mut self) -> Result<(), BgiError> {
         if let Some(window_id) = self.current_window {
             self.backend.present(window_id)
@@ -180,14 +185,25 @@ impl GraphicsContext {
         self.draw_mode
     }
 
-    pub fn draw_ellipse(&mut self, x: i32, y: i32, start_angle: i32, end_angle: i32, x_radius: i32, y_radius: i32) -> Result<(), BgiError> {
+    pub fn draw_ellipse(
+        &mut self,
+        x: i32,
+        y: i32,
+        start_angle: i32,
+        end_angle: i32,
+        x_radius: i32,
+        y_radius: i32,
+    ) -> Result<(), BgiError> {
         if let Some(window_id) = self.current_window {
             draw_ellipse_arc(
                 &mut *self.backend,
                 window_id,
-                x, y,
-                start_angle, end_angle,
-                x_radius, y_radius,
+                x,
+                y,
+                start_angle,
+                end_angle,
+                x_radius,
+                y_radius,
                 self.current_color.to_rgb(),
                 self.line_style,
                 self.draw_mode,
@@ -198,10 +214,10 @@ impl GraphicsContext {
 
     pub fn put_pixel(&mut self, x: i32, y: i32, color: Color) -> Result<(), BgiError> {
         if let Some(window_id) = self.current_window {
-            let commands = vec![DrawCommand::Pixel { 
-                x, 
-                y, 
-                color: color.to_rgb() 
+            let commands = vec![DrawCommand::Pixel {
+                x,
+                y,
+                color: color.to_rgb(),
             }];
             self.backend.draw(window_id, &commands)?;
         }
@@ -224,7 +240,10 @@ impl GraphicsContext {
             draw_thick_line(
                 &mut *self.backend,
                 window_id,
-                x1, y1, x2, y2,
+                x1,
+                y1,
+                x2,
+                y2,
                 self.current_color.to_rgb(),
                 self.line_style,
                 self.draw_mode,
@@ -233,13 +252,22 @@ impl GraphicsContext {
         Ok(())
     }
 
-    pub fn draw_rectangle(&mut self, left: i32, top: i32, right: i32, bottom: i32) -> Result<(), BgiError> {
+    pub fn draw_rectangle(
+        &mut self,
+        left: i32,
+        top: i32,
+        right: i32,
+        bottom: i32,
+    ) -> Result<(), BgiError> {
         if let Some(window_id) = self.current_window {
             // Use line composition for rectangles, just like the original BGI
             draw_rectangle_lines(
                 &mut *self.backend,
                 window_id,
-                left, top, right, bottom,
+                left,
+                top,
+                right,
+                bottom,
                 self.current_color.to_rgb(),
                 self.line_style,
                 self.draw_mode,
@@ -254,7 +282,9 @@ impl GraphicsContext {
             draw_thick_circle(
                 &mut *self.backend,
                 window_id,
-                x, y, radius,
+                x,
+                y,
+                radius,
                 self.current_color.to_rgb(),
                 self.line_style.thickness,
             )?;
@@ -264,8 +294,8 @@ impl GraphicsContext {
 
     pub fn clear(&mut self, color: Color) -> Result<(), BgiError> {
         if let Some(window_id) = self.current_window {
-            let commands = vec![DrawCommand::Clear { 
-                color: color.to_rgb()
+            let commands = vec![DrawCommand::Clear {
+                color: color.to_rgb(),
             }];
             self.backend.draw(window_id, &commands)?;
         }
@@ -290,17 +320,7 @@ impl GraphicsContext {
 
 // Graphics initialization functions
 
-
-
-
-
 // Note: GraphicsContext cannot be cloned because Backend doesn't implement Clone
-
-
-
-
-
-
 
 /// Get resolution and color information for a device/mode combination
 pub fn getmodeinfo(driver: i32, mode: i32) -> Option<(u32, u32, u32)> {
@@ -318,15 +338,13 @@ pub fn getmodeinfo(driver: i32, mode: i32) -> Option<(u32, u32, u32)> {
         10 => GraphicsDriver::Pc3270,
         _ => return None,
     };
-    
+
     let graphics_mode = GraphicsMode::new(graphics_driver, mode);
     let resolution = graphics_mode.resolution();
     let colors = graphics_mode.color_depth();
-    
+
     Some((resolution.0 as u32, resolution.1 as u32, colors as u32))
 }
-
-
 
 /// Drawing primitives using GRAPHICS_STATE from graphics.rs
 /// Note: These maintain the classic BGI API without explicit context parameters
@@ -385,11 +403,24 @@ pub fn circle_ctx(context: &mut GraphicsContext, x: i32, y: i32, radius: i32) ->
     optimized_ctx::circle_ctx(context, x, y, radius)
 }
 
-pub fn rectangle_ctx(context: &mut GraphicsContext, left: i32, top: i32, right: i32, bottom: i32) -> GraphResult {
+pub fn rectangle_ctx(
+    context: &mut GraphicsContext,
+    left: i32,
+    top: i32,
+    right: i32,
+    bottom: i32,
+) -> GraphResult {
     optimized_ctx::rectangle_ctx(context, left, top, right, bottom)
 }
 
-pub fn arc_ctx(context: &mut GraphicsContext, _x: i32, _y: i32, _start_angle: i32, _end_angle: i32, _radius: i32) -> GraphResult {
+pub fn arc_ctx(
+    context: &mut GraphicsContext,
+    _x: i32,
+    _y: i32,
+    _start_angle: i32,
+    _end_angle: i32,
+    _radius: i32,
+) -> GraphResult {
     crate::validate_context!(context);
     // TDD stub - drawing logic will be implemented
     GraphResult::Ok
@@ -407,9 +438,17 @@ pub fn getpixel_ctx(context: &GraphicsContext, x: i32, y: i32) -> Result<Color, 
     }
 }
 
-pub fn ellipse_ctx(context: &mut GraphicsContext, x: i32, y: i32, start_angle: i32, end_angle: i32, x_radius: i32, y_radius: i32) -> GraphResult {
+pub fn ellipse_ctx(
+    context: &mut GraphicsContext,
+    x: i32,
+    y: i32,
+    start_angle: i32,
+    end_angle: i32,
+    x_radius: i32,
+    y_radius: i32,
+) -> GraphResult {
     crate::validate_context!(context);
-    
+
     match context.draw_ellipse(x, y, start_angle, end_angle, x_radius, y_radius) {
         Ok(()) => GraphResult::Ok,
         Err(_) => GraphResult::InvalidDriver,
@@ -428,41 +467,10 @@ fn set_graph_result(result: GraphResult) {
     LAST_RESULT.with(|r| *r.borrow_mut() = result);
 }
 
-
-
-
-
 // Palette functions are implemented in palette.rs and re-exported
 
-// Text rendering functions  
-pub fn outtextxy(x: i32, y: i32, text: &str) {
-    // TDD stub - will implement with actual backend
-}
-
-pub fn settextstyle(font: i32, direction: i32, char_size: i32) {
-    // TDD stub - will implement with actual backend  
-}
-
-pub fn gettextsettings() -> crate::types::BgiTextSettings {
-    // TDD stub - returns default settings
-    crate::types::BgiTextSettings {
-        font: 0,
-        direction: 0,
-        charsize: 1,
-        horiz: 0,
-        vert: 0,
-    }
-}
-
-pub fn textwidth(text: &str) -> i32 {
-    // TDD stub - simple calculation
-    text.len() as i32 * 8 // 8 pixels per character
-}
-
-pub fn textheight(text: &str) -> i32 {
-    // TDD stub - simple calculation  
-    if text.is_empty() { 0 } else { 16 } // 16 pixels height
-}
+// Text rendering functions - implemented in graphics.rs, re-exported via `pub use graphics::*`
+// Functions: outtextxy, settextstyle, gettextsettings, settextjustify, textwidth, textheight
 
 // TDD: Thread-local storage for viewport and cursor position
 thread_local! {
@@ -476,7 +484,7 @@ thread_local! {
 pub fn setviewport(left: i32, top: i32, right: i32, bottom: i32, clip: bool) {
     // Update global viewport state
     VIEWPORT.with(|vp| *vp.borrow_mut() = (left, top, right, bottom));
-    
+
     // Also update graphics state if initialized
     graphics::setviewport(left, top, right, bottom, clip);
 }
@@ -499,7 +507,7 @@ pub fn getmaxy() -> i32 {
 /// Move cursor to absolute position.
 pub fn moveto(x: i32, y: i32) {
     CURSOR_POS.with(|pos| *pos.borrow_mut() = (x, y));
-    
+
     // Also update graphics state if initialized
     graphics::moveto(x, y);
 }
@@ -511,7 +519,7 @@ pub fn moverel(dx: i32, dy: i32) {
         position.0 = position.0.saturating_add(dx);
         position.1 = position.1.saturating_add(dy);
     });
-    
+
     // Also update graphics state if initialized
     graphics::moverel(dx, dy);
 }
@@ -524,6 +532,15 @@ pub fn getx() -> i32 {
 /// Get current cursor Y position.
 pub fn gety() -> i32 {
     CURSOR_POS.with(|pos| pos.borrow().1)
+}
+
+/// Get current cursor position as a Point.
+/// This is a convenience function not in the original BGI API.
+pub fn getposition() -> crate::types::Point {
+    CURSOR_POS.with(|pos| {
+        let (x, y) = *pos.borrow();
+        crate::types::Point { x, y }
+    })
 }
 
 // Filled shapes functions

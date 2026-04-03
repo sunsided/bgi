@@ -146,7 +146,10 @@ impl GraphicsMode {
     /// Get the resolution (width, height) for this graphics mode.
     pub fn resolution(self) -> (i32, i32) {
         match self {
-            GraphicsMode::CgaC0 | GraphicsMode::CgaC1 | GraphicsMode::CgaC2 | GraphicsMode::CgaC3 => (320, 200),
+            GraphicsMode::CgaC0
+            | GraphicsMode::CgaC1
+            | GraphicsMode::CgaC2
+            | GraphicsMode::CgaC3 => (320, 200),
             GraphicsMode::CgaHi => (640, 200),
             GraphicsMode::McgaC0 | GraphicsMode::McgaC1 => (320, 200),
             GraphicsMode::McgaC2 => (640, 200),
@@ -158,7 +161,10 @@ impl GraphicsMode {
             GraphicsMode::VgaMed => (640, 350),
             GraphicsMode::VgaHi => (640, 480),
             GraphicsMode::HercMono => (720, 348),
-            GraphicsMode::Att400C0 | GraphicsMode::Att400C1 | GraphicsMode::Att400C2 | GraphicsMode::Att400C3 => (320, 200),
+            GraphicsMode::Att400C0
+            | GraphicsMode::Att400C1
+            | GraphicsMode::Att400C2
+            | GraphicsMode::Att400C3 => (320, 200),
             GraphicsMode::Att400Med => (640, 200),
             GraphicsMode::Att400Hi => (640, 400),
             GraphicsMode::Pc3270Hi => (720, 350),
@@ -170,14 +176,23 @@ impl GraphicsMode {
     /// Get the color depth (number of colors) for this graphics mode.
     pub fn color_depth(self) -> i32 {
         match self {
-            GraphicsMode::CgaC0 | GraphicsMode::CgaC1 | GraphicsMode::CgaC2 | GraphicsMode::CgaC3 => 4,
+            GraphicsMode::CgaC0
+            | GraphicsMode::CgaC1
+            | GraphicsMode::CgaC2
+            | GraphicsMode::CgaC3 => 4,
             GraphicsMode::CgaHi => 2,
             GraphicsMode::McgaC0 | GraphicsMode::McgaC1 => 256,
-            GraphicsMode::McgaC2 | GraphicsMode::McgaC3 | GraphicsMode::McgaMed | GraphicsMode::McgaHi => 2,
+            GraphicsMode::McgaC2
+            | GraphicsMode::McgaC3
+            | GraphicsMode::McgaMed
+            | GraphicsMode::McgaHi => 2,
             GraphicsMode::EgaLo | GraphicsMode::EgaHi => 16,
             GraphicsMode::VgaLo | GraphicsMode::VgaMed | GraphicsMode::VgaHi => 16,
             GraphicsMode::HercMono => 2,
-            GraphicsMode::Att400C0 | GraphicsMode::Att400C1 | GraphicsMode::Att400C2 | GraphicsMode::Att400C3 => 4,
+            GraphicsMode::Att400C0
+            | GraphicsMode::Att400C1
+            | GraphicsMode::Att400C2
+            | GraphicsMode::Att400C3 => 4,
             GraphicsMode::Att400Med | GraphicsMode::Att400Hi => 2,
             GraphicsMode::Pc3270Hi => 2,
             GraphicsMode::Ibm8514Lo | GraphicsMode::Ibm8514Hi => 256,
@@ -273,7 +288,12 @@ pub struct Rect {
 impl Rect {
     /// Create a new rectangle.
     pub const fn new(left: i32, top: i32, right: i32, bottom: i32) -> Self {
-        Self { left, top, right, bottom }
+        Self {
+            left,
+            top,
+            right,
+            bottom,
+        }
     }
 
     /// Get the width of the rectangle.
@@ -486,6 +506,27 @@ pub struct BgiTextSettings {
     pub horiz: i32,
     /// Vertical justification.
     pub vert: i32,
+}
+
+/// BGI-compatible line settings structure (linesettingstype).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct BgiLineSettings {
+    /// Line style (SOLID_LINE, DOTTED_LINE, etc.).
+    pub linestyle: i32,
+    /// User-defined line pattern (16-bit bitmask).
+    pub upattern: u16,
+    /// Line thickness (NORM_WIDTH, THICK_WIDTH, etc.).
+    pub thickness: i32,
+}
+
+impl Default for BgiLineSettings {
+    fn default() -> Self {
+        Self {
+            linestyle: 0,     // SOLID_LINE
+            upattern: 0xFFFF, // solid pattern
+            thickness: 1,     // NORM_WIDTH
+        }
+    }
 }
 
 /// Color constants used in BGI.

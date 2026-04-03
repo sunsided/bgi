@@ -1,12 +1,14 @@
 //! Core graphics functions for BGI initialization and management.
 
-use crate::{Color, WindowState, DrawingState, FontSettings, InputEvent, GraphResult, constants::*};
 use crate::types::MouseState;
-use std::collections::HashMap;
+use crate::{
+    constants::*, Color, DrawingState, FontSettings, GraphResult, InputEvent, WindowState,
+};
 use std::cell::RefCell;
+use std::collections::HashMap;
 
 #[cfg(feature = "visual-backend")]
-use crate::backend::{Backend, create_default_backend};
+use crate::backend::{create_default_backend, Backend};
 #[cfg(feature = "visual-backend")]
 use crate::window::WindowId;
 
@@ -59,27 +61,27 @@ impl GraphicsState {
     pub fn init_graphics(&mut self, driver: i32, mode: i32, path: &str) -> Result<(), i32> {
         // Initialize window state
         self.window_state.init_graphics(driver, mode, path)?;
-        
+
         // Reset drawing state
         self.drawing_state = DrawingState::default();
-        
+
         // Reset font settings
         self.font_settings = FontSettings::default();
-        
+
         // Clear input events
         self.input_event.clear_all();
-        
+
         // Initialize palette
         self.current_palette = create_default_palette();
-        
+
         // Initialize graphics pages
         let (width, height) = self.window_state.get_screen_size();
         let page_size = (width * height * 4) as usize; // 4 bytes per pixel (RGBA)
-        
+
         for page in 0..self.window_state.pages.total_pages {
             self.pages.insert(page, vec![0; page_size]);
         }
-        
+
         // Initialize visual backend if feature is enabled
         #[cfg(feature = "visual-backend")]
         {
@@ -95,7 +97,10 @@ impl GraphicsState {
                             width as u32,
                             height as u32,
                             Some("BGI Graphics"),
-                            crate::types::GraphicsMode::new(crate::types::GraphicsDriver::Vga, mode)
+                            crate::types::GraphicsMode::new(
+                                crate::types::GraphicsDriver::Vga,
+                                mode,
+                            ),
                         ) {
                             Ok(window_id) => {
                                 self.current_window = Some(window_id);
@@ -124,11 +129,13 @@ impl GraphicsState {
     pub fn close_graphics(&mut self) {
         self.window_state.close_graphics();
         self.pages.clear();
-        
+
         // Clean up visual backend
         #[cfg(feature = "visual-backend")]
         {
-            if let (Some(ref mut backend), Some(window_id)) = (&mut self.backend, self.current_window) {
+            if let (Some(ref mut backend), Some(window_id)) =
+                (&mut self.backend, self.current_window)
+            {
                 let _ = backend.close_window(window_id);
                 let _ = backend.shutdown();
             }
@@ -169,18 +176,18 @@ pub fn initgraph(driver: &mut i32, mode: &mut i32, path: &str) {
             *mode = original_mode;
         }
     }
-    
+
     // Validate input parameters
     if *driver < 0 || *mode < 0 {
         *driver = -1;
         *mode = -1;
         return;
     }
-    
+
     GRAPHICS_STATE.with(|state_ref| {
         let mut state_opt = state_ref.borrow_mut();
         let mut graphics_state = GraphicsState::new();
-        
+
         match graphics_state.init_graphics(*driver, *mode, path) {
             Ok(()) => {
                 // Explicitly set success code
@@ -231,7 +238,7 @@ pub fn grapherrormsg<T: Into<i32>>(error_code: T) -> &'static str {
     match code {
         0 => "No error",
         -2 => "Graphics hardware not detected",
-        -3 => "Device driver file not found", 
+        -3 => "Device driver file not found",
         -4 => "Invalid device driver",
         -5 => "Not enough memory to load driver",
         -6 => "Out of memory",
@@ -339,18 +346,25 @@ pub fn getbkcolor() -> Color {
 pub fn setlinestyle(line_style: i32, pattern: u16, thickness: i32) {
     GRAPHICS_STATE.with(|state_ref| {
         if let Some(ref mut graphics_state) = state_ref.borrow_mut().as_mut() {
-            graphics_state.drawing_state.set_line_style(line_style, pattern, thickness);
+            graphics_state
+                .drawing_state
+                .set_line_style(line_style, pattern, thickness);
         }
     });
 }
 
 /// Get line style settings.
-pub fn getlinesettings() -> (i32, u16, i32) {
+pub fn getlinesettings() -> crate::types::BgiLineSettings {
     GRAPHICS_STATE.with(|state_ref| {
         if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
-            graphics_state.drawing_state.get_line_style()
+            let (linestyle, upattern, thickness) = graphics_state.drawing_state.get_line_style();
+            crate::types::BgiLineSettings {
+                linestyle,
+                upattern,
+                thickness,
+            }
         } else {
-            (SOLID_LINE, 0xFFFF, NORM_WIDTH)
+            crate::types::BgiLineSettings::default()
         }
     })
 }
@@ -368,7 +382,9 @@ pub fn setfillstyle(pattern: i32, color: Color) {
 pub fn setfillpattern(pattern: &[u8; 8], color: Color) {
     GRAPHICS_STATE.with(|state_ref| {
         if let Some(ref mut graphics_state) = state_ref.borrow_mut().as_mut() {
-            graphics_state.drawing_state.set_fill_pattern(pattern, color);
+            graphics_state
+                .drawing_state
+                .set_fill_pattern(pattern, color);
         }
     });
 }
@@ -408,7 +424,9 @@ pub fn getwritemode() -> i32 {
 pub fn setviewport(left: i32, top: i32, right: i32, bottom: i32, clip: bool) {
     GRAPHICS_STATE.with(|state_ref| {
         if let Some(ref mut graphics_state) = state_ref.borrow_mut().as_mut() {
-            graphics_state.drawing_state.set_viewport(left, top, right, bottom, clip);
+            graphics_state
+                .drawing_state
+                .set_viewport(left, top, right, bottom, clip);
         }
     });
 }
@@ -430,7 +448,13 @@ pub fn getviewsettings() -> (i32, i32, i32, i32, bool) {
     GRAPHICS_STATE.with(|state_ref| {
         if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
             let viewport = graphics_state.drawing_state.get_viewport();
-            (viewport.left, viewport.top, viewport.right, viewport.bottom, viewport.clip)
+            (
+                viewport.left,
+                viewport.top,
+                viewport.right,
+                viewport.bottom,
+                viewport.clip,
+            )
         } else {
             (0, 0, 639, 479, true)
         }
@@ -443,16 +467,18 @@ pub fn cleardevice() {
         if let Some(ref mut graphics_state) = state_ref.borrow_mut().as_mut() {
             let bg_color = graphics_state.window_state.properties.background_color;
             let active_page = graphics_state.window_state.pages.active_page;
-            
+
             if let Some(page_data) = graphics_state.pages.get_mut(&active_page) {
                 // Fill page with background color (simplified)
                 page_data.fill(0); // Black for now
             }
-            
+
             // Clear visual backend if available
             #[cfg(feature = "visual-backend")]
             {
-                if let (Some(ref mut backend), Some(window_id)) = (&mut graphics_state.backend, graphics_state.current_window) {
+                if let (Some(ref mut backend), Some(window_id)) =
+                    (&mut graphics_state.backend, graphics_state.current_window)
+                {
                     use crate::backend::DrawCommand;
                     let rgb_color = bg_color.to_rgb();
                     let commands = vec![DrawCommand::Clear { color: rgb_color }];
@@ -533,7 +559,10 @@ fn create_default_palette() -> Vec<Color> {
 /// Helper function to check if graphics is initialized.
 pub fn is_graphics_initialized() -> bool {
     GRAPHICS_STATE.with(|state_ref| {
-        state_ref.borrow().as_ref().map_or(false, |gs| gs.is_initialized())
+        state_ref
+            .borrow()
+            .as_ref()
+            .map_or(false, |gs| gs.is_initialized())
     })
 }
 
@@ -542,9 +571,7 @@ pub fn with_graphics_state<F, R>(f: F) -> Option<R>
 where
     F: FnOnce(&GraphicsState) -> R,
 {
-    GRAPHICS_STATE.with(|state_ref| {
-        state_ref.borrow().as_ref().map(f)
-    })
+    GRAPHICS_STATE.with(|state_ref| state_ref.borrow().as_ref().map(f))
 }
 
 /// Helper function to get mutable graphics state for other modules.
@@ -552,9 +579,7 @@ pub fn with_graphics_state_mut<F, R>(f: F) -> Option<R>
 where
     F: FnOnce(&mut GraphicsState) -> R,
 {
-    GRAPHICS_STATE.with(|state_ref| {
-        state_ref.borrow_mut().as_mut().map(f)
-    })
+    GRAPHICS_STATE.with(|state_ref| state_ref.borrow_mut().as_mut().map(f))
 }
 
 /// Move to absolute position.
@@ -709,7 +734,9 @@ pub fn kbhit() -> bool {
                 let events = backend.poll_events();
                 for event in events {
                     match event {
-                        crate::backend::InputEvent::Key { key_code, extended, .. } => {
+                        crate::backend::InputEvent::Key {
+                            key_code, extended, ..
+                        } => {
                             // Feed key event into input system
                             graphics_state.input_event.add_key_event(key_code, extended);
                         }
@@ -718,7 +745,7 @@ pub fn kbhit() -> bool {
                 }
                 return graphics_state.input_event.has_key_event();
             }
-            
+
             // Return false if no backend or in headless mode
             false
         } else {
@@ -737,7 +764,9 @@ pub fn getch() -> Option<char> {
                 let events = backend.poll_events();
                 for event in events {
                     match event {
-                        crate::backend::InputEvent::Key { key_code, extended, .. } => {
+                        crate::backend::InputEvent::Key {
+                            key_code, extended, ..
+                        } => {
                             // Feed key event into input system
                             graphics_state.input_event.add_key_event(key_code, extended);
                         }
@@ -745,7 +774,7 @@ pub fn getch() -> Option<char> {
                     }
                 }
             }
-            
+
             graphics_state.input_event.get_next_key().map(|event| {
                 // Convert key_code to character (simplified)
                 if event.key_code >= 32 && event.key_code <= 126 {
@@ -792,7 +821,7 @@ pub fn clearviewport() {
             let viewport = graphics_state.drawing_state.viewport;
             // Clear the viewport area by filling it with background color
             let bg_color = graphics_state.drawing_state.background_color;
-            
+
             // For now, just a stub - should clear the viewport rectangle
             let _ = (viewport, bg_color);
         }
@@ -806,12 +835,23 @@ pub fn linerel(dx: i32, dy: i32) {
             let current_pos = graphics_state.drawing_state.position;
             let new_x = current_pos.x + dx;
             let new_y = current_pos.y + dy;
-            
+
             // Draw line from current position to new position
             graphics_state.drawing_state.position.x = new_x;
             graphics_state.drawing_state.position.y = new_y;
-            
+
             // TODO: Actually draw the line using the backend
+        }
+    });
+}
+
+/// Set text style (font, direction, char size).
+pub fn settextstyle(font: i32, direction: i32, char_size: i32) {
+    GRAPHICS_STATE.with(|state_ref| {
+        if let Some(ref mut graphics_state) = state_ref.borrow_mut().as_mut() {
+            graphics_state
+                .font_settings
+                .set_text_style(font, direction, char_size);
         }
     });
 }
@@ -851,8 +891,42 @@ pub fn gettextsettings() -> crate::types::BgiTextSettings {
     })
 }
 
+/// Output text at specified position.
+/// Currently a stub - will be implemented with bgi-stroked-fonts.
+pub fn outtextxy(_x: i32, _y: i32, _text: &str) {
+    // TDD stub - will implement with actual font rendering
+}
+
+/// Calculate the width of a text string in pixels.
+pub fn textwidth(text: &str) -> i32 {
+    GRAPHICS_STATE.with(|state_ref| {
+        if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
+            graphics_state.font_settings.text_width(text)
+        } else {
+            // Fallback: 8 pixels per character
+            text.len() as i32 * 8
+        }
+    })
+}
+
+/// Calculate the height of a text string in pixels.
+pub fn textheight(text: &str) -> i32 {
+    GRAPHICS_STATE.with(|state_ref| {
+        if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
+            graphics_state.font_settings.text_height(text)
+        } else {
+            // Fallback: 16 pixels height
+            if text.is_empty() {
+                0
+            } else {
+                16
+            }
+        }
+    })
+}
+
 /// Set batch mode to optimize bulk drawing operations.
-/// When batch mode is enabled, individual draw operations (like putpixel) 
+/// When batch mode is enabled, individual draw operations (like putpixel)
 /// will not immediately present to the screen, allowing for much faster
 /// bulk operations. Call refresh() to present all changes at once.
 pub fn set_batch_mode(enabled: bool) {
@@ -863,9 +937,7 @@ pub fn set_batch_mode(enabled: bool) {
 
 /// Check if batch mode is currently enabled.
 pub fn is_batch_mode() -> bool {
-    with_graphics_state(|state| {
-        state.drawing_state.batch_mode
-    }).unwrap_or(false)
+    with_graphics_state(|state| state.drawing_state.batch_mode).unwrap_or(false)
 }
 
 /// Force a refresh/present of the current window.
@@ -873,7 +945,8 @@ pub fn is_batch_mode() -> bool {
 pub fn refresh() {
     #[cfg(feature = "visual-backend")]
     with_graphics_state_mut(|state| {
-        if let (Some(ref mut backend), Some(window_id)) = (&mut state.backend, state.current_window) {
+        if let (Some(ref mut backend), Some(window_id)) = (&mut state.backend, state.current_window)
+        {
             if let Err(_) = backend.present(window_id) {
                 // Ignore present errors to maintain BGI compatibility
             }
