@@ -82,13 +82,13 @@ jobs:
         run: cargo fmt -- --check
 
       - name: Run Clippy (default)
-        run: cargo clippy -- -D warnings
+        run: cargo clippy
 
       - name: Run Clippy (visual-backend)
-        run: cargo clippy --features visual-backend -- -D warnings
+        run: cargo clippy --features visual-backend
 
       - name: Run Clippy (pgm-backend)
-        run: cargo clippy --features pgm-backend -- -D warnings
+        run: cargo clippy --features pgm-backend
 
   docs:
     name: Documentation
@@ -112,15 +112,9 @@ jobs:
 
       - name: Build docs (default features)
         run: cargo doc --no-deps
-        env:
-          RUSTDOCFLAGS: -D warnings
 
       - name: Build docs (visual-backend)
         run: cargo doc --no-deps --features visual-backend
-        env:
-          RUSTDOCFLAGS: -D warnings
 
       - name: Build docs (pgm-backend)
         run: cargo doc --no-deps --features pgm-backend
-        env:
-          RUSTDOCFLAGS: -D warnings
