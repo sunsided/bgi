@@ -663,5 +663,11 @@ fn test_input_event_placeholder() {
         InputEvent::Placeholder => {
             // This is expected
         }
+        InputEvent::Key { .. } => {
+            // Key events from actual backend
+        }
+        InputEvent::Mouse { .. } => {
+            // Mouse events from actual backend  
+        }
     }
 }

@@ -102,11 +102,15 @@ fn main() {
     println!("   ✅ refresh() can be called as often as needed");
     println!("   ✅ Safe to mix batch and normal modes");
     
-    println!("\nPress any key to exit...");
-    while !kbhit() {
-        thread::sleep(Duration::from_millis(50));
+    if is_headless() {
+        println!("\nBatch test completed in headless mode. Exiting...");
+    } else {
+        println!("\nPress any key to exit...");
+        while !kbhit() {
+            thread::sleep(Duration::from_millis(50));
+        }
+        getch();
     }
-    getch();
     
     closegraph();
 }

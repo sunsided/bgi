@@ -716,9 +716,11 @@ pub fn kbhit() -> bool {
                         _ => {} // Handle other events if needed
                     }
                 }
+                return graphics_state.input_event.has_key_event();
             }
             
-            graphics_state.input_event.has_key_event()
+            // Return false if no backend or in headless mode
+            false
         } else {
             false
         }
@@ -756,6 +758,19 @@ pub fn getch() -> Option<char> {
             None
         }
     })
+}
+
+/// Check if the graphics system is running in headless mode (no visual output).
+/// This is useful for examples to adapt their behavior accordingly.
+pub fn is_headless() -> bool {
+    #[cfg(feature = "visual-backend")]
+    {
+        false
+    }
+    #[cfg(not(feature = "visual-backend"))]
+    {
+        true
+    }
 }
 
 /// Flood fill an area with the current fill color (stub implementation).

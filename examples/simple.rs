@@ -40,18 +40,22 @@ fn main() {
     // Add some text
     setcolor(Color::YELLOW);
     outtextxy(10, 300, "Simple BGI Graphics Demo");
-    outtextxy(10, 320, "Press any key to exit...");
-
-    println!("Drawing completed. Press any key in the graphics window to exit...");
     
-    // Wait for key press from graphics window
-    loop {
-        if kbhit() {
-            let ch = getch();
-            println!("Key pressed: {:?}", ch);
-            break;
+    if is_headless() {
+        println!("Drawing completed in headless mode. Exiting...");
+    } else {
+        outtextxy(10, 320, "Press any key to exit...");
+        println!("Drawing completed. Press any key in the graphics window to exit...");
+        
+        // Wait for key press from graphics window
+        loop {
+            if kbhit() {
+                let ch = getch();
+                println!("Key pressed: {:?}", ch);
+                break;
+            }
+            delay(10); // Small delay to avoid busy waiting
         }
-        std::thread::sleep(std::time::Duration::from_millis(50));
     }
     
     // Close graphics

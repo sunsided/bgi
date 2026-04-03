@@ -122,18 +122,22 @@ fn main() {
     // Add title
     setcolor(Color::WHITE);
     outtextxy(10, 10, "Mandelbrot Set (Batch Mode)");
-    outtextxy(10, 30, "Press any key to exit...");
     
-    println!("Mandelbrot set rendered. Press any key in the graphics window to exit...");
-    
-    // Wait for key press from graphics window
-    loop {
-        if kbhit() {
-            let ch = getch();
-            println!("Key pressed: {:?}", ch);
-            break;
+    if is_headless() {
+        println!("Mandelbrot set rendered in headless mode. Exiting...");
+    } else {
+        outtextxy(10, 30, "Press any key to exit...");
+        println!("Mandelbrot set rendered. Press any key in the graphics window to exit...");
+        
+        // Wait for key press from graphics window
+        loop {
+            if kbhit() {
+                let ch = getch();
+                println!("Key pressed: {:?}", ch);
+                break;
+            }
+            delay(10); // Small delay to avoid busy waiting
         }
-        std::thread::sleep(std::time::Duration::from_millis(50));
     }
 
     // Close graphics

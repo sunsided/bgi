@@ -53,11 +53,11 @@
 - [x] T009 [P] Keyboard input integration test in tests/input/test_keyboard.rs
 - [x] T010 [P] Mouse input integration test in tests/input/test_mouse.rs
 - [x] T011 [P] Event queue management test in tests/input/test_event_queue.rs
-- [ ] T011a [P] Font loading and rendering test in tests/graphics/test_fonts.rs
-- [ ] T011b [P] Graphics state management test in tests/graphics/test_state.rs
-- [ ] T012 [P] Coordinate transformation test in tests/integration/test_coordinates.rs
-- [ ] T013 [P] Backend switching test in tests/integration/test_backend_selection.rs
-- [ ] T014 [P] Visual validation test in tests/integration/test_visual_output.rs
+- [x] T011a [P] Font loading and rendering test in tests/graphics/test_fonts.rs
+- [x] T011b [P] Graphics state management test in tests/graphics/test_state.rs
+- [x] T012 [P] Coordinate transformation test in tests/integration/test_coordinates.rs
+- [x] T013 [P] Backend switching test in tests/integration/test_backend_selection.rs
+- [x] T014 [P] Visual validation test in tests/integration/test_visual_output.rs
 
 ## Phase 3.3: Core Implementation (ONLY after tests are failing)
 - [ ] T015 [P] Backend trait definition in src/backend/mod.rs
