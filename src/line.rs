@@ -48,8 +48,6 @@ pub fn draw_line_bresenham(
     draw_mode: i32,
 ) -> Result<(), crate::error::BgiError> {
     let mut counter = 0u16; // Counter for pattern pixel
-    #[allow(unused)]
-    let mut pixels_plotted = 0; // Debug counter (only checked in tests)
     let dx = (x2 - x1).abs();
     let sx = if x1 < x2 { 1 } else { -1 };
     let dy = (y2 - y1).abs();
@@ -64,7 +62,7 @@ pub fn draw_line_bresenham(
             true
         } else {
             let pattern = line_style.pattern; // Use the pattern directly from line_style
-            // Check the bit at position (counter % 16) in the pattern
+                                              // Check the bit at position (counter % 16) in the pattern
             let bit_position = 15 - (counter % 16); // BGI patterns are read left-to-right
             (pattern >> bit_position) & 1 != 0
         };
@@ -74,7 +72,6 @@ pub fn draw_line_bresenham(
             // Other modes (XOR_PUT, OR_PUT, etc.) would require different implementations
             let commands = vec![DrawCommand::Pixel { x, y, color }];
             backend.draw(window_id, &commands)?;
-            pixels_plotted += 1; // Only checked in test assertions
         }
 
         counter += 1;

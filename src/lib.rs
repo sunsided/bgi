@@ -51,14 +51,14 @@ pub mod optimizations;
 
 pub use graphics::*;
 pub use image::*;
-pub use optimizations::{BatchDrawer, DrawingPool, const_optimized};
+pub use optimizations::{const_optimized, BatchDrawer, DrawingPool};
 pub use palette::*;
 pub use shapes::*;
 
-use backend::{Backend, DrawCommand, create_default_backend};
+use backend::{create_default_backend, Backend, DrawCommand};
 use line::{
-    LineStyle as LineStyleInternal, draw_ellipse_arc, draw_rectangle_lines, draw_thick_circle,
-    draw_thick_line,
+    draw_ellipse_arc, draw_rectangle_lines, draw_thick_circle, draw_thick_line,
+    LineStyle as LineStyleInternal,
 };
 use optimizations::optimized_ctx;
 use window::WindowId;
@@ -349,7 +349,6 @@ pub fn getmodeinfo(driver: i32, mode: i32) -> Option<(u32, u32, u32)> {
 
 /// Drawing primitives using GRAPHICS_STATE from graphics.rs
 /// Note: These maintain the classic BGI API without explicit context parameters
-
 pub fn line(x1: i32, y1: i32, x2: i32, y2: i32) {
     // Use the same implementation as shapes.rs for consistency
     crate::shapes::line(x1, y1, x2, y2);
@@ -395,7 +394,6 @@ pub fn ellipse(x: i32, y: i32, start_angle: i32, end_angle: i32, x_radius: i32, 
 
 /// Explicit context API - alternative versions for contract tests that expect explicit context passing
 /// Note: These are designed to satisfy the drawing primitives contract tests
-
 pub fn line_ctx(context: &mut GraphicsContext, x1: i32, y1: i32, x2: i32, y2: i32) -> GraphResult {
     optimized_ctx::line_ctx(context, x1, y1, x2, y2)
 }

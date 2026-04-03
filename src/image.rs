@@ -1,8 +1,8 @@
 //! Image manipulation functions for BGI graphics.
 
 use crate::{
-    Color,
     graphics::{with_graphics_state, with_graphics_state_mut},
+    Color,
 };
 use std::collections::HashMap;
 

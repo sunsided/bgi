@@ -1,6 +1,6 @@
 //! Window state management for BGI graphics window.
 
-use crate::{Color, constants::*};
+use crate::{constants::*, Color};
 
 /// Graphics driver information.
 #[derive(Debug, Clone, PartialEq, Eq)]

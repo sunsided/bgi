@@ -1,8 +1,8 @@
 //! Shape drawing functions for BGI graphics.
 
 use crate::{
-    Color, RgbColor,
     graphics::{with_graphics_state, with_graphics_state_mut},
+    Color, RgbColor,
 };
 
 /// Draw a line from (x1, y1) to (x2, y2).
