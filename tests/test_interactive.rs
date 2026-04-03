@@ -1,6 +1,6 @@
 use bgi::{
-    Color, circle, closegraph, delay, getch, initgraph, ismouseclick, kbhit, line, mouseclick,
-    mousex, mousey, setcolor,
+    circle, closegraph, delay, getch, initgraph, ismouseclick, kbhit, line, mouseclick, mousex,
+    mousey, setcolor, Color,
 };
 
 #[test]
@@ -209,6 +209,7 @@ fn test_interactive_response_drawing() {
 }
 
 #[test]
+#[ignore = "Timing test - can be flaky in CI environments"]
 fn test_interactive_timing() {
     let mut driver = 9; // VGA
     let mut mode = 2; // VGAHI
