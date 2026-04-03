@@ -3,11 +3,10 @@ name = "bgi"
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.90"
-authors = ["Your Name <your.email@example.com>"]
+authors = ["Markus Mayer <widemeadows@gmail.com>"]
 license = "MIT OR Apache-2.0"
 description = "A modern Rust port of the Borland Graphics Interface (BGI) with extensible backends"
-repository = "https://github.com/yourusername/bgi"
-documentation = "https://docs.rs/bgi"
+repository = "https://github.com/sunsided/bgi"
 readme = "README.md"
 keywords = ["graphics", "bgi", "drawing", "retrocomputing", "game-development"]
 categories = ["graphics", "multimedia", "game-development"]
@@ -21,13 +20,13 @@ pgm-backend = []
 [dependencies]
 # Core dependencies
 thiserror = "1.0"
-bitflags = "2.4"
+bitflags = "2.11"
 
 # Visual backend dependencies
 minifb = { version = "0.25", optional = true }
 
 # Font rendering dependency
-bgi-stroked-fonts = "0.1"
+bgi-stroked-fonts = "0.2"
 
 # Winit backend dependencies (legacy)
 winit = { version = "0.29", optional = true }
