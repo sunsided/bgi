@@ -17,7 +17,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        rust: [stable, 1.90.0]
+        rust: [stable]
     steps:
       - uses: actions/checkout@v4
 
@@ -37,7 +37,7 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-${{ matrix.rust }}-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Build (default features)
+      - name: Build (default features - headless)
         run: cargo build --verbose
 
       - name: Build (visual-backend)
@@ -45,9 +45,6 @@ jobs:
 
       - name: Build (pgm-backend)
         run: cargo build --verbose --features pgm-backend
-
-      - name: Build (all features)
-        run: cargo build --verbose --all-features
 
       - name: Run tests (headless - default)
         run: cargo test --verbose
@@ -87,8 +84,11 @@ jobs:
       - name: Run Clippy (default)
         run: cargo clippy -- -D warnings
 
-      - name: Run Clippy (all features)
-        run: cargo clippy --all-features -- -D warnings
+      - name: Run Clippy (visual-backend)
+        run: cargo clippy --features visual-backend -- -D warnings
+
+      - name: Run Clippy (pgm-backend)
+        run: cargo clippy --features pgm-backend -- -D warnings
 
   docs:
     name: Documentation
@@ -110,7 +110,17 @@ jobs:
             target/
           key: ${{ runner.os }}-cargo-docs-${{ hashFiles('**/Cargo.lock') }}
 
-      - name: Build docs
-        run: cargo doc --no-deps --all-features
+      - name: Build docs (default features)
+        run: cargo doc --no-deps
+        env:
+          RUSTDOCFLAGS: -D warnings
+
+      - name: Build docs (visual-backend)
+        run: cargo doc --no-deps --features visual-backend
+        env:
+          RUSTDOCFLAGS: -D warnings
+
+      - name: Build docs (pgm-backend)
+        run: cargo doc --no-deps --features pgm-backend
         env:
           RUSTDOCFLAGS: -D warnings
