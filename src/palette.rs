@@ -1,6 +1,9 @@
 //! Color palette management functions for BGI graphics.
 
-use crate::{Color, graphics::{with_graphics_state, with_graphics_state_mut}};
+use crate::{
+    graphics::{with_graphics_state, with_graphics_state_mut},
+    Color,
+};
 
 /// Set a single palette entry.
 pub fn setpalette(color_num: i32, color: Color) {
@@ -19,7 +22,8 @@ pub fn getpaletteentry(color_num: i32) -> Option<Color> {
         } else {
             None
         }
-    }).flatten()
+    })
+    .flatten()
 }
 
 /// Set entire palette from array.
@@ -32,7 +36,12 @@ pub fn setallpalette(palette: &[Color]) {
 
 /// Set palette entry using RGB values.
 pub fn setrgbpalette(color_num: i32, red: u8, green: u8, blue: u8) {
-    let color = Color::Rgb(crate::RgbColor { r: red, g: green, b: blue, a: 255 });
+    let color = Color::Rgb(crate::RgbColor {
+        r: red,
+        g: green,
+        b: blue,
+        a: 255,
+    });
     setpalette(color_num, color);
 }
 
@@ -60,8 +69,7 @@ pub fn getdefaultpalette() -> Vec<Color> {
 
 /// Get current palette size.
 pub fn getpalettesize() -> i32 {
-    with_graphics_state(|state| state.current_palette.len() as i32)
-        .unwrap_or(0)
+    with_graphics_state(|state| state.current_palette.len() as i32).unwrap_or(0)
 }
 
 /// Get maximum color index.
@@ -71,6 +79,5 @@ pub fn getmaxcolor() -> i32 {
 
 /// Get entire current palette.
 pub fn getpalette() -> Vec<Color> {
-    with_graphics_state(|state| state.current_palette.clone())
-        .unwrap_or_else(getdefaultpalette)
+    with_graphics_state(|state| state.current_palette.clone()).unwrap_or_else(getdefaultpalette)
 }

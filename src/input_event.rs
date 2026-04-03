@@ -194,7 +194,11 @@ impl InputEvent {
     /// Check if a mouse button was clicked (and clear the click state).
     pub fn is_mouse_click(&mut self, button: i32) -> bool {
         // Find and remove the first click for this button
-        if let Some(pos) = self.mouse_clicks.iter().position(|click| click.button == button) {
+        if let Some(pos) = self
+            .mouse_clicks
+            .iter()
+            .position(|click| click.button == button)
+        {
             self.mouse_clicks.remove(pos);
             true
         } else {
@@ -204,7 +208,8 @@ impl InputEvent {
 
     /// Get mouse click information without clearing it.
     pub fn peek_mouse_click(&self, button: i32) -> Option<MouseClick> {
-        self.mouse_clicks.iter()
+        self.mouse_clicks
+            .iter()
             .find(|click| click.button == button)
             .copied()
     }
@@ -235,7 +240,7 @@ impl InputEvent {
         (
             self.mouse_state.buttons.left,
             self.mouse_state.buttons.right,
-            self.mouse_state.buttons.middle
+            self.mouse_state.buttons.middle,
         )
     }
 
@@ -304,8 +309,6 @@ impl InputEvent {
             self.mouse_state.buttons.middle,
         )
     }
-
-
 
     /// Clear all input events.
     pub fn clear_all(&mut self) {

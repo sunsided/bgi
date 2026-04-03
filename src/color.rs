@@ -110,6 +110,14 @@ impl Color {
             None
         }
     }
+
+    /// Convert color to palette index (0-15 for indexed colors, 0 for RGB).
+    pub fn to_index(self) -> u8 {
+        match self {
+            Self::Indexed(idx) => idx,
+            Self::Rgb(_) => 0, // RGB colors don't have a palette index
+        }
+    }
 }
 
 /// RGB color with 8-bit components.

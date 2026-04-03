@@ -390,12 +390,16 @@ pub fn setfillpattern(pattern: &[u8; 8], color: Color) {
 }
 
 /// Get fill style settings.
-pub fn getfillsettings() -> (i32, Color) {
+pub fn getfillsettings() -> crate::types::BgiFillSettings {
     GRAPHICS_STATE.with(|state_ref| {
         if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
-            graphics_state.drawing_state.get_fill_style()
+            let (pattern, color) = graphics_state.drawing_state.get_fill_style();
+            crate::types::BgiFillSettings {
+                pattern,
+                color: color.to_index() as i32,
+            }
         } else {
-            (SOLID_FILL, Color::WHITE)
+            crate::types::BgiFillSettings::default()
         }
     })
 }
@@ -444,19 +448,19 @@ pub fn getviewport() -> (i32, i32, i32, i32) {
 }
 
 /// Get current viewport settings (extended version with clip flag).
-pub fn getviewsettings() -> (i32, i32, i32, i32, bool) {
+pub fn getviewsettings() -> crate::types::BgiViewportSettings {
     GRAPHICS_STATE.with(|state_ref| {
         if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
             let viewport = graphics_state.drawing_state.get_viewport();
-            (
-                viewport.left,
-                viewport.top,
-                viewport.right,
-                viewport.bottom,
-                viewport.clip,
-            )
+            crate::types::BgiViewportSettings {
+                left: viewport.left,
+                top: viewport.top,
+                right: viewport.right,
+                bottom: viewport.bottom,
+                clip: viewport.clip,
+            }
         } else {
-            (0, 0, 639, 479, true)
+            crate::types::BgiViewportSettings::default()
         }
     })
 }

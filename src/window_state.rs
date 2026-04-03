@@ -1,6 +1,6 @@
 //! Window state management for BGI graphics window.
 
-use crate::{Color, constants::*};
+use crate::{constants::*, Color};
 
 /// Graphics driver information.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -255,7 +255,20 @@ impl WindowState {
 
     /// Check if driver is valid.
     pub fn is_valid_driver(&self, driver: i32) -> bool {
-        matches!(driver, DETECT | CGA | MCGA | EGA | EGA64 | EGAMONO | IBM8514 | HERCMONO | ATT400 | VGA | PC3270)
+        matches!(
+            driver,
+            DETECT
+                | CGA
+                | MCGA
+                | EGA
+                | EGA64
+                | EGAMONO
+                | IBM8514
+                | HERCMONO
+                | ATT400
+                | VGA
+                | PC3270
+        )
     }
 
     /// Check if mode is valid for driver.
@@ -263,21 +276,21 @@ impl WindowState {
         use crate::constants::*;
         match driver {
             VGA => {
-                // VGA-specific modes only  
+                // VGA-specific modes only
                 matches!(mode, VGALO | VGAMED | VGAHI | MCGAHI)
-            },
+            }
             EGA => {
                 // EGA-specific modes only
                 matches!(mode, EGALO | EGAHI | EGA64LO | EGAMED)
-            },
+            }
             CGA => {
                 // CGA-specific modes only
                 matches!(mode, CGALO | CGAMED | CGAHI)
-            },
+            }
             MCGA => {
                 // MCGA-specific modes only
                 matches!(mode, MCGAHI)
-            },
+            }
             _ => false, // Invalid drivers should return false
         }
     }

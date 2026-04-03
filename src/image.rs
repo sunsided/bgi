@@ -1,6 +1,9 @@
 //! Image manipulation functions for BGI graphics.
 
-use crate::{Color, graphics::{with_graphics_state, with_graphics_state_mut}};
+use crate::{
+    graphics::{with_graphics_state, with_graphics_state_mut},
+    Color,
+};
 use std::collections::HashMap;
 
 thread_local! {
@@ -30,13 +33,13 @@ impl ImageData {
             data: vec![0; size],
         }
     }
-    
+
     /// Get pixel at coordinates.
     pub fn get_pixel(&self, x: i32, y: i32) -> Option<Color> {
         if x < 0 || x >= self.width || y < 0 || y >= self.height {
             return None;
         }
-        
+
         let index = ((y * self.width + x) * 4) as usize;
         if index + 3 < self.data.len() {
             Some(Color::Rgb(crate::RgbColor {
@@ -129,12 +132,7 @@ pub fn putimage(left: i32, top: i32, image_data: &[u8], mode: i32) {
         return;
     }
 
-    let image_id = u32::from_le_bytes([
-        image_data[0],
-        image_data[1],
-        image_data[2],
-        image_data[3]
-    ]);
+    let image_id = u32::from_le_bytes([image_data[0], image_data[1], image_data[2], image_data[3]]);
 
     IMAGE_STORE.with(|store| {
         if let Some(data) = store.borrow().get(&image_id) {
@@ -190,12 +188,7 @@ pub fn getimagesize(image_data: &[u8]) -> (i32, i32) {
         return (0, 0);
     }
 
-    let image_id = u32::from_le_bytes([
-        image_data[0],
-        image_data[1],
-        image_data[2],
-        image_data[3]
-    ]);
+    let image_id = u32::from_le_bytes([image_data[0], image_data[1], image_data[2], image_data[3]]);
 
     IMAGE_STORE.with(|store| {
         if let Some(data) = store.borrow().get(&image_id) {

@@ -10,8 +10,8 @@ use std::cell::RefCell;
 pub mod color;
 pub mod constants;
 pub mod error;
+pub mod input;
 pub mod types;
-// pub mod input; // Temporarily disabled due to byte literal issues
 
 // Re-export public API
 pub use color::{Color, RgbColor};
@@ -19,7 +19,8 @@ pub use constants::*;
 pub use error::{BgiError, BgiResult};
 pub use types::colors::*;
 pub use types::{
-    BgiLineSettings, BgiTextSettings, GraphResult, GraphicsDriver, GraphicsMode, MouseState, Point,
+    BgiFillSettings, BgiLineSettings, BgiTextSettings, BgiViewportSettings, GraphResult,
+    GraphicsDriver, GraphicsMode, MouseState, Point,
 };
 
 // Include backend module

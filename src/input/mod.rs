@@ -19,14 +19,14 @@ pub enum InputEvent {
         modifiers: KeyModifiers,
     },
     Mouse {
-        x: i16,           // BGI logical coordinates
-        y: i16,           // BGI logical coordinates
+        x: i16, // BGI logical coordinates
+        y: i16, // BGI logical coordinates
         button: MouseButton,
         is_pressed: bool,
     },
     MouseMove {
-        x: i16,           // BGI logical coordinates
-        y: i16,           // BGI logical coordinates
+        x: i16, // BGI logical coordinates
+        y: i16, // BGI logical coordinates
     },
     WindowClose,
 }
@@ -51,7 +51,16 @@ pub enum KeyCode {
     Right,
 
     // Function keys
-    F1, F2, F3, F4, F5, F6, F7, F8, F9, F10,
+    F1,
+    F2,
+    F3,
+    F4,
+    F5,
+    F6,
+    F7,
+    F8,
+    F9,
+    F10,
 
     // Other special keys
     Insert,
@@ -194,12 +203,28 @@ impl KeyCode {
 
     /// Check if this is an extended key code (requires special handling in BGI)
     pub fn is_extended(self) -> bool {
-        matches!(self,
-            KeyCode::Up | KeyCode::Down | KeyCode::Left | KeyCode::Right |
-            KeyCode::F1 | KeyCode::F2 | KeyCode::F3 | KeyCode::F4 | KeyCode::F5 |
-            KeyCode::F6 | KeyCode::F7 | KeyCode::F8 | KeyCode::F9 | KeyCode::F10 |
-            KeyCode::Insert | KeyCode::Delete | KeyCode::Home | KeyCode::End |
-            KeyCode::PageUp | KeyCode::PageDown
+        matches!(
+            self,
+            KeyCode::Up
+                | KeyCode::Down
+                | KeyCode::Left
+                | KeyCode::Right
+                | KeyCode::F1
+                | KeyCode::F2
+                | KeyCode::F3
+                | KeyCode::F4
+                | KeyCode::F5
+                | KeyCode::F6
+                | KeyCode::F7
+                | KeyCode::F8
+                | KeyCode::F9
+                | KeyCode::F10
+                | KeyCode::Insert
+                | KeyCode::Delete
+                | KeyCode::Home
+                | KeyCode::End
+                | KeyCode::PageUp
+                | KeyCode::PageDown
         )
     }
 }
@@ -218,7 +243,11 @@ mod tests {
             key_code: KeyCode::Ascii(b'A'),
             ascii_code: b'A',
             is_pressed: true,
-            modifiers: KeyModifiers { shift: false, ctrl: false, alt: false },
+            modifiers: KeyModifiers {
+                shift: false,
+                ctrl: false,
+                alt: false,
+            },
         };
 
         queue.push_event(event);
@@ -240,7 +269,8 @@ mod tests {
         assert_eq!(queue.mouse_position(), (100, 200));
 
         queue.push_event(InputEvent::Mouse {
-            x: 150, y: 250,
+            x: 150,
+            y: 250,
             button: MouseButton::Left,
             is_pressed: true,
         });

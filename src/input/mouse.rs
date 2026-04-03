@@ -60,9 +60,9 @@ impl MouseButtonState {
 /// Convert raw button code to MouseButton.
 pub fn raw_to_button(raw: u32) -> Option<MouseButton> {
     match raw {
-        0 | 1 => Some(MouseButton::Left),
-        1 | 2 => Some(MouseButton::Right),
-        2 | 4 => Some(MouseButton::Middle),
+        0 => Some(MouseButton::Left),
+        1 => Some(MouseButton::Right),
+        2 => Some(MouseButton::Middle),
         _ => None,
     }
 }

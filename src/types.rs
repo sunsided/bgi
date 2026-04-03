@@ -529,6 +529,51 @@ impl Default for BgiLineSettings {
     }
 }
 
+/// BGI-compatible fill settings structure (fillsettingstype).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct BgiFillSettings {
+    /// Fill pattern (SOLID_FILL, LINE_FILL, etc.).
+    pub pattern: i32,
+    /// Fill color.
+    pub color: i32,
+}
+
+impl Default for BgiFillSettings {
+    fn default() -> Self {
+        Self {
+            pattern: 1, // SOLID_FILL
+            color: 15,  // WHITE
+        }
+    }
+}
+
+/// BGI-compatible viewport settings structure (viewporttype).
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct BgiViewportSettings {
+    /// Left boundary.
+    pub left: i32,
+    /// Top boundary.
+    pub top: i32,
+    /// Right boundary.
+    pub right: i32,
+    /// Bottom boundary.
+    pub bottom: i32,
+    /// Clipping enabled.
+    pub clip: bool,
+}
+
+impl Default for BgiViewportSettings {
+    fn default() -> Self {
+        Self {
+            left: 0,
+            top: 0,
+            right: 639,
+            bottom: 479,
+            clip: true,
+        }
+    }
+}
+
 /// Color constants used in BGI.
 pub mod colors {
     /// Black color.

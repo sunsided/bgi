@@ -1,6 +1,9 @@
 //! Shape drawing functions for BGI graphics.
 
-use crate::{Color, RgbColor, graphics::{with_graphics_state, with_graphics_state_mut}};
+use crate::{
+    graphics::{with_graphics_state, with_graphics_state_mut},
+    Color, RgbColor,
+};
 
 /// Draw a line from (x1, y1) to (x2, y2).
 pub fn line(x1: i32, y1: i32, x2: i32, y2: i32) {
@@ -10,16 +13,30 @@ pub fn line(x1: i32, y1: i32, x2: i32, y2: i32) {
         let active_page = state.window_state.pages.active_page;
 
         // Line drawing using Bresenham's algorithm with pattern support
-        draw_line_to_page(&mut state.pages, active_page, x1, y1, x2, y2, color, pattern);
-        
+        draw_line_to_page(
+            &mut state.pages,
+            active_page,
+            x1,
+            y1,
+            x2,
+            y2,
+            color,
+            pattern,
+        );
+
         // Present to visual backend if available
         #[cfg(feature = "visual-backend")]
         {
-            if let (Some(ref mut backend), Some(window_id)) = (&mut state.backend, state.current_window) {
+            if let (Some(ref mut backend), Some(window_id)) =
+                (&mut state.backend, state.current_window)
+            {
                 use crate::backend::DrawCommand;
                 let rgb_color = color.to_rgb();
                 let commands = vec![DrawCommand::Line {
-                    x1, y1, x2, y2,
+                    x1,
+                    y1,
+                    x2,
+                    y2,
                     color: rgb_color,
                 }];
                 if let Err(_) = backend.draw(window_id, &commands) {
@@ -40,10 +57,19 @@ pub fn lineto(x: i32, y: i32) {
         let color = state.drawing_state.get_color();
         let pattern = state.drawing_state.get_line_pattern();
         let active_page = state.window_state.pages.active_page;
-        
+
         // Draw line from current position to (x, y)
-        draw_line_to_page(&mut state.pages, active_page, current_x, current_y, x, y, color, pattern);
-        
+        draw_line_to_page(
+            &mut state.pages,
+            active_page,
+            current_x,
+            current_y,
+            x,
+            y,
+            color,
+            pattern,
+        );
+
         // Update current position
         state.drawing_state.move_to(x, y);
     });
@@ -64,15 +90,19 @@ pub fn circle(x: i32, y: i32, radius: i32) {
 
         // Simple circle drawing
         draw_circle_to_page(&mut state.pages, active_page, x, y, radius, color);
-        
+
         // Present to visual backend if available
         #[cfg(feature = "visual-backend")]
         {
-            if let (Some(ref mut backend), Some(window_id)) = (&mut state.backend, state.current_window) {
+            if let (Some(ref mut backend), Some(window_id)) =
+                (&mut state.backend, state.current_window)
+            {
                 use crate::backend::DrawCommand;
                 let rgb_color = color.to_rgb();
                 let commands = vec![DrawCommand::Circle {
-                    x, y, radius,
+                    x,
+                    y,
+                    radius,
                     color: rgb_color,
                     filled: false,
                 }];
@@ -94,7 +124,16 @@ pub fn arc(x: i32, y: i32, start_angle: i32, end_angle: i32, radius: i32) {
         let active_page = state.window_state.pages.active_page;
 
         // Simple arc drawing
-        draw_arc_to_page(&mut state.pages, active_page, x, y, start_angle, end_angle, radius, color);
+        draw_arc_to_page(
+            &mut state.pages,
+            active_page,
+            x,
+            y,
+            start_angle,
+            end_angle,
+            radius,
+            color,
+        );
     });
 }
 
@@ -106,19 +145,60 @@ pub fn rectangle(left: i32, top: i32, right: i32, bottom: i32) {
         let active_page = state.window_state.pages.active_page;
 
         // Draw rectangle using four lines
-        draw_line_to_page(&mut state.pages, active_page, left, top, right, top, color, pattern);
-        draw_line_to_page(&mut state.pages, active_page, right, top, right, bottom, color, pattern);
-        draw_line_to_page(&mut state.pages, active_page, right, bottom, left, bottom, color, pattern);
-        draw_line_to_page(&mut state.pages, active_page, left, bottom, left, top, color, pattern);
-        
+        draw_line_to_page(
+            &mut state.pages,
+            active_page,
+            left,
+            top,
+            right,
+            top,
+            color,
+            pattern,
+        );
+        draw_line_to_page(
+            &mut state.pages,
+            active_page,
+            right,
+            top,
+            right,
+            bottom,
+            color,
+            pattern,
+        );
+        draw_line_to_page(
+            &mut state.pages,
+            active_page,
+            right,
+            bottom,
+            left,
+            bottom,
+            color,
+            pattern,
+        );
+        draw_line_to_page(
+            &mut state.pages,
+            active_page,
+            left,
+            bottom,
+            left,
+            top,
+            color,
+            pattern,
+        );
+
         // Present to visual backend if available
         #[cfg(feature = "visual-backend")]
         {
-            if let (Some(ref mut backend), Some(window_id)) = (&mut state.backend, state.current_window) {
+            if let (Some(ref mut backend), Some(window_id)) =
+                (&mut state.backend, state.current_window)
+            {
                 use crate::backend::DrawCommand;
                 let rgb_color = color.to_rgb();
                 let commands = vec![DrawCommand::Rectangle {
-                    x1: left, y1: top, x2: right, y2: bottom,
+                    x1: left,
+                    y1: top,
+                    x2: right,
+                    y2: bottom,
                     color: rgb_color,
                     filled: false,
                 }];
@@ -140,7 +220,17 @@ pub fn ellipse(x: i32, y: i32, start_angle: i32, end_angle: i32, x_radius: i32, 
         let active_page = state.window_state.pages.active_page;
 
         // Simple ellipse drawing
-        draw_ellipse_to_page(&mut state.pages, active_page, x, y, start_angle, end_angle, x_radius, y_radius, color);
+        draw_ellipse_to_page(
+            &mut state.pages,
+            active_page,
+            x,
+            y,
+            start_angle,
+            end_angle,
+            x_radius,
+            y_radius,
+            color,
+        );
     });
 }
 
@@ -149,21 +239,24 @@ pub fn putpixel(x: i32, y: i32, color: Color) {
     with_graphics_state_mut(|state| {
         let active_page = state.window_state.pages.active_page;
         set_pixel_in_page(&mut state.pages, active_page, x, y, color);
-        
+
         // Present to visual backend if available and not in batch mode
         #[cfg(feature = "visual-backend")]
         {
-            if let (Some(ref mut backend), Some(window_id)) = (&mut state.backend, state.current_window) {
+            if let (Some(ref mut backend), Some(window_id)) =
+                (&mut state.backend, state.current_window)
+            {
                 use crate::backend::DrawCommand;
                 let rgb_color = color.to_rgb();
                 let commands = vec![DrawCommand::Pixel {
-                    x, y,
+                    x,
+                    y,
                     color: rgb_color,
                 }];
                 if let Err(_) = backend.draw(window_id, &commands) {
                     // Ignore draw errors to maintain BGI compatibility
                 }
-                
+
                 // Only present if not in batch mode
                 if !state.drawing_state.batch_mode {
                     if let Err(_) = backend.present(window_id) {
@@ -180,7 +273,8 @@ pub fn getpixel(x: i32, y: i32) -> Color {
     with_graphics_state(|state| {
         let active_page = state.window_state.pages.active_page;
         get_pixel_from_page(&state.pages, active_page, x, y)
-    }).unwrap_or(Color::BLACK)
+    })
+    .unwrap_or(Color::BLACK)
 }
 
 /// Draw and fill a polygon.
@@ -198,7 +292,16 @@ pub fn fillpoly(points: &[(i32, i32)]) {
             let next_i = (i + 1) % points.len();
             let (x1, y1) = points[i];
             let (x2, y2) = points[next_i];
-            draw_line_to_page(&mut state.pages, active_page, x1, y1, x2, y2, fill_color, 0xFFFF);
+            draw_line_to_page(
+                &mut state.pages,
+                active_page,
+                x1,
+                y1,
+                x2,
+                y2,
+                fill_color,
+                0xFFFF,
+            );
         }
     });
 }
@@ -207,7 +310,16 @@ pub fn fillpoly(points: &[(i32, i32)]) {
 
 use std::collections::HashMap;
 
-fn draw_line_to_page(pages: &mut HashMap<i32, Vec<u8>>, page: i32, x1: i32, y1: i32, x2: i32, y2: i32, color: Color, pattern: u16) {
+fn draw_line_to_page(
+    pages: &mut HashMap<i32, Vec<u8>>,
+    page: i32,
+    x1: i32,
+    y1: i32,
+    x2: i32,
+    y2: i32,
+    color: Color,
+    pattern: u16,
+) {
     if pages.get(&page).is_none() {
         return;
     }
@@ -229,11 +341,11 @@ fn draw_line_to_page(pages: &mut HashMap<i32, Vec<u8>>, page: i32, x1: i32, y1: 
         // Check if this pixel should be drawn based on the pattern
         let bit_position = pixel_count % 16;
         let should_draw = (pattern >> (15 - bit_position)) & 1 == 1;
-        
+
         if should_draw {
             set_pixel_in_page(pages, page, x0, y0, color);
         }
-        
+
         pixel_count += 1;
 
         if x0 == x1 && y0 == y1 {
@@ -252,7 +364,14 @@ fn draw_line_to_page(pages: &mut HashMap<i32, Vec<u8>>, page: i32, x1: i32, y1: 
     }
 }
 
-fn draw_circle_to_page(pages: &mut HashMap<i32, Vec<u8>>, page: i32, cx: i32, cy: i32, radius: i32, color: Color) {
+fn draw_circle_to_page(
+    pages: &mut HashMap<i32, Vec<u8>>,
+    page: i32,
+    cx: i32,
+    cy: i32,
+    radius: i32,
+    color: Color,
+) {
     if let Some(_page_data) = pages.get_mut(&page) {
         // Midpoint circle algorithm would be implemented here
         // For now, just approximate with 8 points
@@ -266,7 +385,16 @@ fn draw_circle_to_page(pages: &mut HashMap<i32, Vec<u8>>, page: i32, cx: i32, cy
     }
 }
 
-fn draw_arc_to_page(pages: &mut HashMap<i32, Vec<u8>>, page: i32, cx: i32, cy: i32, start_angle: i32, end_angle: i32, radius: i32, color: Color) {
+fn draw_arc_to_page(
+    pages: &mut HashMap<i32, Vec<u8>>,
+    page: i32,
+    cx: i32,
+    cy: i32,
+    start_angle: i32,
+    end_angle: i32,
+    radius: i32,
+    color: Color,
+) {
     if let Some(_page_data) = pages.get_mut(&page) {
         let start_rad = (start_angle as f64) * std::f64::consts::PI / 180.0;
         let end_rad = (end_angle as f64) * std::f64::consts::PI / 180.0;
@@ -282,7 +410,17 @@ fn draw_arc_to_page(pages: &mut HashMap<i32, Vec<u8>>, page: i32, cx: i32, cy: i
     }
 }
 
-fn draw_ellipse_to_page(pages: &mut HashMap<i32, Vec<u8>>, page: i32, cx: i32, cy: i32, _start_angle: i32, _end_angle: i32, x_radius: i32, y_radius: i32, color: Color) {
+fn draw_ellipse_to_page(
+    pages: &mut HashMap<i32, Vec<u8>>,
+    page: i32,
+    cx: i32,
+    cy: i32,
+    _start_angle: i32,
+    _end_angle: i32,
+    x_radius: i32,
+    y_radius: i32,
+    color: Color,
+) {
     if let Some(_page_data) = pages.get_mut(&page) {
         // Simple ellipse approximation using parametric form
         for i in 0..360 {
@@ -295,7 +433,13 @@ fn draw_ellipse_to_page(pages: &mut HashMap<i32, Vec<u8>>, page: i32, cx: i32, c
 }
 
 /// Set a pixel color in a specific page.
-pub fn set_pixel_in_page(pages: &mut HashMap<i32, Vec<u8>>, page: i32, x: i32, y: i32, color: Color) {
+pub fn set_pixel_in_page(
+    pages: &mut HashMap<i32, Vec<u8>>,
+    page: i32,
+    x: i32,
+    y: i32,
+    color: Color,
+) {
     if let Some(page_data) = pages.get_mut(&page) {
         if x >= 0 && y >= 0 && x < 640 && y < 480 {
             let index = ((y * 640 + x) * 3) as usize;

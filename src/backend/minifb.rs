@@ -8,7 +8,7 @@ use crate::color::RgbColor;
 use crate::error::{BgiError, BgiResult};
 use crate::types::{GraphicsMode, Point, Rect};
 use crate::window::WindowId;
-use minifb::{Window, WindowOptions, Key, MouseMode, MouseButton};
+use minifb::{Key, MouseButton, MouseMode, Window, WindowOptions};
 use std::collections::HashMap;
 
 /// MiniFB backend that provides windowing via the minifb crate
@@ -66,8 +66,17 @@ impl MiniFbBackend {
         }
     }
 
-    fn set_pixel_in_buffer(&mut self, window_id: WindowId, x: i32, y: i32, color: RgbColor) -> BgiResult<()> {
-        if let (Some(window), Some(buffer)) = (self.windows.get(&window_id), self.buffers.get_mut(&window_id)) {
+    fn set_pixel_in_buffer(
+        &mut self,
+        window_id: WindowId,
+        x: i32,
+        y: i32,
+        color: RgbColor,
+    ) -> BgiResult<()> {
+        if let (Some(window), Some(buffer)) = (
+            self.windows.get(&window_id),
+            self.buffers.get_mut(&window_id),
+        ) {
             let (width, height) = window.get_size();
             if x >= 0 && y >= 0 && (x as usize) < width && (y as usize) < height {
                 let index = (y as usize) * width + (x as usize);
@@ -81,7 +90,15 @@ impl MiniFbBackend {
         }
     }
 
-    fn draw_line_in_buffer(&mut self, window_id: WindowId, x1: i32, y1: i32, x2: i32, y2: i32, color: RgbColor) -> BgiResult<()> {
+    fn draw_line_in_buffer(
+        &mut self,
+        window_id: WindowId,
+        x1: i32,
+        y1: i32,
+        x2: i32,
+        y2: i32,
+        color: RgbColor,
+    ) -> BgiResult<()> {
         // Simple Bresenham line algorithm
         let dx = (x2 - x1).abs();
         let dy = (y2 - y1).abs();
@@ -111,7 +128,15 @@ impl MiniFbBackend {
         Ok(())
     }
 
-    fn draw_circle_in_buffer(&mut self, window_id: WindowId, cx: i32, cy: i32, radius: i32, color: RgbColor, filled: bool) -> BgiResult<()> {
+    fn draw_circle_in_buffer(
+        &mut self,
+        window_id: WindowId,
+        cx: i32,
+        cy: i32,
+        radius: i32,
+        color: RgbColor,
+        filled: bool,
+    ) -> BgiResult<()> {
         if filled {
             // Fill the circle
             for y in -radius..=radius {
@@ -190,12 +215,10 @@ impl Backend for MiniFbBackend {
         options.scale = minifb::Scale::X1;
         options.topmost = true; // Try to keep window on top
 
-        let mut window = Window::new(
-            window_title,
-            width as usize,
-            height as usize,
-            options,
-        ).map_err(|e| BgiError::BackendError { message: format!("Failed to create window: {}", e) })?;
+        let mut window = Window::new(window_title, width as usize, height as usize, options)
+            .map_err(|e| BgiError::BackendError {
+                message: format!("Failed to create window: {}", e),
+            })?;
 
         // Limit update rate for better performance
         window.limit_update_rate(Some(std::time::Duration::from_micros(16600))); // ~60 FPS
@@ -206,7 +229,8 @@ impl Backend for MiniFbBackend {
 
         self.windows.insert(window_id, window);
         self.buffers.insert(window_id, buffer);
-        self.buffer_dimensions.insert(window_id, (width as usize, height as usize));
+        self.buffer_dimensions
+            .insert(window_id, (width as usize, height as usize));
 
         if self.current_window.is_none() {
             self.current_window = Some(window_id);
@@ -258,8 +282,8 @@ impl Backend for MiniFbBackend {
     }
 
     fn is_window_valid(&self, window_id: WindowId) -> bool {
-        self.windows.contains_key(&window_id) &&
-        self.windows.get(&window_id).map_or(false, |w| w.is_open())
+        self.windows.contains_key(&window_id)
+            && self.windows.get(&window_id).map_or(false, |w| w.is_open())
     }
 
     fn draw(&mut self, window_id: WindowId, commands: &[DrawCommand]) -> BgiResult<()> {
@@ -271,10 +295,23 @@ impl Backend for MiniFbBackend {
                 DrawCommand::Pixel { x, y, color } => {
                     self.set_pixel_in_buffer(window_id, *x, *y, *color)?;
                 }
-                DrawCommand::Line { x1, y1, x2, y2, color } => {
+                DrawCommand::Line {
+                    x1,
+                    y1,
+                    x2,
+                    y2,
+                    color,
+                } => {
                     self.draw_line_in_buffer(window_id, *x1, *y1, *x2, *y2, *color)?;
                 }
-                DrawCommand::Rectangle { x1, y1, x2, y2, color, filled } => {
+                DrawCommand::Rectangle {
+                    x1,
+                    y1,
+                    x2,
+                    y2,
+                    color,
+                    filled,
+                } => {
                     if *filled {
                         // Fill rectangle
                         for y in *y1..=*y2 {
@@ -285,10 +322,17 @@ impl Backend for MiniFbBackend {
                         self.draw_line_in_buffer(window_id, *x1, *y1, *x2, *y1, *color)?; // Top
                         self.draw_line_in_buffer(window_id, *x1, *y2, *x2, *y2, *color)?; // Bottom
                         self.draw_line_in_buffer(window_id, *x1, *y1, *x1, *y2, *color)?; // Left
-                        self.draw_line_in_buffer(window_id, *x2, *y1, *x2, *y2, *color)?; // Right
+                        self.draw_line_in_buffer(window_id, *x2, *y1, *x2, *y2, *color)?;
+                        // Right
                     }
                 }
-                DrawCommand::Circle { x, y, radius, color, filled } => {
+                DrawCommand::Circle {
+                    x,
+                    y,
+                    radius,
+                    color,
+                    filled,
+                } => {
                     self.draw_circle_in_buffer(window_id, *x, *y, *radius, *color, *filled)?;
                 }
                 DrawCommand::Text { x, y, text, color } => {
@@ -313,16 +357,21 @@ impl Backend for MiniFbBackend {
     }
 
     fn present(&mut self, window_id: WindowId) -> BgiResult<()> {
-        if let (Some(window), Some(buffer), Some((width, height))) =
-            (self.windows.get_mut(&window_id), self.buffers.get(&window_id), self.buffer_dimensions.get(&window_id)) {
-
+        if let (Some(window), Some(buffer), Some((width, height))) = (
+            self.windows.get_mut(&window_id),
+            self.buffers.get(&window_id),
+            self.buffer_dimensions.get(&window_id),
+        ) {
             // Check if window is still open before updating
             if !window.is_open() {
                 return Err(BgiError::InvalidWindow);
             }
 
-            window.update_with_buffer(buffer, *width, *height)
-                .map_err(|e| BgiError::BackendError { message: format!("Failed to update window: {}", e) })?;
+            window
+                .update_with_buffer(buffer, *width, *height)
+                .map_err(|e| BgiError::BackendError {
+                    message: format!("Failed to update window: {}", e),
+                })?;
         } else {
             return Err(BgiError::InvalidWindow);
         }
@@ -330,9 +379,10 @@ impl Backend for MiniFbBackend {
     }
 
     fn get_pixel(&self, window_id: WindowId, x: i32, y: i32) -> Result<RgbColor, BgiError> {
-        if let (Some(buffer), Some((width, height))) =
-            (self.buffers.get(&window_id), self.buffer_dimensions.get(&window_id)) {
-
+        if let (Some(buffer), Some((width, height))) = (
+            self.buffers.get(&window_id),
+            self.buffer_dimensions.get(&window_id),
+        ) {
             let width = *width as i32;
             let height = *height as i32;
 
@@ -360,7 +410,12 @@ impl Backend for MiniFbBackend {
 
     fn viewport(&self, _window_id: WindowId) -> BgiResult<Rect> {
         // TODO: Return actual viewport
-        Ok(Rect { left: 0, top: 0, right: 640, bottom: 480 })
+        Ok(Rect {
+            left: 0,
+            top: 0,
+            right: 640,
+            bottom: 480,
+        })
     }
 
     fn poll_events(&mut self) -> Vec<InputEvent> {
@@ -380,16 +435,54 @@ impl Backend for MiniFbBackend {
             }
 
             // Get previous key states for this window
-            let prev_states = self.previous_key_states.entry(*window_id).or_insert_with(HashMap::new);
+            let prev_states = self
+                .previous_key_states
+                .entry(*window_id)
+                .or_insert_with(HashMap::new);
 
             // Check all keys we care about
             let keys_to_check = [
-                Key::A, Key::B, Key::C, Key::D, Key::E, Key::F, Key::G, Key::H, Key::I, Key::J,
-                Key::K, Key::L, Key::M, Key::N, Key::O, Key::P, Key::Q, Key::R, Key::S, Key::T,
-                Key::U, Key::V, Key::W, Key::X, Key::Y, Key::Z,
-                Key::Key0, Key::Key1, Key::Key2, Key::Key3, Key::Key4, Key::Key5,
-                Key::Key6, Key::Key7, Key::Key8, Key::Key9,
-                Key::Space, Key::Enter, Key::Escape, Key::Tab, Key::Backspace,
+                Key::A,
+                Key::B,
+                Key::C,
+                Key::D,
+                Key::E,
+                Key::F,
+                Key::G,
+                Key::H,
+                Key::I,
+                Key::J,
+                Key::K,
+                Key::L,
+                Key::M,
+                Key::N,
+                Key::O,
+                Key::P,
+                Key::Q,
+                Key::R,
+                Key::S,
+                Key::T,
+                Key::U,
+                Key::V,
+                Key::W,
+                Key::X,
+                Key::Y,
+                Key::Z,
+                Key::Key0,
+                Key::Key1,
+                Key::Key2,
+                Key::Key3,
+                Key::Key4,
+                Key::Key5,
+                Key::Key6,
+                Key::Key7,
+                Key::Key8,
+                Key::Key9,
+                Key::Space,
+                Key::Enter,
+                Key::Escape,
+                Key::Tab,
+                Key::Backspace,
             ];
 
             for key in &keys_to_check {
@@ -399,20 +492,46 @@ impl Backend for MiniFbBackend {
                 // Detect key press event (was not pressed, now is pressed)
                 if is_pressed && !was_pressed {
                     let key_code = match key {
-                        Key::A => 'a' as i32, Key::B => 'b' as i32, Key::C => 'c' as i32, Key::D => 'd' as i32,
-                        Key::E => 'e' as i32, Key::F => 'f' as i32, Key::G => 'g' as i32, Key::H => 'h' as i32,
-                        Key::I => 'i' as i32, Key::J => 'j' as i32, Key::K => 'k' as i32, Key::L => 'l' as i32,
-                        Key::M => 'm' as i32, Key::N => 'n' as i32, Key::O => 'o' as i32, Key::P => 'p' as i32,
-                        Key::Q => 'q' as i32, Key::R => 'r' as i32, Key::S => 's' as i32, Key::T => 't' as i32,
-                        Key::U => 'u' as i32, Key::V => 'v' as i32, Key::W => 'w' as i32, Key::X => 'x' as i32,
-                        Key::Y => 'y' as i32, Key::Z => 'z' as i32,
-                        Key::Key0 => '0' as i32, Key::Key1 => '1' as i32, Key::Key2 => '2' as i32, Key::Key3 => '3' as i32,
-                        Key::Key4 => '4' as i32, Key::Key5 => '5' as i32, Key::Key6 => '6' as i32, Key::Key7 => '7' as i32,
-                        Key::Key8 => '8' as i32, Key::Key9 => '9' as i32,
+                        Key::A => 'a' as i32,
+                        Key::B => 'b' as i32,
+                        Key::C => 'c' as i32,
+                        Key::D => 'd' as i32,
+                        Key::E => 'e' as i32,
+                        Key::F => 'f' as i32,
+                        Key::G => 'g' as i32,
+                        Key::H => 'h' as i32,
+                        Key::I => 'i' as i32,
+                        Key::J => 'j' as i32,
+                        Key::K => 'k' as i32,
+                        Key::L => 'l' as i32,
+                        Key::M => 'm' as i32,
+                        Key::N => 'n' as i32,
+                        Key::O => 'o' as i32,
+                        Key::P => 'p' as i32,
+                        Key::Q => 'q' as i32,
+                        Key::R => 'r' as i32,
+                        Key::S => 's' as i32,
+                        Key::T => 't' as i32,
+                        Key::U => 'u' as i32,
+                        Key::V => 'v' as i32,
+                        Key::W => 'w' as i32,
+                        Key::X => 'x' as i32,
+                        Key::Y => 'y' as i32,
+                        Key::Z => 'z' as i32,
+                        Key::Key0 => '0' as i32,
+                        Key::Key1 => '1' as i32,
+                        Key::Key2 => '2' as i32,
+                        Key::Key3 => '3' as i32,
+                        Key::Key4 => '4' as i32,
+                        Key::Key5 => '5' as i32,
+                        Key::Key6 => '6' as i32,
+                        Key::Key7 => '7' as i32,
+                        Key::Key8 => '8' as i32,
+                        Key::Key9 => '9' as i32,
                         Key::Space => ' ' as i32,
-                        Key::Enter => 13, // CR
-                        Key::Escape => 27, // ESC
-                        Key::Tab => 9, // TAB
+                        Key::Enter => 13,    // CR
+                        Key::Escape => 27,   // ESC
+                        Key::Tab => 9,       // TAB
                         Key::Backspace => 8, // BS
                         _ => 0,
                     };
@@ -453,7 +572,13 @@ impl Backend for MiniFbBackend {
         Ok((1920, 1080)) // Default screen size
     }
 
-    fn copy_surface(&mut self, _window_id: WindowId, _src_rect: Rect, _dst_x: i32, _dst_y: i32) -> BgiResult<()> {
+    fn copy_surface(
+        &mut self,
+        _window_id: WindowId,
+        _src_rect: Rect,
+        _dst_x: i32,
+        _dst_y: i32,
+    ) -> BgiResult<()> {
         // TODO: Implement surface copying
         Ok(())
     }
@@ -472,7 +597,9 @@ impl Backend for MiniFbBackend {
                 existing_buffer.copy_from_slice(buffer);
                 Ok(())
             } else {
-                Err(BgiError::InvalidParameter("Buffer size mismatch".to_string()))
+                Err(BgiError::InvalidParameter(
+                    "Buffer size mismatch".to_string(),
+                ))
             }
         } else {
             Err(BgiError::InvalidWindow)
@@ -481,10 +608,18 @@ impl Backend for MiniFbBackend {
 
     fn load_image(&mut self, _filename: &str) -> BgiResult<(u32, u32, Vec<u32>)> {
         // TODO: Implement image loading
-        Err(BgiError::NotSupported("Image loading not implemented".to_string()))
+        Err(BgiError::NotSupported(
+            "Image loading not implemented".to_string(),
+        ))
     }
 
-    fn save_image(&self, _filename: &str, _width: u32, _height: u32, _pixels: &[u32]) -> BgiResult<()> {
+    fn save_image(
+        &self,
+        _filename: &str,
+        _width: u32,
+        _height: u32,
+        _pixels: &[u32],
+    ) -> BgiResult<()> {
         // TODO: Implement image saving
         Ok(())
     }

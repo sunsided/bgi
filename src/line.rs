@@ -1,8 +1,8 @@
 //! Line drawing algorithms and styles for BGI.
 
-use crate::constants::*;
-use crate::color::RgbColor;
 use crate::backend::{Backend, DrawCommand};
+use crate::color::RgbColor;
+use crate::constants::*;
 use crate::window::WindowId;
 
 /// Line patterns for different line styles.
@@ -50,10 +50,12 @@ pub fn draw_line_bresenham(
     // Debug print only for the specific test case
     let is_debug_line = y1 == y2 && y1 >= 10 && y1 <= 30 && x1 == 10 && x2 == 50;
     if is_debug_line {
-        println!("draw_line_bresenham: ({},{}) to ({},{}), style={}, pattern={:04X}", 
-                 x1, y1, x2, y2, line_style.style, line_style.pattern);
+        println!(
+            "draw_line_bresenham: ({},{}) to ({},{}), style={}, pattern={:04X}",
+            x1, y1, x2, y2, line_style.style, line_style.pattern
+        );
     }
-    
+
     let mut counter = 0u16; // Counter for pattern pixel
     let mut pixels_plotted = 0; // Debug counter
     let dx = (x2 - x1).abs();
@@ -70,7 +72,7 @@ pub fn draw_line_bresenham(
             true
         } else {
             let pattern = line_style.pattern; // Use the pattern directly from line_style
-            // Check the bit at position (counter % 16) in the pattern
+                                              // Check the bit at position (counter % 16) in the pattern
             let bit_position = 15 - (counter % 16); // BGI patterns are read left-to-right
             (pattern >> bit_position) & 1 != 0
         };
@@ -103,7 +105,10 @@ pub fn draw_line_bresenham(
     }
 
     if is_debug_line {
-        println!("  Pixels plotted: {} out of {} total", pixels_plotted, counter);
+        println!(
+            "  Pixels plotted: {} out of {} total",
+            pixels_plotted, counter
+        );
     }
 
     Ok(())
@@ -123,7 +128,9 @@ pub fn draw_thick_line(
     draw_mode: i32,
 ) -> Result<(), crate::error::BgiError> {
     // Draw the main line
-    draw_line_bresenham(backend, window_id, x1, y1, x2, y2, color, line_style, draw_mode)?;
+    draw_line_bresenham(
+        backend, window_id, x1, y1, x2, y2, color, line_style, draw_mode,
+    )?;
 
     if line_style.thickness == THICK_WIDTH {
         // Determine line octant to decide how to draw thick lines
@@ -132,13 +139,53 @@ pub fn draw_thick_line(
         match octant {
             1 | 4 | 5 | 8 => {
                 // Draw additional lines above and below
-                draw_line_bresenham(backend, window_id, x1, y1 - 1, x2, y2 - 1, color, line_style, draw_mode)?;
-                draw_line_bresenham(backend, window_id, x1, y1 + 1, x2, y2 + 1, color, line_style, draw_mode)?;
+                draw_line_bresenham(
+                    backend,
+                    window_id,
+                    x1,
+                    y1 - 1,
+                    x2,
+                    y2 - 1,
+                    color,
+                    line_style,
+                    draw_mode,
+                )?;
+                draw_line_bresenham(
+                    backend,
+                    window_id,
+                    x1,
+                    y1 + 1,
+                    x2,
+                    y2 + 1,
+                    color,
+                    line_style,
+                    draw_mode,
+                )?;
             }
             _ => {
                 // Draw additional lines to the left and right
-                draw_line_bresenham(backend, window_id, x1 - 1, y1, x2 - 1, y2, color, line_style, draw_mode)?;
-                draw_line_bresenham(backend, window_id, x1 + 1, y1, x2 + 1, y2, color, line_style, draw_mode)?;
+                draw_line_bresenham(
+                    backend,
+                    window_id,
+                    x1 - 1,
+                    y1,
+                    x2 - 1,
+                    y2,
+                    color,
+                    line_style,
+                    draw_mode,
+                )?;
+                draw_line_bresenham(
+                    backend,
+                    window_id,
+                    x1 + 1,
+                    y1,
+                    x2 + 1,
+                    y2,
+                    color,
+                    line_style,
+                    draw_mode,
+                )?;
             }
         }
     }
@@ -167,10 +214,26 @@ pub fn draw_circle_bresenham(
     loop {
         // Plot the 8 symmetric points
         let commands = vec![
-            DrawCommand::Pixel { x: x - xx, y: y + yy, color }, // I quadrant
-            DrawCommand::Pixel { x: x - yy, y: y - xx, color }, // II quadrant
-            DrawCommand::Pixel { x: x + xx, y: y - yy, color }, // III quadrant
-            DrawCommand::Pixel { x: x + yy, y: y + xx, color }, // IV quadrant
+            DrawCommand::Pixel {
+                x: x - xx,
+                y: y + yy,
+                color,
+            }, // I quadrant
+            DrawCommand::Pixel {
+                x: x - yy,
+                y: y - xx,
+                color,
+            }, // II quadrant
+            DrawCommand::Pixel {
+                x: x + xx,
+                y: y - yy,
+                color,
+            }, // III quadrant
+            DrawCommand::Pixel {
+                x: x + yy,
+                y: y + xx,
+                color,
+            }, // IV quadrant
         ];
         backend.draw(window_id, &commands)?;
 
@@ -237,17 +300,25 @@ pub fn draw_rectangle_lines(
 ) -> Result<(), crate::error::BgiError> {
     // Draw the four sides of the rectangle using line calls
     // Top line: (x1, y1) to (x2, y1)
-    draw_thick_line(backend, window_id, x1, y1, x2, y1, color, line_style, draw_mode)?;
-    
+    draw_thick_line(
+        backend, window_id, x1, y1, x2, y1, color, line_style, draw_mode,
+    )?;
+
     // Right line: (x2, y1) to (x2, y2)
-    draw_thick_line(backend, window_id, x2, y1, x2, y2, color, line_style, draw_mode)?;
-    
+    draw_thick_line(
+        backend, window_id, x2, y1, x2, y2, color, line_style, draw_mode,
+    )?;
+
     // Bottom line: (x2, y2) to (x1, y2)
-    draw_thick_line(backend, window_id, x2, y2, x1, y2, color, line_style, draw_mode)?;
-    
+    draw_thick_line(
+        backend, window_id, x2, y2, x1, y2, color, line_style, draw_mode,
+    )?;
+
     // Left line: (x1, y2) to (x1, y1)
-    draw_thick_line(backend, window_id, x1, y2, x1, y1, color, line_style, draw_mode)?;
-    
+    draw_thick_line(
+        backend, window_id, x1, y2, x1, y1, color, line_style, draw_mode,
+    )?;
+
     Ok(())
 }
 
@@ -280,10 +351,26 @@ pub fn draw_ellipse_bresenham(
     // First set of points, y' > -1
     while stopping_x >= stopping_y {
         let commands = vec![
-            DrawCommand::Pixel { x: cx + x, y: cy - y, color },
-            DrawCommand::Pixel { x: cx - x, y: cy - y, color },
-            DrawCommand::Pixel { x: cx - x, y: cy + y, color },
-            DrawCommand::Pixel { x: cx + x, y: cy + y, color },
+            DrawCommand::Pixel {
+                x: cx + x,
+                y: cy - y,
+                color,
+            },
+            DrawCommand::Pixel {
+                x: cx - x,
+                y: cy - y,
+                color,
+            },
+            DrawCommand::Pixel {
+                x: cx - x,
+                y: cy + y,
+                color,
+            },
+            DrawCommand::Pixel {
+                x: cx + x,
+                y: cy + y,
+                color,
+            },
         ];
         backend.draw(window_id, &commands)?;
 
@@ -312,10 +399,26 @@ pub fn draw_ellipse_bresenham(
     // Second set of points, y' < -1
     while stopping_x <= stopping_y {
         let commands = vec![
-            DrawCommand::Pixel { x: cx + x, y: cy - y, color },
-            DrawCommand::Pixel { x: cx - x, y: cy - y, color },
-            DrawCommand::Pixel { x: cx - x, y: cy + y, color },
-            DrawCommand::Pixel { x: cx + x, y: cy + y, color },
+            DrawCommand::Pixel {
+                x: cx + x,
+                y: cy - y,
+                color,
+            },
+            DrawCommand::Pixel {
+                x: cx - x,
+                y: cy - y,
+                color,
+            },
+            DrawCommand::Pixel {
+                x: cx - x,
+                y: cy + y,
+                color,
+            },
+            DrawCommand::Pixel {
+                x: cx + x,
+                y: cy + y,
+                color,
+            },
         ];
         backend.draw(window_id, &commands)?;
 
@@ -366,7 +469,7 @@ pub fn draw_ellipse_arc(
 
     // For arcs, use line approximation (like the original BGI)
     const PI_CONV: f64 = std::f64::consts::PI / 180.0;
-    
+
     for angle in start_angle..end_angle {
         let angle_rad = angle as f64 * PI_CONV;
         let next_angle_rad = (angle + 1) as f64 * PI_CONV;
@@ -376,7 +479,9 @@ pub fn draw_ellipse_arc(
         let x2 = x + (xradius as f64 * next_angle_rad.cos()) as i32;
         let y2 = y - (yradius as f64 * next_angle_rad.sin()) as i32;
 
-        draw_thick_line(backend, window_id, x1, y1, x2, y2, color, line_style, draw_mode)?;
+        draw_thick_line(
+            backend, window_id, x1, y1, x2, y2, color, line_style, draw_mode,
+        )?;
     }
 
     Ok(())

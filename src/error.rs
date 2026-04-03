@@ -141,7 +141,9 @@ impl From<GraphicsError> for BgiError {
             GraphicsError::NoInitGraph => Self::NotInitialized,
             GraphicsError::InvalidDriver => Self::InvalidDriver,
             GraphicsError::InvalidMode => Self::InvalidMode { mode: -1 },
-            GraphicsError::FontNotFound | GraphicsError::NoFontMem | GraphicsError::InvalidFont
+            GraphicsError::FontNotFound
+            | GraphicsError::NoFontMem
+            | GraphicsError::InvalidFont
             | GraphicsError::InvalidFontNum => Self::FontError {
                 message: error.message().to_string(),
             },
@@ -163,56 +165,58 @@ impl From<GraphicsError> for BgiError {
 impl From<crate::types::GraphResult> for BgiError {
     fn from(result: crate::types::GraphResult) -> Self {
         use crate::types::GraphResult;
-        
+
         match result {
             GraphResult::Ok => unreachable!("Ok is not an error"),
-            GraphResult::NotInitialized | GraphResult::GraphicsNotInitialized => Self::NotInitialized,
-            GraphResult::NotDetected => Self::General { 
-                message: "Graphics hardware not detected".to_string() 
+            GraphResult::NotInitialized | GraphResult::GraphicsNotInitialized => {
+                Self::NotInitialized
+            }
+            GraphResult::NotDetected => Self::General {
+                message: "Graphics hardware not detected".to_string(),
             },
-            GraphResult::DeviceDriverFileNotFound => Self::General { 
-                message: "Device driver file not found".to_string() 
+            GraphResult::DeviceDriverFileNotFound => Self::General {
+                message: "Device driver file not found".to_string(),
             },
             GraphResult::InvalidDriver => Self::InvalidDriver,
-            GraphResult::NoLoadMem | GraphResult::NotEnoughMemoryForDriver => Self::OutOfMemory { 
-                operation: "loading driver".to_string() 
+            GraphResult::NoLoadMem | GraphResult::NotEnoughMemoryForDriver => Self::OutOfMemory {
+                operation: "loading driver".to_string(),
             },
-            GraphResult::NoScanMem => Self::OutOfMemory { 
-                operation: "scan fill".to_string() 
+            GraphResult::NoScanMem => Self::OutOfMemory {
+                operation: "scan fill".to_string(),
             },
-            GraphResult::NoFloodMem => Self::OutOfMemory { 
-                operation: "flood fill".to_string() 
+            GraphResult::NoFloodMem => Self::OutOfMemory {
+                operation: "flood fill".to_string(),
             },
-            GraphResult::FontNotFound => Self::FontError { 
-                message: "Font file not found".to_string() 
+            GraphResult::FontNotFound => Self::FontError {
+                message: "Font file not found".to_string(),
             },
-            GraphResult::NoFontMem => Self::OutOfMemory { 
-                operation: "loading font".to_string() 
+            GraphResult::NoFontMem => Self::OutOfMemory {
+                operation: "loading font".to_string(),
             },
             GraphResult::InvalidMode => Self::InvalidMode { mode: -1 },
-            GraphResult::GraphicsError => Self::General { 
-                message: "Graphics error".to_string() 
+            GraphResult::GraphicsError => Self::General {
+                message: "Graphics error".to_string(),
             },
-            GraphResult::IoError | GraphResult::IOError => Self::IoError { 
-                message: "I/O operation failed".to_string() 
+            GraphResult::IoError | GraphResult::IOError => Self::IoError {
+                message: "I/O operation failed".to_string(),
             },
-            GraphResult::InvalidFont => Self::FontError { 
-                message: "Invalid font file".to_string() 
+            GraphResult::InvalidFont => Self::FontError {
+                message: "Invalid font file".to_string(),
             },
-            GraphResult::InvalidFontNum => Self::FontError { 
-                message: "Invalid font number".to_string() 
+            GraphResult::InvalidFontNum => Self::FontError {
+                message: "Invalid font number".to_string(),
             },
-            GraphResult::InvalidVersion => Self::General { 
-                message: "Invalid device driver version".to_string() 
+            GraphResult::InvalidVersion => Self::General {
+                message: "Invalid device driver version".to_string(),
             },
-            GraphResult::InvalidDeviceDriverFile => Self::General { 
-                message: "Invalid device driver file".to_string() 
+            GraphResult::InvalidDeviceDriverFile => Self::General {
+                message: "Invalid device driver file".to_string(),
             },
-            GraphResult::OutOfMemory => Self::OutOfMemory { 
-                operation: "operation".to_string() 
+            GraphResult::OutOfMemory => Self::OutOfMemory {
+                operation: "operation".to_string(),
             },
-            GraphResult::FontFileError => Self::FontError { 
-                message: "Font file error".to_string() 
+            GraphResult::FontFileError => Self::FontError {
+                message: "Font file error".to_string(),
             },
         }
     }

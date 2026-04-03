@@ -1,6 +1,6 @@
 //! Drawing state management for BGI graphics operations.
 
-use crate::{Color, constants::*, types::*};
+use crate::{constants::*, types::*, Color};
 
 /// Line style settings for drawing operations.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -136,7 +136,7 @@ impl Default for DrawingState {
             position: Position::default(),
             viewport: Viewport::default(),
             write_mode: COPY_PUT,
-            batch_mode: false,  // Default to normal mode with presentation
+            batch_mode: false, // Default to normal mode with presentation
         }
     }
 }

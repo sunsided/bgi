@@ -3,7 +3,7 @@
 //! This module contains zero-cost abstractions and optimizations
 //! to reduce code duplication and improve performance.
 
-use crate::{GraphicsContext, GraphResult, Color};
+use crate::{Color, GraphResult, GraphicsContext};
 
 /// Macro for context validation to eliminate code duplication
 #[macro_export]
@@ -23,14 +23,14 @@ pub trait GraphicsOperation<T> {
 /// Zero-cost abstraction for drawing operations that don't return values
 pub struct DrawingOp<F>
 where
-    F: FnOnce(&mut GraphicsContext) -> Result<(), crate::error::BgiError>
+    F: FnOnce(&mut GraphicsContext) -> Result<(), crate::error::BgiError>,
 {
     operation: F,
 }
 
 impl<F> DrawingOp<F>
 where
-    F: FnOnce(&mut GraphicsContext) -> Result<(), crate::error::BgiError>
+    F: FnOnce(&mut GraphicsContext) -> Result<(), crate::error::BgiError>,
 {
     pub fn new(operation: F) -> Self {
         Self { operation }
@@ -39,11 +39,11 @@ where
 
 impl<F> GraphicsOperation<()> for DrawingOp<F>
 where
-    F: FnOnce(&mut GraphicsContext) -> Result<(), crate::error::BgiError>
+    F: FnOnce(&mut GraphicsContext) -> Result<(), crate::error::BgiError>,
 {
     fn execute(self, context: &mut GraphicsContext) -> GraphResult {
         validate_context!(context);
-        
+
         match (self.operation)(context) {
             Ok(()) => GraphResult::Ok,
             Err(_) => GraphResult::InvalidDriver,
@@ -54,7 +54,7 @@ where
 /// Zero-cost abstraction for query operations that return values
 pub struct QueryOp<F, T>
 where
-    F: FnOnce(&GraphicsContext) -> Result<T, crate::error::BgiError>
+    F: FnOnce(&GraphicsContext) -> Result<T, crate::error::BgiError>,
 {
     operation: F,
     _phantom: std::marker::PhantomData<T>,
@@ -62,7 +62,7 @@ where
 
 impl<F, T> QueryOp<F, T>
 where
-    F: FnOnce(&GraphicsContext) -> Result<T, crate::error::BgiError>
+    F: FnOnce(&GraphicsContext) -> Result<T, crate::error::BgiError>,
 {
     pub fn new(operation: F) -> Self {
         Self {
@@ -79,7 +79,7 @@ where
 {
     fn execute(self, context: &mut GraphicsContext) -> GraphResult {
         validate_context!(context);
-        
+
         match (self.operation)(context) {
             Ok(_) => GraphResult::Ok,
             Err(_) => GraphResult::InvalidDriver,
@@ -93,7 +93,13 @@ pub mod optimized_ctx {
 
     /// Optimized line drawing with context validation
     #[inline]
-    pub fn line_ctx(context: &mut GraphicsContext, x1: i32, y1: i32, x2: i32, y2: i32) -> GraphResult {
+    pub fn line_ctx(
+        context: &mut GraphicsContext,
+        x1: i32,
+        y1: i32,
+        x2: i32,
+        y2: i32,
+    ) -> GraphResult {
         DrawingOp::new(|ctx| ctx.draw_line(x1, y1, x2, y2)).execute(context)
     }
 
@@ -105,13 +111,24 @@ pub mod optimized_ctx {
 
     /// Optimized rectangle drawing with context validation
     #[inline]
-    pub fn rectangle_ctx(context: &mut GraphicsContext, left: i32, top: i32, right: i32, bottom: i32) -> GraphResult {
+    pub fn rectangle_ctx(
+        context: &mut GraphicsContext,
+        left: i32,
+        top: i32,
+        right: i32,
+        bottom: i32,
+    ) -> GraphResult {
         DrawingOp::new(|ctx| ctx.draw_rectangle(left, top, right, bottom)).execute(context)
     }
 
     /// Optimized pixel operations with context validation
     #[inline]
-    pub fn putpixel_ctx(context: &mut GraphicsContext, x: i32, y: i32, color: Color) -> GraphResult {
+    pub fn putpixel_ctx(
+        context: &mut GraphicsContext,
+        x: i32,
+        y: i32,
+        color: Color,
+    ) -> GraphResult {
         DrawingOp::new(|ctx| ctx.put_pixel(x, y, color)).execute(context)
     }
 
@@ -121,7 +138,7 @@ pub mod optimized_ctx {
         if !context.is_initialized() {
             return (Color::BLACK, GraphResult::NotInitialized);
         }
-        
+
         match context.get_pixel(x, y) {
             Ok(color) => (color, GraphResult::Ok),
             Err(_) => (Color::BLACK, GraphResult::InvalidDriver),
@@ -142,31 +159,36 @@ impl BatchDrawer {
     }
 
     pub fn add_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32) {
-        self.operations.push(Box::new(move |ctx| ctx.draw_line(x1, y1, x2, y2)));
+        self.operations
+            .push(Box::new(move |ctx| ctx.draw_line(x1, y1, x2, y2)));
     }
 
     pub fn add_circle(&mut self, x: i32, y: i32, radius: i32) {
-        self.operations.push(Box::new(move |ctx| ctx.draw_circle(x, y, radius)));
+        self.operations
+            .push(Box::new(move |ctx| ctx.draw_circle(x, y, radius)));
     }
 
     pub fn add_rectangle(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
-        self.operations.push(Box::new(move |ctx| ctx.draw_rectangle(left, top, right, bottom)));
+        self.operations.push(Box::new(move |ctx| {
+            ctx.draw_rectangle(left, top, right, bottom)
+        }));
     }
 
     pub fn add_pixel(&mut self, x: i32, y: i32, color: Color) {
-        self.operations.push(Box::new(move |ctx| ctx.put_pixel(x, y, color)));
+        self.operations
+            .push(Box::new(move |ctx| ctx.put_pixel(x, y, color)));
     }
 
     /// Execute all batched operations with single context validation
     pub fn execute(self, context: &mut GraphicsContext) -> GraphResult {
         crate::validate_context!(context);
-        
+
         for operation in self.operations {
             if let Err(_) = operation(context) {
                 return GraphResult::InvalidDriver;
             }
         }
-        
+
         GraphResult::Ok
     }
 
@@ -175,9 +197,9 @@ impl BatchDrawer {
         if !context.is_initialized() {
             return (0, GraphResult::NotInitialized);
         }
-        
+
         let mut success_count = 0;
-        
+
         for operation in self.operations {
             if operation(context).is_ok() {
                 success_count += 1;
@@ -209,17 +231,21 @@ pub mod const_optimized {
 
     impl<const SIDES: usize> PatternShape<SIDES> {
         pub const fn new(center_x: i32, center_y: i32, radius: i32) -> Self {
-            Self { center_x, center_y, radius }
+            Self {
+                center_x,
+                center_y,
+                radius,
+            }
         }
-        
+
         /// Draw regular polygon with compile-time known number of sides
         pub fn draw(self, context: &mut GraphicsContext) -> GraphResult {
             crate::validate_context!(context);
-            
+
             if SIDES < 3 {
                 return GraphResult::InvalidDriver;
             }
-            
+
             let angle_step = 360.0 / SIDES as f64;
             let mut prev_x = self.center_x + self.radius;
             let mut prev_y = self.center_y;
@@ -259,7 +285,7 @@ pub struct DrawingPool {
 impl DrawingPool {
     pub fn new() -> Self {
         Self {
-            line_buffer: Vec::with_capacity(1000),  // Pre-allocate for common case
+            line_buffer: Vec::with_capacity(1000), // Pre-allocate for common case
             circle_buffer: Vec::with_capacity(100),
             pixel_buffer: Vec::with_capacity(1000),
         }
@@ -286,28 +312,28 @@ impl DrawingPool {
     /// Flush all buffered operations to the graphics context
     pub fn flush(&mut self, context: &mut GraphicsContext) -> GraphResult {
         crate::validate_context!(context);
-        
+
         // Draw all lines
         for &(x1, y1, x2, y2) in &self.line_buffer {
             if let Err(_) = context.draw_line(x1, y1, x2, y2) {
                 return GraphResult::InvalidDriver;
             }
         }
-        
+
         // Draw all circles
         for &(x, y, radius) in &self.circle_buffer {
             if let Err(_) = context.draw_circle(x, y, radius) {
                 return GraphResult::InvalidDriver;
             }
         }
-        
+
         // Draw all pixels
         for &(x, y, color) in &self.pixel_buffer {
             if let Err(_) = context.put_pixel(x, y, color) {
                 return GraphResult::InvalidDriver;
             }
         }
-        
+
         // Clear buffers for reuse
         self.clear();
 
@@ -316,7 +342,11 @@ impl DrawingPool {
 
     /// Get statistics about buffer usage
     pub fn stats(&self) -> (usize, usize, usize) {
-        (self.line_buffer.len(), self.circle_buffer.len(), self.pixel_buffer.len())
+        (
+            self.line_buffer.len(),
+            self.circle_buffer.len(),
+            self.pixel_buffer.len(),
+        )
     }
 }
 
