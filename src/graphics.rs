@@ -626,10 +626,39 @@ pub fn gety() -> i32 {
     })
 }
 
+/// Poll events from the backend and feed them into the input system.
+/// This is called internally by input functions to ensure fresh event data.
+#[cfg(feature = "visual-backend")]
+fn poll_backend_events(graphics_state: &mut GraphicsState) {
+    if let Some(ref mut backend) = graphics_state.backend {
+        let events = backend.poll_events();
+        for event in events {
+            match event {
+                crate::backend::InputEvent::Key {
+                    key_code, extended, ..
+                } => {
+                    graphics_state.input_event.add_key_event(key_code, extended);
+                }
+                crate::backend::InputEvent::Mouse { x, y, buttons, .. } => {
+                    let mouse_buttons = crate::input_event::MouseButtons {
+                        left: (buttons & 1) != 0,
+                        right: (buttons & 2) != 0,
+                        middle: (buttons & 4) != 0,
+                    };
+                    graphics_state.input_event.update_mouse(x, y, mouse_buttons);
+                }
+                _ => {}
+            }
+        }
+    }
+}
+
 /// Get mouse X coordinate.
 pub fn mousex() -> i32 {
     GRAPHICS_STATE.with(|state_ref| {
-        if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
+        if let Some(ref mut graphics_state) = state_ref.borrow_mut().as_mut() {
+            #[cfg(feature = "visual-backend")]
+            poll_backend_events(graphics_state);
             graphics_state.input_event.get_mouse_position().0
         } else {
             0
@@ -640,7 +669,9 @@ pub fn mousex() -> i32 {
 /// Get mouse Y coordinate.
 pub fn mousey() -> i32 {
     GRAPHICS_STATE.with(|state_ref| {
-        if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
+        if let Some(ref mut graphics_state) = state_ref.borrow_mut().as_mut() {
+            #[cfg(feature = "visual-backend")]
+            poll_backend_events(graphics_state);
             graphics_state.input_event.get_mouse_position().1
         } else {
             0
@@ -651,7 +682,9 @@ pub fn mousey() -> i32 {
 /// Get mouse button state and position.
 pub fn getmouse() -> MouseState {
     GRAPHICS_STATE.with(|state_ref| {
-        if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
+        if let Some(ref mut graphics_state) = state_ref.borrow_mut().as_mut() {
+            #[cfg(feature = "visual-backend")]
+            poll_backend_events(graphics_state);
             let (x, y) = graphics_state.input_event.get_mouse_position();
             let buttons = graphics_state.input_event.get_mouse_buttons();
             MouseState {
@@ -676,7 +709,9 @@ pub fn getmouse() -> MouseState {
 /// Check if mouse button was clicked.
 pub fn ismouseclick(button: i32) -> bool {
     GRAPHICS_STATE.with(|state_ref| {
-        if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
+        if let Some(ref mut graphics_state) = state_ref.borrow_mut().as_mut() {
+            #[cfg(feature = "visual-backend")]
+            poll_backend_events(graphics_state);
             match button {
                 1 => graphics_state.input_event.has_left_click(),
                 2 => graphics_state.input_event.has_right_click(),
@@ -692,7 +727,9 @@ pub fn ismouseclick(button: i32) -> bool {
 /// Get mouse click information.
 pub fn mouseclick(button: i32) -> bool {
     GRAPHICS_STATE.with(|state_ref| {
-        if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
+        if let Some(ref mut graphics_state) = state_ref.borrow_mut().as_mut() {
+            #[cfg(feature = "visual-backend")]
+            poll_backend_events(graphics_state);
             match button {
                 1 => graphics_state.input_event.has_left_click(),
                 2 => graphics_state.input_event.has_right_click(),
@@ -732,26 +769,9 @@ pub fn clearmouseclick(button: i32) {
 pub fn kbhit() -> bool {
     GRAPHICS_STATE.with(|state_ref| {
         if let Some(ref mut graphics_state) = state_ref.borrow_mut().as_mut() {
-            // Poll events from backend and feed them into input system
             #[cfg(feature = "visual-backend")]
-            if let Some(ref mut backend) = graphics_state.backend {
-                let events = backend.poll_events();
-                for event in events {
-                    match event {
-                        crate::backend::InputEvent::Key {
-                            key_code, extended, ..
-                        } => {
-                            // Feed key event into input system
-                            graphics_state.input_event.add_key_event(key_code, extended);
-                        }
-                        _ => {} // Handle other events if needed
-                    }
-                }
-                return graphics_state.input_event.has_key_event();
-            }
-
-            // Return false if no backend or in headless mode
-            false
+            poll_backend_events(graphics_state);
+            graphics_state.input_event.has_key_event()
         } else {
             false
         }
@@ -762,22 +782,8 @@ pub fn kbhit() -> bool {
 pub fn getch() -> Option<char> {
     GRAPHICS_STATE.with(|state_ref| {
         if let Some(ref mut graphics_state) = state_ref.borrow_mut().as_mut() {
-            // Poll events from backend and feed them into input system
             #[cfg(feature = "visual-backend")]
-            if let Some(ref mut backend) = graphics_state.backend {
-                let events = backend.poll_events();
-                for event in events {
-                    match event {
-                        crate::backend::InputEvent::Key {
-                            key_code, extended, ..
-                        } => {
-                            // Feed key event into input system
-                            graphics_state.input_event.add_key_event(key_code, extended);
-                        }
-                        _ => {} // Handle other events if needed
-                    }
-                }
-            }
+            poll_backend_events(graphics_state);
 
             graphics_state.input_event.get_next_key().map(|event| {
                 // Convert key_code to character (simplified)

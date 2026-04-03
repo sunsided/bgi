@@ -21,6 +21,8 @@ pub struct MiniFbBackend {
     initialized: bool,
     /// Track previous key states to detect key press events
     previous_key_states: HashMap<WindowId, HashMap<Key, bool>>,
+    /// Track previous mouse button states to detect click events
+    previous_mouse_states: HashMap<WindowId, (bool, bool, bool)>, // (left, right, middle)
 }
 
 impl MiniFbBackend {
@@ -34,6 +36,7 @@ impl MiniFbBackend {
             next_window_id: WindowId(1),
             initialized: false,
             previous_key_states: HashMap::new(),
+            previous_mouse_states: HashMap::new(),
         }
     }
 
@@ -547,6 +550,35 @@ impl Backend for MiniFbBackend {
 
                 // Update the previous state
                 prev_states.insert(*key, is_pressed);
+            }
+
+            // Poll mouse position and button states
+            if let Some((mx, my)) = window.get_mouse_pos(MouseMode::Clamp) {
+                let left = window.get_mouse_down(MouseButton::Left);
+                let right = window.get_mouse_down(MouseButton::Right);
+                let middle = window.get_mouse_down(MouseButton::Middle);
+
+                // Get previous mouse state for this window
+                let prev_mouse = self
+                    .previous_mouse_states
+                    .entry(*window_id)
+                    .or_insert((false, false, false));
+
+                // Emit mouse event with current position and button mask
+                // buttons: bit 0 = left, bit 1 = right, bit 2 = middle
+                let buttons = (if left { 1u32 } else { 0 })
+                    | (if right { 2u32 } else { 0 })
+                    | (if middle { 4u32 } else { 0 });
+
+                events.push(InputEvent::Mouse {
+                    window_id: *window_id,
+                    x: mx as i32,
+                    y: my as i32,
+                    buttons,
+                });
+
+                // Update previous mouse state
+                *prev_mouse = (left, right, middle);
             }
         }
 

@@ -185,7 +185,7 @@ tasks:
       - cargo run {{.PROFILE_FLAG}} --features visual-backend --example batch_test
 
   run:input_debug:
-    desc: Run the input_debug example
+    desc: "Run the input_debug example (interactive: focus window and press keys)"
     cmds:
       - cargo run {{.PROFILE_FLAG}} --features visual-backend --example input_debug
 
@@ -210,7 +210,7 @@ tasks:
       - cargo run {{.PROFILE_FLAG}} --features visual-backend --example window_test
 
   run:interactive_demo:
-    desc: Run the interactive_demo example
+    desc: "Run the interactive_demo example (animated graphics demo)"
     cmds:
       - cargo run {{.PROFILE_FLAG}} --features visual-backend --example interactive_demo
 
