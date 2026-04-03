@@ -42,8 +42,11 @@ pub fn line(x1: i32, y1: i32, x2: i32, y2: i32) {
                 if let Err(_) = backend.draw(window_id, &commands) {
                     // Ignore draw errors to maintain BGI compatibility
                 }
-                if let Err(_) = backend.present(window_id) {
-                    // Ignore present errors to maintain BGI compatibility
+                // Only present if not in batch mode
+                if !state.drawing_state.batch_mode {
+                    if let Err(_) = backend.present(window_id) {
+                        // Ignore present errors to maintain BGI compatibility
+                    }
                 }
             }
         }
@@ -109,8 +112,11 @@ pub fn circle(x: i32, y: i32, radius: i32) {
                 if let Err(_) = backend.draw(window_id, &commands) {
                     // Ignore draw errors to maintain BGI compatibility
                 }
-                if let Err(_) = backend.present(window_id) {
-                    // Ignore present errors to maintain BGI compatibility
+                // Only present if not in batch mode
+                if !state.drawing_state.batch_mode {
+                    if let Err(_) = backend.present(window_id) {
+                        // Ignore present errors to maintain BGI compatibility
+                    }
                 }
             }
         }
@@ -205,8 +211,11 @@ pub fn rectangle(left: i32, top: i32, right: i32, bottom: i32) {
                 if let Err(_) = backend.draw(window_id, &commands) {
                     // Ignore draw errors to maintain BGI compatibility
                 }
-                if let Err(_) = backend.present(window_id) {
-                    // Ignore present errors to maintain BGI compatibility
+                // Only present if not in batch mode
+                if !state.drawing_state.batch_mode {
+                    if let Err(_) = backend.present(window_id) {
+                        // Ignore present errors to maintain BGI compatibility
+                    }
                 }
             }
         }

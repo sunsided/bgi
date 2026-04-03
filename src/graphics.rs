@@ -489,8 +489,11 @@ pub fn cleardevice() {
                     if let Err(_) = backend.draw(window_id, &commands) {
                         // Ignore draw errors to maintain BGI compatibility
                     }
-                    if let Err(_) = backend.present(window_id) {
-                        // Ignore present errors to maintain BGI compatibility
+                    // Only present if not in batch mode
+                    if !graphics_state.drawing_state.batch_mode {
+                        if let Err(_) = backend.present(window_id) {
+                            // Ignore present errors to maintain BGI compatibility
+                        }
                     }
                 }
             }

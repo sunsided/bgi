@@ -426,15 +426,11 @@ impl Backend for MiniFbBackend {
 
         // Poll events from all windows
         for (window_id, window) in &mut self.windows {
-            // First ensure the window is updated to process events
-            // MiniFB processes input events during window updates
-            if let Some(buffer) = self.buffers.get(window_id) {
-                if let Some((width, height)) = self.buffer_dimensions.get(window_id) {
-                    if window.is_open() {
-                        // Update window to process input events
-                        let _ = window.update_with_buffer(buffer, *width, *height);
-                    }
-                }
+            // Pump OS events without presenting the buffer to screen.
+            // This prevents input polling from causing screen flicker.
+            // Use update() (event-only) instead of update_with_buffer() (event + blit).
+            if window.is_open() {
+                window.update();
             }
 
             // Get previous key states for this window

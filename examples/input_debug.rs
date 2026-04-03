@@ -20,6 +20,10 @@ fn main() {
         return;
     }
 
+    // Enable batch mode to eliminate flicker - all draw calls will accumulate
+    // in the buffer until refresh() is called at the end of each frame.
+    set_batch_mode(true);
+
     let width = getmaxx() as f32;
     let height = getmaxy() as f32;
 
@@ -105,6 +109,9 @@ fn main() {
             let middle = if ismouseclick(4) { "M" } else { "-" };
             let right = if ismouseclick(2) { "R" } else { "-" };
             outtextxy(10, 90, &format!("Buttons: [{}{}{}]", left, middle, right));
+
+            // Present all accumulated draw commands to the screen at once
+            refresh();
         }
 
         // Check for keyboard input
@@ -119,6 +126,7 @@ fn main() {
                 // Display last key pressed
                 setcolor(Color::YELLOW);
                 outtextxy(10, 110, &format!("Last key: '{}'", ch));
+                refresh();
             }
         }
 
