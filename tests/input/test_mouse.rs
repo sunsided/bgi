@@ -94,7 +94,8 @@ fn test_mouse_move_deduplication() {
 
     // Add non-move event, then mouse moves
     queue.push_event(InputEvent::Mouse {
-        x: 40, y: 40,
+        x: 40,
+        y: 40,
         button: MouseButton::Left,
         is_pressed: true,
     });
@@ -105,7 +106,10 @@ fn test_mouse_move_deduplication() {
     assert_eq!(queue.len(), 2);
 
     // Button event first
-    if let Some(InputEvent::Mouse { button, is_pressed, .. }) = queue.pop_event() {
+    if let Some(InputEvent::Mouse {
+        button, is_pressed, ..
+    }) = queue.pop_event()
+    {
         assert_eq!(button, MouseButton::Left);
         assert!(is_pressed);
     } else {
@@ -128,11 +132,11 @@ fn test_mouse_coordinates() {
 
     // Test various coordinate ranges
     let test_positions = [
-        (0, 0),           // Origin
-        (639, 479),       // VGA bottom-right
-        (-1, -1),         // Negative (should be allowed for out-of-bounds)
-        (1000, 1000),     // Large values
-        (320, 240),       // Center of typical mode
+        (0, 0),       // Origin
+        (639, 479),   // VGA bottom-right
+        (-1, -1),     // Negative (should be allowed for out-of-bounds)
+        (1000, 1000), // Large values
+        (320, 240),   // Center of typical mode
     ];
 
     for (x, y) in test_positions.iter() {
@@ -157,7 +161,7 @@ fn test_all_mouse_buttons() {
             is_pressed: true,
         };
 
-        let release_event = InputEvent::Mouse {
+        let _release_event = InputEvent::Mouse {
             x: 100,
             y: 100,
             button: *button,
@@ -167,19 +171,37 @@ fn test_all_mouse_buttons() {
         // Test that button types are preserved correctly
         match button {
             MouseButton::Left => {
-                assert_eq!(press_event, InputEvent::Mouse {
-                    x: 100, y: 100, button: MouseButton::Left, is_pressed: true
-                });
+                assert_eq!(
+                    press_event,
+                    InputEvent::Mouse {
+                        x: 100,
+                        y: 100,
+                        button: MouseButton::Left,
+                        is_pressed: true
+                    }
+                );
             }
             MouseButton::Right => {
-                assert_eq!(press_event, InputEvent::Mouse {
-                    x: 100, y: 100, button: MouseButton::Right, is_pressed: true
-                });
+                assert_eq!(
+                    press_event,
+                    InputEvent::Mouse {
+                        x: 100,
+                        y: 100,
+                        button: MouseButton::Right,
+                        is_pressed: true
+                    }
+                );
             }
             MouseButton::Middle => {
-                assert_eq!(press_event, InputEvent::Mouse {
-                    x: 100, y: 100, button: MouseButton::Middle, is_pressed: true
-                });
+                assert_eq!(
+                    press_event,
+                    InputEvent::Mouse {
+                        x: 100,
+                        y: 100,
+                        button: MouseButton::Middle,
+                        is_pressed: true
+                    }
+                );
             }
         }
     }
@@ -202,7 +224,8 @@ fn test_mouse_position_caching() {
 
     // Add button click at different position
     queue.push_event(InputEvent::Mouse {
-        x: 789, y: 012,
+        x: 789,
+        y: 12,
         button: MouseButton::Left,
         is_pressed: true,
     });
@@ -231,7 +254,8 @@ fn test_mixed_event_types() {
         modifiers: bgi::input::KeyModifiers::default(),
     });
     queue.push_event(InputEvent::Mouse {
-        x: 20, y: 20,
+        x: 20,
+        y: 20,
         button: MouseButton::Left,
         is_pressed: true,
     });
@@ -242,8 +266,14 @@ fn test_mixed_event_types() {
     assert_eq!(queue.len(), 4);
 
     // Events should come out in order
-    assert!(matches!(queue.pop_event(), Some(InputEvent::MouseMove { .. })));
-    assert!(matches!(queue.pop_event(), Some(InputEvent::Keyboard { .. })));
+    assert!(matches!(
+        queue.pop_event(),
+        Some(InputEvent::MouseMove { .. })
+    ));
+    assert!(matches!(
+        queue.pop_event(),
+        Some(InputEvent::Keyboard { .. })
+    ));
     assert!(matches!(queue.pop_event(), Some(InputEvent::Mouse { .. })));
     assert!(matches!(queue.pop_event(), Some(InputEvent::WindowClose)));
 }
@@ -255,14 +285,24 @@ fn test_mouse_queue_overflow() {
 
     // Fill with mouse events
     queue.push_event(InputEvent::MouseMove { x: 1, y: 1 });
-    queue.push_event(InputEvent::Mouse { x: 2, y: 2, button: MouseButton::Left, is_pressed: true });
+    queue.push_event(InputEvent::Mouse {
+        x: 2,
+        y: 2,
+        button: MouseButton::Left,
+        is_pressed: true,
+    });
     queue.push_event(InputEvent::MouseMove { x: 3, y: 3 });
 
     assert_eq!(queue.len(), 2); // Mouse moves should be deduplicated
     assert_eq!(queue.mouse_position(), (3, 3));
 
     // Add more events to trigger overflow
-    queue.push_event(InputEvent::Mouse { x: 4, y: 4, button: MouseButton::Right, is_pressed: true });
+    queue.push_event(InputEvent::Mouse {
+        x: 4,
+        y: 4,
+        button: MouseButton::Right,
+        is_pressed: true,
+    });
     queue.push_event(InputEvent::MouseMove { x: 5, y: 5 });
 
     assert_eq!(queue.len(), 3); // At capacity

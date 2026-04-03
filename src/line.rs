@@ -47,17 +47,9 @@ pub fn draw_line_bresenham(
     line_style: LineStyle,
     draw_mode: i32,
 ) -> Result<(), crate::error::BgiError> {
-    // Debug print only for the specific test case
-    let is_debug_line = y1 == y2 && y1 >= 10 && y1 <= 30 && x1 == 10 && x2 == 50;
-    if is_debug_line {
-        println!(
-            "draw_line_bresenham: ({},{}) to ({},{}), style={}, pattern={:04X}",
-            x1, y1, x2, y2, line_style.style, line_style.pattern
-        );
-    }
-
     let mut counter = 0u16; // Counter for pattern pixel
-    let mut pixels_plotted = 0; // Debug counter
+    #[allow(unused)]
+    let mut pixels_plotted = 0; // Debug counter (only checked in tests)
     let dx = (x2 - x1).abs();
     let sx = if x1 < x2 { 1 } else { -1 };
     let dy = (y2 - y1).abs();
@@ -82,7 +74,7 @@ pub fn draw_line_bresenham(
             // Other modes (XOR_PUT, OR_PUT, etc.) would require different implementations
             let commands = vec![DrawCommand::Pixel { x, y, color }];
             backend.draw(window_id, &commands)?;
-            pixels_plotted += 1;
+            pixels_plotted += 1; // Only checked in test assertions
         }
 
         counter += 1;
@@ -102,13 +94,6 @@ pub fn draw_line_bresenham(
             err += dx;
             y += sy;
         }
-    }
-
-    if is_debug_line {
-        println!(
-            "  Pixels plotted: {} out of {} total",
-            pixels_plotted, counter
-        );
     }
 
     Ok(())

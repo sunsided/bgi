@@ -10,7 +10,7 @@ fn test_backend_selection_via_environment() {
     // This test should fail until backend selection is implemented
 
     // Test visual backend selection
-    env::set_var("BGI_BACKEND", "visual");
+    unsafe { env::set_var("BGI_BACKEND", "visual") };
     let mut gd = VGA;
     let mut gm = VGAHI;
     initgraph(&mut gd, &mut gm, "");
@@ -27,7 +27,7 @@ fn test_backend_selection_via_environment() {
     }
 
     // Test PGM backend selection
-    env::set_var("BGI_BACKEND", "pgm");
+    unsafe { env::set_var("BGI_BACKEND", "pgm") };
     let mut gd2 = VGA;
     let mut gm2 = VGAHI;
     initgraph(&mut gd2, &mut gm2, "");
@@ -41,7 +41,7 @@ fn test_backend_selection_via_environment() {
     closegraph();
 
     // Clean up environment
-    env::remove_var("BGI_BACKEND");
+    unsafe { env::remove_var("BGI_BACKEND") };
 
     // Force test failure until implementation exists
     panic!("Backend selection test not yet implemented - expected failure in TDD");
@@ -55,7 +55,7 @@ fn test_automatic_backend_fallback() {
     // Test that when visual backend is unavailable, it falls back to PGM
     // Simulate headless environment
     let original_display = env::var("DISPLAY").ok();
-    env::remove_var("DISPLAY");
+    unsafe { env::remove_var("DISPLAY") };
 
     let mut gd = VGA;
     let mut gm = VGAHI;
@@ -72,7 +72,7 @@ fn test_automatic_backend_fallback() {
 
     // Restore original DISPLAY if it existed
     if let Some(display) = original_display {
-        env::set_var("DISPLAY", display);
+        unsafe { env::set_var("DISPLAY", display) };
     }
 
     // Force test failure until implementation exists
@@ -125,7 +125,7 @@ fn test_backend_switching_consistency() {
     // Test that both backends produce consistent BGI behavior
 
     // Test with PGM backend
-    env::set_var("BGI_BACKEND", "pgm");
+    unsafe { env::set_var("BGI_BACKEND", "pgm") };
     let mut gd = VGA;
     let mut gm = VGAHI;
     initgraph(&mut gd, &mut gm, "");
@@ -141,7 +141,7 @@ fn test_backend_switching_consistency() {
     closegraph();
 
     // Test with visual backend (if available)
-    env::set_var("BGI_BACKEND", "visual");
+    unsafe { env::set_var("BGI_BACKEND", "visual") };
     let mut gd2 = VGA;
     let mut gm2 = VGAHI;
     initgraph(&mut gd2, &mut gm2, "");
@@ -173,7 +173,7 @@ fn test_backend_switching_consistency() {
     }
 
     // Clean up environment
-    env::remove_var("BGI_BACKEND");
+    unsafe { env::remove_var("BGI_BACKEND") };
 
     // Force test failure until implementation exists
     panic!("Backend switching consistency test not yet implemented - expected failure in TDD");
@@ -185,7 +185,7 @@ fn test_invalid_backend_handling() {
     // This test should fail until backend error handling is implemented
 
     // Test handling of invalid backend specification
-    env::set_var("BGI_BACKEND", "invalid_backend");
+    unsafe { env::set_var("BGI_BACKEND", "invalid_backend") };
 
     let mut gd = VGA;
     let mut gm = VGAHI;
@@ -201,7 +201,7 @@ fn test_invalid_backend_handling() {
     closegraph();
 
     // Clean up environment
-    env::remove_var("BGI_BACKEND");
+    unsafe { env::remove_var("BGI_BACKEND") };
 
     // Force test failure until implementation exists
     panic!("Invalid backend handling test not yet implemented - expected failure in TDD");
@@ -215,7 +215,7 @@ fn test_backend_state_isolation() {
     // Test that each backend maintains its own state independently
 
     // Initialize with one backend
-    env::set_var("BGI_BACKEND", "pgm");
+    unsafe { env::set_var("BGI_BACKEND", "pgm") };
     let mut gd = VGA;
     let mut gm = VGAHI;
     initgraph(&mut gd, &mut gm, "");
@@ -230,7 +230,7 @@ fn test_backend_state_isolation() {
     closegraph();
 
     // Switch to different backend and test state independence
-    env::set_var("BGI_BACKEND", "visual");
+    unsafe { env::set_var("BGI_BACKEND", "visual") };
     let mut gd2 = VGA;
     let mut gm2 = VGAHI;
     initgraph(&mut gd2, &mut gm2, "");
@@ -251,7 +251,7 @@ fn test_backend_state_isolation() {
     }
 
     // Clean up environment
-    env::remove_var("BGI_BACKEND");
+    unsafe { env::remove_var("BGI_BACKEND") };
 
     // Force test failure until implementation exists
     panic!("Backend state isolation test not yet implemented - expected failure in TDD");

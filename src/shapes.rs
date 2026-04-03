@@ -27,7 +27,7 @@ pub fn line(x1: i32, y1: i32, x2: i32, y2: i32) {
         // Present to visual backend if available
         #[cfg(feature = "visual-backend")]
         {
-            if let (Some(ref mut backend), Some(window_id)) =
+            if let (Some(backend), Some(window_id)) =
                 (&mut state.backend, state.current_window)
             {
                 use crate::backend::DrawCommand;
@@ -97,7 +97,7 @@ pub fn circle(x: i32, y: i32, radius: i32) {
         // Present to visual backend if available
         #[cfg(feature = "visual-backend")]
         {
-            if let (Some(ref mut backend), Some(window_id)) =
+            if let (Some(backend), Some(window_id)) =
                 (&mut state.backend, state.current_window)
             {
                 use crate::backend::DrawCommand;
@@ -195,7 +195,7 @@ pub fn rectangle(left: i32, top: i32, right: i32, bottom: i32) {
         // Present to visual backend if available
         #[cfg(feature = "visual-backend")]
         {
-            if let (Some(ref mut backend), Some(window_id)) =
+            if let (Some(backend), Some(window_id)) =
                 (&mut state.backend, state.current_window)
             {
                 use crate::backend::DrawCommand;
@@ -252,7 +252,7 @@ pub fn putpixel(x: i32, y: i32, color: Color) {
         // Present to visual backend if available and not in batch mode
         #[cfg(feature = "visual-backend")]
         {
-            if let (Some(ref mut backend), Some(window_id)) =
+            if let (Some(backend), Some(window_id)) =
                 (&mut state.backend, state.current_window)
             {
                 use crate::backend::DrawCommand;

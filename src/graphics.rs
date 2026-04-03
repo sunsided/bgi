@@ -133,9 +133,7 @@ impl GraphicsState {
         // Clean up visual backend
         #[cfg(feature = "visual-backend")]
         {
-            if let (Some(ref mut backend), Some(window_id)) =
-                (&mut self.backend, self.current_window)
-            {
+            if let (Some(backend), Some(window_id)) = (&mut self.backend, self.current_window) {
                 let _ = backend.close_window(window_id);
                 let _ = backend.shutdown();
             }
@@ -480,7 +478,7 @@ pub fn cleardevice() {
             // Clear visual backend if available
             #[cfg(feature = "visual-backend")]
             {
-                if let (Some(ref mut backend), Some(window_id)) =
+                if let (Some(backend), Some(window_id)) =
                     (&mut graphics_state.backend, graphics_state.current_window)
                 {
                     use crate::backend::DrawCommand;
@@ -958,8 +956,7 @@ pub fn is_batch_mode() -> bool {
 pub fn refresh() {
     #[cfg(feature = "visual-backend")]
     with_graphics_state_mut(|state| {
-        if let (Some(ref mut backend), Some(window_id)) = (&mut state.backend, state.current_window)
-        {
+        if let (Some(backend), Some(window_id)) = (&mut state.backend, state.current_window) {
             if let Err(_) = backend.present(window_id) {
                 // Ignore present errors to maintain BGI compatibility
             }

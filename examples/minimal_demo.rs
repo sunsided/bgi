@@ -8,7 +8,7 @@ use std::time::Duration;
 
 fn main() {
     let mut driver = 9; // DETECT equivalent
-    let mut mode = 2;   // VGA mode
+    let mut mode = 2; // VGA mode
 
     // Initialize graphics
     initgraph(&mut driver, &mut mode, "");
@@ -39,7 +39,7 @@ fn main() {
     // Draw 1000 random lines with random colors
     for i in 0..1000 {
         // Random color (1-15, avoiding black)
-        let color_num = 1 + (rng.gen::<u8>() % 15);
+        let color_num = 1 + (rng.r#gen::<u8>() % 15);
         let color = match color_num {
             1 => Color::BLUE,
             2 => Color::GREEN,
@@ -81,10 +81,10 @@ fn main() {
 
     println!("All 1000 lines drawn!");
     println!("Window will stay open for 5 seconds to view the result...");
-    
+
     // Keep window open for viewing
     thread::sleep(Duration::from_secs(5));
-    
+
     closegraph();
     println!("Demo complete!");
 }

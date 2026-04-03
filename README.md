@@ -10,7 +10,7 @@ A modern Rust port of the classic Borland Graphics Interface (BGI) with extensib
 - Mouse and keyboard input handling
 - Pixel-perfect rendering with classic BGI behavior
 - Zero-cost abstractions with compile-time backend selection
-- Modern Rust: Edition 2021, MSRV 1.80
+- Modern Rust: Edition 2024, MSRV 1.90
 
 ## Quick Start
 

@@ -116,7 +116,7 @@ impl InputEventQueue {
         }
 
         // Deduplicate consecutive mouse moves
-        if let InputEvent::MouseMove { x, y } = event {
+        if let InputEvent::MouseMove { .. } = event {
             if let Some(InputEvent::MouseMove { .. }) = self.events.back() {
                 // Replace the last mouse move with the new one
                 self.events.pop_back();

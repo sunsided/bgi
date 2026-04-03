@@ -282,7 +282,7 @@ fn test_pgm_output_generation() {
     let mut gm = 4i32;
 
     // Force PGM backend
-    env::set_var("BGI_BACKEND", "pgm");
+    unsafe { env::set_var("BGI_BACKEND", "pgm") };
 
     initgraph(&mut gd, &mut gm, "");
 
@@ -297,7 +297,7 @@ fn test_pgm_output_generation() {
     // Note: Actual file checking would need to be implemented
     // For now, this test just verifies the graphics operations complete
 
-    env::remove_var("BGI_BACKEND");
+    unsafe { env::remove_var("BGI_BACKEND") };
 
     // Force test failure until implementation exists
     panic!("PGM output generation test not yet implemented - expected failure in TDD");
