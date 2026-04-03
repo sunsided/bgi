@@ -1,6 +1,6 @@
 use bgi::{
-    circle, closegraph, delay, getch, initgraph, ismouseclick, kbhit, line, mouseclick, mousex,
-    mousey, setcolor, Color,
+    Color, circle, closegraph, delay, getch, initgraph, ismouseclick, kbhit, line, mouseclick,
+    mousex, mousey, setcolor,
 };
 
 #[test]
