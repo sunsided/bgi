@@ -62,7 +62,7 @@ pub fn draw_line_bresenham(
             true
         } else {
             let pattern = line_style.pattern; // Use the pattern directly from line_style
-                                              // Check the bit at position (counter % 16) in the pattern
+            // Check the bit at position (counter % 16) in the pattern
             let bit_position = 15 - (counter % 16); // BGI patterns are read left-to-right
             (pattern >> bit_position) & 1 != 0
         };

@@ -1,8 +1,8 @@
 //! Color palette management functions for BGI graphics.
 
 use crate::{
-    graphics::{with_graphics_state, with_graphics_state_mut},
     Color,
+    graphics::{with_graphics_state, with_graphics_state_mut},
 };
 
 /// Set a single palette entry.

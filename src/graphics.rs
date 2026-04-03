@@ -2,13 +2,13 @@
 
 use crate::types::MouseState;
 use crate::{
-    constants::*, Color, DrawingState, FontSettings, GraphResult, InputEvent, WindowState,
+    Color, DrawingState, FontSettings, GraphResult, InputEvent, WindowState, constants::*,
 };
 use std::cell::RefCell;
 use std::collections::HashMap;
 
 #[cfg(feature = "visual-backend")]
-use crate::backend::{create_default_backend, Backend};
+use crate::backend::{Backend, create_default_backend};
 #[cfg(feature = "visual-backend")]
 use crate::window::WindowId;
 
@@ -927,11 +927,7 @@ pub fn textheight(text: &str) -> i32 {
             graphics_state.font_settings.text_height(text)
         } else {
             // Fallback: 16 pixels height
-            if text.is_empty() {
-                0
-            } else {
-                16
-            }
+            if text.is_empty() { 0 } else { 16 }
         }
     })
 }
