@@ -1,6 +1,6 @@
 //! Drawing state management for BGI graphics operations.
 
-use crate::{constants::*, types::*, Color};
+use crate::{Color, constants::*, types::*};
 
 /// Line style settings for drawing operations.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

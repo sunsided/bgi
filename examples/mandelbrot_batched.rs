@@ -44,7 +44,7 @@ fn iter_to_color(iter: i32, max_iter: i32) -> Color {
 
 fn main() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI (640x480, 16 colors)
+    let mut mode = 2; // VGAHI (640x480, 16 colors)
 
     // Initialize graphics
     initgraph(&mut driver, &mut mode, "");
@@ -56,17 +56,17 @@ fn main() {
     }
 
     println!("🚀 Mandelbrot Set with Batch Mode Optimization");
-    
+
     // Enable batch mode for maximum performance
     set_batch_mode(true);
     println!("✅ Batch mode enabled for bulk pixel operations");
-    
+
     let width = getmaxx() + 1;
     let height = getmaxy() + 1;
-    
+
     println!("Rendering {}x{} Mandelbrot set...", width, height);
 
-    // Mandelbrot set parameters  
+    // Mandelbrot set parameters
     let x_min = -2.5;
     let x_max = 1.0;
     let y_min = -1.25;
@@ -96,7 +96,11 @@ fn main() {
             refresh(); // Present accumulated changes
             let elapsed = start_time.elapsed();
             let progress = (py * 100) / height;
-            println!("Progress: {}% - {:.2}s elapsed", progress, elapsed.as_secs_f64());
+            println!(
+                "Progress: {}% - {:.2}s elapsed",
+                progress,
+                elapsed.as_secs_f64()
+            );
 
             // Check for early exit
             if kbhit() {
@@ -108,27 +112,30 @@ fn main() {
 
     // Final refresh to show complete image
     refresh();
-    
+
     let render_time = start_time.elapsed();
-    
+
     // Disable batch mode
     set_batch_mode(false);
-    
+
     println!("🎯 Performance Results:");
     println!("   Rendering time: {:.3}s", render_time.as_secs_f64());
     println!("   Pixels drawn: {}", width * height);
-    println!("   Pixels/second: {:.0}", (width * height) as f64 / render_time.as_secs_f64());
+    println!(
+        "   Pixels/second: {:.0}",
+        (width * height) as f64 / render_time.as_secs_f64()
+    );
 
     // Add title
     setcolor(Color::WHITE);
     outtextxy(10, 10, "Mandelbrot Set (Batch Mode)");
-    
+
     if is_headless() {
         println!("Mandelbrot set rendered in headless mode. Exiting...");
     } else {
         outtextxy(10, 30, "Press any key to exit...");
         println!("Mandelbrot set rendered. Press any key in the graphics window to exit...");
-        
+
         // Wait for key press from graphics window
         loop {
             if kbhit() {

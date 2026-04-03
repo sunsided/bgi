@@ -22,8 +22,11 @@ fn test_30_fps_performance_target() {
     const FRAME_DURATION: Duration = Duration::from_nanos((1_000_000_000.0 / TARGET_FPS) as u64);
     const TEST_FRAMES: usize = 100; // Test 100 frames
 
-    println!("Performance Test: Targeting {} FPS ({:.2}ms per frame)",
-             TARGET_FPS, FRAME_DURATION.as_secs_f64() * 1000.0);
+    println!(
+        "Performance Test: Targeting {} FPS ({:.2}ms per frame)",
+        TARGET_FPS,
+        FRAME_DURATION.as_secs_f64() * 1000.0
+    );
 
     let mut frame_times = Vec::with_capacity(TEST_FRAMES);
     let mut successful_frames = 0;
@@ -68,22 +71,40 @@ fn test_30_fps_performance_target() {
     println!("  Average FPS: {:.2}", average_fps);
     println!("  Min FPS: {:.2}", min_fps);
     println!("  Max FPS: {:.2}", max_fps);
-    println!("  Average frame time: {:.2}ms", average_frame_time.as_secs_f64() * 1000.0);
-    println!("  Min frame time: {:.2}ms", min_frame_time.as_secs_f64() * 1000.0);
-    println!("  Max frame time: {:.2}ms", max_frame_time.as_secs_f64() * 1000.0);
-    println!("  Frames meeting 30 FPS target: {}/{} ({:.1}%)",
-             successful_frames, TEST_FRAMES, success_rate);
+    println!(
+        "  Average frame time: {:.2}ms",
+        average_frame_time.as_secs_f64() * 1000.0
+    );
+    println!(
+        "  Min frame time: {:.2}ms",
+        min_frame_time.as_secs_f64() * 1000.0
+    );
+    println!(
+        "  Max frame time: {:.2}ms",
+        max_frame_time.as_secs_f64() * 1000.0
+    );
+    println!(
+        "  Frames meeting 30 FPS target: {}/{} ({:.1}%)",
+        successful_frames, TEST_FRAMES, success_rate
+    );
 
     closegraph();
 
     // Performance requirements:
     // - Average FPS should be >= 30
     // - At least 80% of frames should meet the 30 FPS target
-    assert!(average_fps >= TARGET_FPS,
-        "Average FPS ({:.2}) is below target ({:.2})", average_fps, TARGET_FPS);
+    assert!(
+        average_fps >= TARGET_FPS,
+        "Average FPS ({:.2}) is below target ({:.2})",
+        average_fps,
+        TARGET_FPS
+    );
 
-    assert!(success_rate >= 80.0,
-        "Only {:.1}% of frames met 30 FPS target (need >= 80%)", success_rate);
+    assert!(
+        success_rate >= 80.0,
+        "Only {:.1}% of frames met 30 FPS target (need >= 80%)",
+        success_rate
+    );
 
     println!("✓ Performance validation passed!");
 }
@@ -125,11 +146,11 @@ fn perform_typical_drawing_operations(frame: usize) {
     setcolor(Color::RED);
     setfillstyle(SOLID_FILL, Color::RED);
     bar(10, 10, 50, 50);
-    
+
     setcolor(Color::GREEN);
     setfillstyle(SOLID_FILL, Color::GREEN);
     fillellipse(300, 200, 30, 20);
-    
+
     // Draw text (often used for debugging/UI)
     setcolor(Color::YELLOW);
     outtextxy(10, 400, &format!("Frame: {}", frame));
@@ -200,7 +221,8 @@ fn test_individual_operation_performance() {
 
     // Test text operations
     let start = Instant::now();
-    for i in 0..100 { // Fewer iterations for text
+    for i in 0..100 {
+        // Fewer iterations for text
         let x = (i % 60) * 10;
         let y = (i % 40) * 10;
         outtextxy(x, y, &format!("Text {}", i));
@@ -223,17 +245,29 @@ fn test_individual_operation_performance() {
     // - Pixels: At least 1500/second (50 pixels per frame * 30 FPS)
     // - Text: At least 60/second (2 text operations per frame * 30 FPS)
 
-    assert!(lines_per_second >= 300.0,
-        "Line drawing too slow: {:.0}/sec (need >= 300)", lines_per_second);
+    assert!(
+        lines_per_second >= 300.0,
+        "Line drawing too slow: {:.0}/sec (need >= 300)",
+        lines_per_second
+    );
 
-    assert!(circles_per_second >= 240.0,
-        "Circle drawing too slow: {:.0}/sec (need >= 240)", circles_per_second);
+    assert!(
+        circles_per_second >= 240.0,
+        "Circle drawing too slow: {:.0}/sec (need >= 240)",
+        circles_per_second
+    );
 
-    assert!(pixels_per_second >= 1500.0,
-        "Pixel operations too slow: {:.0}/sec (need >= 1500)", pixels_per_second);
+    assert!(
+        pixels_per_second >= 1500.0,
+        "Pixel operations too slow: {:.0}/sec (need >= 1500)",
+        pixels_per_second
+    );
 
-    assert!(text_per_second >= 60.0,
-        "Text operations too slow: {:.0}/sec (need >= 60)", text_per_second);
+    assert!(
+        text_per_second >= 60.0,
+        "Text operations too slow: {:.0}/sec (need >= 60)",
+        text_per_second
+    );
 
     println!("✓ Individual operation performance validation passed!");
 }
@@ -274,11 +308,17 @@ fn test_memory_performance() {
     closegraph();
 
     println!("Memory Performance:");
-    println!("  Full screen fills per second: {:.1}", screen_fills_per_second);
+    println!(
+        "  Full screen fills per second: {:.1}",
+        screen_fills_per_second
+    );
 
     // Should be able to fill screen at least 30 times per second for smooth animation
-    assert!(screen_fills_per_second >= 30.0,
-        "Screen fill too slow: {:.1}/sec (need >= 30)", screen_fills_per_second);
+    assert!(
+        screen_fills_per_second >= 30.0,
+        "Screen fill too slow: {:.1}/sec (need >= 30)",
+        screen_fills_per_second
+    );
 
     println!("✓ Memory performance validation passed!");
 }
@@ -329,15 +369,27 @@ fn test_viewport_performance() {
     let full_screen_ops_per_sec = OPERATIONS as f64 / full_screen_time.as_secs_f64();
 
     println!("Viewport Performance:");
-    println!("  Clipped operations per second: {:.0}", clipped_ops_per_sec);
-    println!("  Full screen operations per second: {:.0}", full_screen_ops_per_sec);
+    println!(
+        "  Clipped operations per second: {:.0}",
+        clipped_ops_per_sec
+    );
+    println!(
+        "  Full screen operations per second: {:.0}",
+        full_screen_ops_per_sec
+    );
 
     // Both should be fast enough for 30 FPS
-    assert!(clipped_ops_per_sec >= 300.0,
-        "Clipped drawing too slow: {:.0}/sec", clipped_ops_per_sec);
+    assert!(
+        clipped_ops_per_sec >= 300.0,
+        "Clipped drawing too slow: {:.0}/sec",
+        clipped_ops_per_sec
+    );
 
-    assert!(full_screen_ops_per_sec >= 300.0,
-        "Full screen drawing too slow: {:.0}/sec", full_screen_ops_per_sec);
+    assert!(
+        full_screen_ops_per_sec >= 300.0,
+        "Full screen drawing too slow: {:.0}/sec",
+        full_screen_ops_per_sec
+    );
 
     println!("✓ Viewport performance validation passed!");
 }

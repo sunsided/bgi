@@ -1,10 +1,6 @@
 //! Unit tests for window state management.
 
-use bgi::{
-    window_state::*,
-    Color,
-    constants::*,
-};
+use bgi::{Color, constants::*, window_state::*};
 
 #[test]
 fn test_driver_info_default() {
@@ -328,7 +324,7 @@ fn test_mode_name_generation() {
 #[test]
 fn test_screen_mode_generation() {
     let state = WindowState::new();
-    
+
     // Test VGA High mode
     let mode = state.get_screen_mode(VGA, VGAHI);
     assert!(mode.is_ok());
@@ -338,7 +334,7 @@ fn test_screen_mode_generation() {
     assert_eq!(mode.color_depth, 4);
     assert_eq!(mode.max_colors, 16);
     assert_eq!(mode.mode, VGAHI);
-    
+
     // Test MCGA mode (256 colors)
     let mode = state.get_screen_mode(VGA, MCGAHI);
     assert!(mode.is_ok());
@@ -360,34 +356,64 @@ fn test_structure_equality() {
         driver: VGA,
         name: "VGA".to_string(),
         mode: VGAHI,
-        mode_name: "VGA High".to_string()
+        mode_name: "VGA High".to_string(),
     };
     let driver2 = DriverInfo {
         driver: VGA,
         name: "VGA".to_string(),
         mode: VGAHI,
-        mode_name: "VGA High".to_string()
+        mode_name: "VGA High".to_string(),
     };
     let driver3 = DriverInfo {
         driver: EGA,
         name: "EGA".to_string(),
         mode: EGAHI,
-        mode_name: "EGA High".to_string()
+        mode_name: "EGA High".to_string(),
     };
 
     assert_eq!(driver1, driver2);
     assert_ne!(driver1, driver3);
 
-    let mode1 = ScreenMode { width: 640, height: 480, color_depth: 4, max_colors: 16, mode: VGAHI };
-    let mode2 = ScreenMode { width: 640, height: 480, color_depth: 4, max_colors: 16, mode: VGAHI };
-    let mode3 = ScreenMode { width: 320, height: 200, color_depth: 8, max_colors: 256, mode: MCGAHI };
+    let mode1 = ScreenMode {
+        width: 640,
+        height: 480,
+        color_depth: 4,
+        max_colors: 16,
+        mode: VGAHI,
+    };
+    let mode2 = ScreenMode {
+        width: 640,
+        height: 480,
+        color_depth: 4,
+        max_colors: 16,
+        mode: VGAHI,
+    };
+    let mode3 = ScreenMode {
+        width: 320,
+        height: 200,
+        color_depth: 8,
+        max_colors: 256,
+        mode: MCGAHI,
+    };
 
     assert_eq!(mode1, mode2);
     assert_ne!(mode1, mode3);
 
-    let pages1 = GraphicsPages { active_page: 0, visual_page: 0, total_pages: 1 };
-    let pages2 = GraphicsPages { active_page: 0, visual_page: 0, total_pages: 1 };
-    let pages3 = GraphicsPages { active_page: 1, visual_page: 0, total_pages: 2 };
+    let pages1 = GraphicsPages {
+        active_page: 0,
+        visual_page: 0,
+        total_pages: 1,
+    };
+    let pages2 = GraphicsPages {
+        active_page: 0,
+        visual_page: 0,
+        total_pages: 1,
+    };
+    let pages3 = GraphicsPages {
+        active_page: 1,
+        visual_page: 0,
+        total_pages: 2,
+    };
 
     assert_eq!(pages1, pages2);
     assert_ne!(pages1, pages3);

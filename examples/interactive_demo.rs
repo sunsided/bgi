@@ -7,7 +7,7 @@ use std::time::Duration;
 
 fn main() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI (640x480, 16 colors)
+    let mut mode = 2; // VGAHI (640x480, 16 colors)
 
     // Initialize graphics with visual backend
     initgraph(&mut driver, &mut mode, "");
@@ -82,11 +82,11 @@ fn main() {
     // Final message
     setcolor(Color::GREEN);
     outtextxy(10, 70, "Animation complete! Visual backend working!");
-    
+
     println!("Animation complete!");
     println!("Check the graphics window - you should see animated circles!");
     println!("The window will close automatically in 3 seconds...");
-    
+
     // Keep window open for a bit longer
     thread::sleep(Duration::from_secs(3));
 

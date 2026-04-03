@@ -320,7 +320,7 @@ fn test_create_pixel_buffer_backend() {
     // Pixel buffer backend has specific characteristics
     assert!(caps.multi_window); // Should support multiple windows
     assert!(!caps.hardware_acceleration); // Software rendering
-                                          // Other capabilities depend on implementation
+    // Other capabilities depend on implementation
 }
 
 // Mock backend for testing trait functionality
@@ -622,9 +622,11 @@ fn test_mock_backend_error_conditions() {
     assert!(backend.draw(invalid_window, &[]).is_err());
     assert!(backend.present(invalid_window).is_err());
     assert!(backend.get_pixel(invalid_window, 0, 0).is_err());
-    assert!(backend
-        .set_viewport(invalid_window, Rect::new(0, 0, 100, 100))
-        .is_err());
+    assert!(
+        backend
+            .set_viewport(invalid_window, Rect::new(0, 0, 100, 100))
+            .is_err()
+    );
     assert!(backend.viewport(invalid_window).is_err());
 }
 
@@ -718,9 +720,11 @@ fn test_mock_backend_image_operations() {
     assert_eq!(pixels.len(), 100);
 
     // Test image saving
-    assert!(backend
-        .save_image("output.png", width, height, &pixels)
-        .is_ok());
+    assert!(
+        backend
+            .save_image("output.png", width, height, &pixels)
+            .is_ok()
+    );
 }
 
 #[test]

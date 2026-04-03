@@ -1,8 +1,8 @@
 //! Shape drawing functions for BGI graphics.
 
 use crate::{
-    graphics::{with_graphics_state, with_graphics_state_mut},
     Color, RgbColor,
+    graphics::{with_graphics_state, with_graphics_state_mut},
 };
 
 /// Draw a line from (x1, y1) to (x2, y2).
@@ -27,9 +27,7 @@ pub fn line(x1: i32, y1: i32, x2: i32, y2: i32) {
         // Present to visual backend if available
         #[cfg(feature = "visual-backend")]
         {
-            if let (Some(backend), Some(window_id)) =
-                (&mut state.backend, state.current_window)
-            {
+            if let (Some(backend), Some(window_id)) = (&mut state.backend, state.current_window) {
                 use crate::backend::DrawCommand;
                 let rgb_color = color.to_rgb();
                 let commands = vec![DrawCommand::Line {
@@ -97,9 +95,7 @@ pub fn circle(x: i32, y: i32, radius: i32) {
         // Present to visual backend if available
         #[cfg(feature = "visual-backend")]
         {
-            if let (Some(backend), Some(window_id)) =
-                (&mut state.backend, state.current_window)
-            {
+            if let (Some(backend), Some(window_id)) = (&mut state.backend, state.current_window) {
                 use crate::backend::DrawCommand;
                 let rgb_color = color.to_rgb();
                 let commands = vec![DrawCommand::Circle {
@@ -195,9 +191,7 @@ pub fn rectangle(left: i32, top: i32, right: i32, bottom: i32) {
         // Present to visual backend if available
         #[cfg(feature = "visual-backend")]
         {
-            if let (Some(backend), Some(window_id)) =
-                (&mut state.backend, state.current_window)
-            {
+            if let (Some(backend), Some(window_id)) = (&mut state.backend, state.current_window) {
                 use crate::backend::DrawCommand;
                 let rgb_color = color.to_rgb();
                 let commands = vec![DrawCommand::Rectangle {
@@ -252,9 +246,7 @@ pub fn putpixel(x: i32, y: i32, color: Color) {
         // Present to visual backend if available and not in batch mode
         #[cfg(feature = "visual-backend")]
         {
-            if let (Some(backend), Some(window_id)) =
-                (&mut state.backend, state.current_window)
-            {
+            if let (Some(backend), Some(window_id)) = (&mut state.backend, state.current_window) {
                 use crate::backend::DrawCommand;
                 let rgb_color = color.to_rgb();
                 let commands = vec![DrawCommand::Pixel {

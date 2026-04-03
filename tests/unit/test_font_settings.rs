@@ -1,10 +1,6 @@
 //! Unit tests for font settings and text rendering configuration.
 
-use bgi::{
-    font_settings::*,
-    constants::*,
-    Color,
-};
+use bgi::{Color, constants::*, font_settings::*};
 
 #[test]
 fn test_font_info_default() {
@@ -58,7 +54,10 @@ fn test_font_settings_new() {
     let default_settings = FontSettings::default();
 
     assert_eq!(settings.style.font, default_settings.style.font);
-    assert_eq!(settings.alignment.horizontal, default_settings.alignment.horizontal);
+    assert_eq!(
+        settings.alignment.horizontal,
+        default_settings.alignment.horizontal
+    );
     assert_eq!(settings.fonts.len(), default_settings.fonts.len());
 }
 
@@ -152,7 +151,7 @@ fn test_text_width_calculation() {
     // Test vertical text (fixed width)
     settings.set_text_style(DEFAULT_FONT, VERT_DIR, 1);
     assert_eq!(settings.text_width("Hello"), 8); // Vertical text has fixed width
-    assert_eq!(settings.text_width("Hi"), 8);    // Same width regardless of length
+    assert_eq!(settings.text_width("Hi"), 8); // Same width regardless of length
 
     // Test with user-defined char size
     settings.set_user_char_size(12, 18);
@@ -170,7 +169,7 @@ fn test_text_height_calculation() {
     // Test horizontal text (fixed height)
     settings.set_text_style(DEFAULT_FONT, HORIZ_DIR, 1);
     assert_eq!(settings.text_height("Hello"), 8); // Fixed height
-    assert_eq!(settings.text_height("Hi"), 8);    // Same height regardless of length
+    assert_eq!(settings.text_height("Hi"), 8); // Same height regardless of length
 
     settings.set_text_style(DEFAULT_FONT, HORIZ_DIR, 3);
     assert_eq!(settings.text_height("Hello"), 24); // 8 * 3 scale factor
@@ -178,7 +177,7 @@ fn test_text_height_calculation() {
     // Test vertical text (height depends on character count)
     settings.set_text_style(DEFAULT_FONT, VERT_DIR, 1);
     assert_eq!(settings.text_height("Hello"), 5 * 8); // 5 chars * 8 pixels high
-    assert_eq!(settings.text_height("Hi"), 2 * 8);    // 2 chars * 8 pixels high
+    assert_eq!(settings.text_height("Hi"), 2 * 8); // 2 chars * 8 pixels high
 
     // Test with user-defined char size
     settings.set_user_char_size(12, 18);
@@ -196,11 +195,18 @@ fn test_font_management() {
     assert_eq!(default_font.unwrap().name, "Default");
 
     // Test adding new font
-    settings.add_font(100, "Custom Font".to_string(), Some("custom.ttf".to_string()));
+    settings.add_font(
+        100,
+        "Custom Font".to_string(),
+        Some("custom.ttf".to_string()),
+    );
     let custom_font = settings.get_font_info(100);
     assert!(custom_font.is_some());
     assert_eq!(custom_font.unwrap().name, "Custom Font");
-    assert_eq!(custom_font.unwrap().filename, Some("custom.ttf".to_string()));
+    assert_eq!(
+        custom_font.unwrap().filename,
+        Some("custom.ttf".to_string())
+    );
 
     // Test replacing existing font
     let original_count = settings.fonts.len();
@@ -236,11 +242,11 @@ fn test_font_type_checks() {
 #[test]
 fn test_direction_checks() {
     let mut settings = FontSettings::new();
-    
+
     settings.set_text_style(DEFAULT_FONT, HORIZ_DIR, 1);
     assert!(settings.is_horizontal());
     assert!(!settings.is_vertical());
-    
+
     settings.set_text_style(DEFAULT_FONT, VERT_DIR, 1);
     assert!(!settings.is_horizontal());
     assert!(settings.is_vertical());
@@ -299,23 +305,56 @@ fn test_reset() {
 
 #[test]
 fn test_structure_equality() {
-    let info1 = FontInfo { font: DEFAULT_FONT, name: "Test".to_string(), filename: None };
-    let info2 = FontInfo { font: DEFAULT_FONT, name: "Test".to_string(), filename: None };
-    let info3 = FontInfo { font: TRIPLEX_FONT, name: "Test".to_string(), filename: None };
+    let info1 = FontInfo {
+        font: DEFAULT_FONT,
+        name: "Test".to_string(),
+        filename: None,
+    };
+    let info2 = FontInfo {
+        font: DEFAULT_FONT,
+        name: "Test".to_string(),
+        filename: None,
+    };
+    let info3 = FontInfo {
+        font: TRIPLEX_FONT,
+        name: "Test".to_string(),
+        filename: None,
+    };
 
     assert_eq!(info1, info2);
     assert_ne!(info1, info3);
 
-    let style1 = TextStyle { font: DEFAULT_FONT, direction: HORIZ_DIR, char_size: 1 };
-    let style2 = TextStyle { font: DEFAULT_FONT, direction: HORIZ_DIR, char_size: 1 };
-    let style3 = TextStyle { font: DEFAULT_FONT, direction: VERT_DIR, char_size: 1 };
+    let style1 = TextStyle {
+        font: DEFAULT_FONT,
+        direction: HORIZ_DIR,
+        char_size: 1,
+    };
+    let style2 = TextStyle {
+        font: DEFAULT_FONT,
+        direction: HORIZ_DIR,
+        char_size: 1,
+    };
+    let style3 = TextStyle {
+        font: DEFAULT_FONT,
+        direction: VERT_DIR,
+        char_size: 1,
+    };
 
     assert_eq!(style1, style2);
     assert_ne!(style1, style3);
 
-    let align1 = TextAlignment { horizontal: LEFT_TEXT, vertical: TOP_TEXT };
-    let align2 = TextAlignment { horizontal: LEFT_TEXT, vertical: TOP_TEXT };
-    let align3 = TextAlignment { horizontal: CENTER_TEXT, vertical: TOP_TEXT };
+    let align1 = TextAlignment {
+        horizontal: LEFT_TEXT,
+        vertical: TOP_TEXT,
+    };
+    let align2 = TextAlignment {
+        horizontal: LEFT_TEXT,
+        vertical: TOP_TEXT,
+    };
+    let align3 = TextAlignment {
+        horizontal: CENTER_TEXT,
+        vertical: TOP_TEXT,
+    };
 
     assert_eq!(align1, align2);
     assert_ne!(align1, align3);
@@ -328,12 +367,12 @@ fn test_edge_cases() {
     // Test zero character size (should be clamped to 1)
     settings.set_text_style(DEFAULT_FONT, HORIZ_DIR, 0);
     let (width, height) = settings.get_char_size();
-    assert_eq!(width, 8);  // Should use size 1
+    assert_eq!(width, 8); // Should use size 1
     assert_eq!(height, 8);
 
     // Test negative character size (should be clamped to 1)
     settings.set_text_style(DEFAULT_FONT, HORIZ_DIR, -5);
     let (width, height) = settings.get_char_size();
-    assert_eq!(width, 8);  // Should use size 1
+    assert_eq!(width, 8); // Should use size 1
     assert_eq!(height, 8);
 }

@@ -43,7 +43,7 @@ fn iter_to_color(iter: i32, max_iter: i32) -> Color {
 
 fn main() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI (640x480, 16 colors)
+    let mut mode = 2; // VGAHI (640x480, 16 colors)
 
     // Initialize graphics
     initgraph(&mut driver, &mut mode, "");
@@ -61,7 +61,7 @@ fn main() {
 
     println!("Rendering {}x{} Mandelbrot set...", width, height);
 
-    // Mandelbrot set parameters  
+    // Mandelbrot set parameters
     let x_min = -2.5;
     let x_max = 1.0;
     let y_min = -1.25;
@@ -109,7 +109,11 @@ fn main() {
         if py % 50 == 0 {
             let elapsed = start_time.elapsed();
             let progress = (py * 100) / height;
-            println!("Progress: {}% - {:.2}s elapsed", progress, elapsed.as_secs_f64());
+            println!(
+                "Progress: {}% - {:.2}s elapsed",
+                progress,
+                elapsed.as_secs_f64()
+            );
 
             // Check for key press to allow early exit
             if kbhit() {
@@ -120,18 +124,21 @@ fn main() {
     }
 
     let render_time = start_time.elapsed();
-    println!("Rendering completed in {:.2} seconds", render_time.as_secs_f64());
+    println!(
+        "Rendering completed in {:.2} seconds",
+        render_time.as_secs_f64()
+    );
 
     // Add title
     setcolor(Color::WHITE);
     outtextxy(10, 10, "Mandelbrot Set");
-    
+
     if is_headless() {
         println!("Mandelbrot set rendered in headless mode. Exiting...");
     } else {
         outtextxy(10, 30, "Press any key to exit...");
         println!("Mandelbrot set rendered. Press any key in the graphics window to exit...");
-        
+
         // Wait for key press from graphics window
         loop {
             if kbhit() {

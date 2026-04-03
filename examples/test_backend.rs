@@ -1,10 +1,10 @@
 //! Test the backend directly to see if windows appear
 
-use bgi::{GraphicsContext, GraphicsMode, GraphicsDriver};
+use bgi::{GraphicsContext, GraphicsDriver, GraphicsMode};
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Testing direct backend usage...");
-    
+
     // Create a graphics context that should use the visual backend
     let mode = GraphicsMode::new(GraphicsDriver::Vga, 2); // VGA 640x480
     let mut context = GraphicsContext::new(mode)?;
@@ -24,7 +24,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Keep the window open for a few seconds
     println!("Waiting 5 seconds to see the window...");
     std::thread::sleep(std::time::Duration::from_secs(5));
-    
+
     println!("Test completed.");
     Ok(())
 }

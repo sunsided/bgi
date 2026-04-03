@@ -30,7 +30,7 @@ fn test_font_loading() {
     // Verify text is actually rendered (should fail until implementation exists)
     // This is a placeholder test that will fail until bgi-stroked-fonts integration is complete
     let _pixel_color = getpixel(15, 15); // Should contain font pixel data
-                                         // For now, this will fail as there's no font rendering implementation
+    // For now, this will fail as there's no font rendering implementation
 
     closegraph();
 

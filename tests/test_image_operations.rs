@@ -1,22 +1,26 @@
 use bgi::{
-    initgraph, closegraph,
-    getimage, putimage, loadimage, saveimage,
-    imagesize, getimagesize,
+    closegraph, getimage, getimagesize, imagesize, initgraph, loadimage, putimage, saveimage,
 };
 
 #[test]
 fn test_getimage_contract() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     // Test getting image from a region
     let image_data = getimage(10, 10, 50, 50);
-    assert!(image_data.is_some(), "getimage should return Some for valid region");
+    assert!(
+        image_data.is_some(),
+        "getimage should return Some for valid region"
+    );
 
     // Test getting image from invalid region
     let invalid_image = getimage(-10, -10, 0, 0);
-    assert!(invalid_image.is_none(), "getimage should return None for invalid region");
+    assert!(
+        invalid_image.is_none(),
+        "getimage should return None for invalid region"
+    );
 
     closegraph();
 }
@@ -24,7 +28,7 @@ fn test_getimage_contract() {
 #[test]
 fn test_putimage_contract() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     // First get an image
@@ -47,16 +51,22 @@ fn test_putimage_contract() {
 #[test]
 fn test_loadimage_contract() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     // Test loading non-existent file
     let result = loadimage("non_existent_file.bmp");
-    assert!(result.is_none(), "loadimage should return None for non-existent file");
+    assert!(
+        result.is_none(),
+        "loadimage should return None for non-existent file"
+    );
 
     // Test loading with empty filename
     let empty_result = loadimage("");
-    assert!(empty_result.is_none(), "loadimage should return None for empty filename");
+    assert!(
+        empty_result.is_none(),
+        "loadimage should return None for empty filename"
+    );
 
     closegraph();
 }
@@ -64,7 +74,7 @@ fn test_loadimage_contract() {
 #[test]
 fn test_saveimage_contract() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     // Test saving to invalid path
@@ -73,7 +83,10 @@ fn test_saveimage_contract() {
 
     // Test saving with invalid coordinates
     let invalid_coords = saveimage("test.bmp", -10, -10, 0, 0);
-    assert!(!invalid_coords, "saveimage should return false for invalid coordinates");
+    assert!(
+        !invalid_coords,
+        "saveimage should return false for invalid coordinates"
+    );
 
     closegraph();
 }
@@ -81,16 +94,22 @@ fn test_saveimage_contract() {
 #[test]
 fn test_imagesize_contract() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     // Test getting size of valid region
     let size = imagesize(0, 0, 100, 100);
-    assert!(size > 0, "imagesize should return positive value for valid region");
+    assert!(
+        size > 0,
+        "imagesize should return positive value for valid region"
+    );
 
     // Test getting size of invalid region
     let invalid_size = imagesize(-10, -10, 0, 0);
-    assert_eq!(invalid_size, 0, "imagesize should return 0 for invalid region");
+    assert_eq!(
+        invalid_size, 0,
+        "imagesize should return 0 for invalid region"
+    );
 
     closegraph();
 }
@@ -98,7 +117,7 @@ fn test_imagesize_contract() {
 #[test]
 fn test_getimagesize_contract() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     // Get an image first
@@ -120,16 +139,22 @@ fn test_getimagesize_contract() {
 fn test_image_operations_without_graphics() {
     // Test operations without initializing graphics - should fail gracefully
     let result = getimage(0, 0, 10, 10);
-    assert!(result.is_none(), "getimage should fail without graphics initialization");
+    assert!(
+        result.is_none(),
+        "getimage should fail without graphics initialization"
+    );
 
     let size = imagesize(0, 0, 10, 10);
-    assert_eq!(size, 0, "imagesize should return 0 without graphics initialization");
+    assert_eq!(
+        size, 0,
+        "imagesize should return 0 without graphics initialization"
+    );
 }
 
 #[test]
 fn test_image_roundtrip() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     // Draw something, capture it, put it elsewhere

@@ -5,7 +5,7 @@
 
 #[cfg(feature = "visual-backend")]
 mod minifb_tests {
-    use bgi::backend::{minifb::MiniFbBackend, Backend};
+    use bgi::backend::{Backend, minifb::MiniFbBackend};
     use bgi::color::RgbColor;
     use bgi::types::GraphicsMode;
 

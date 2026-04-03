@@ -23,7 +23,11 @@ fn test_mouse_buttons_default() {
 
 #[test]
 fn test_mouse_event_creation() {
-    let buttons = MouseButtons { left: true, right: false, middle: false };
+    let buttons = MouseButtons {
+        left: true,
+        right: false,
+        middle: false,
+    };
     let event = MouseEvent::new(100, 200, buttons);
 
     assert_eq!(event.x, 100);
@@ -139,7 +143,11 @@ fn test_mouse_button_states() {
     let mut input = InputEvent::new();
 
     // Test all buttons pressed
-    let buttons = MouseButtons { left: true, right: true, middle: true };
+    let buttons = MouseButtons {
+        left: true,
+        right: true,
+        middle: true,
+    };
     input.update_mouse(100, 200, buttons);
 
     assert!(input.mouse_button_pressed(1)); // Left
@@ -174,7 +182,11 @@ fn test_mouse_click_detection() {
     input.update_mouse(100, 200, buttons_up);
 
     // Press left button (should generate click)
-    let buttons_left = MouseButtons { left: true, right: false, middle: false };
+    let buttons_left = MouseButtons {
+        left: true,
+        right: false,
+        middle: false,
+    };
     input.update_mouse(100, 200, buttons_left);
 
     assert!(input.has_left_click());
@@ -203,7 +215,11 @@ fn test_multiple_button_clicks() {
     input.update_mouse(50, 60, buttons_up);
 
     // Press all buttons simultaneously
-    let buttons_all = MouseButtons { left: true, right: true, middle: true };
+    let buttons_all = MouseButtons {
+        left: true,
+        right: true,
+        middle: true,
+    };
     input.update_mouse(50, 60, buttons_all);
 
     // Should generate clicks for all buttons
@@ -230,7 +246,11 @@ fn test_click_clear_operations() {
     let buttons_up = MouseButtons::default();
     input.update_mouse(100, 200, buttons_up);
 
-    let buttons_all = MouseButtons { left: true, right: true, middle: true };
+    let buttons_all = MouseButtons {
+        left: true,
+        right: true,
+        middle: true,
+    };
     input.update_mouse(100, 200, buttons_all);
 
     // Clear individual button clicks
@@ -262,7 +282,11 @@ fn test_peek_vs_consume_clicks() {
     let buttons_up = MouseButtons::default();
     input.update_mouse(100, 200, buttons_up);
 
-    let buttons_left = MouseButtons { left: true, right: false, middle: false };
+    let buttons_left = MouseButtons {
+        left: true,
+        right: false,
+        middle: false,
+    };
     input.update_mouse(120, 180, buttons_left);
 
     // Peek at the click (shouldn't consume it)
@@ -287,20 +311,24 @@ fn test_peek_vs_consume_clicks() {
 #[test]
 fn test_input_event_stats() {
     let mut input = InputEvent::new();
-    
+
     // Initial stats
     let (key_count, click_count) = input.get_stats();
     assert_eq!(key_count, 0);
     assert_eq!(click_count, 0);
     assert!(!input.has_pending_events());
-    
+
     // Add some events
     input.add_key_event(65, false);
     input.add_key_event(66, false);
 
     let buttons_up = MouseButtons::default();
     input.update_mouse(100, 200, buttons_up);
-    let buttons_left = MouseButtons { left: true, right: false, middle: false };
+    let buttons_left = MouseButtons {
+        left: true,
+        right: false,
+        middle: false,
+    };
     input.update_mouse(100, 200, buttons_left);
 
     let (key_count, click_count) = input.get_stats();
@@ -335,7 +363,11 @@ fn test_clear_all_events() {
 
     let buttons_up = MouseButtons::default();
     input.update_mouse(100, 200, buttons_up);
-    let buttons_all = MouseButtons { left: true, right: true, middle: false };
+    let buttons_all = MouseButtons {
+        left: true,
+        right: true,
+        middle: false,
+    };
     input.update_mouse(100, 200, buttons_all);
 
     // Verify events exist
@@ -380,7 +412,11 @@ fn test_no_duplicate_clicks_on_hold() {
     input.update_mouse(100, 200, buttons_up);
 
     // Press button
-    let buttons_down = MouseButtons { left: true, right: false, middle: false };
+    let buttons_down = MouseButtons {
+        left: true,
+        right: false,
+        middle: false,
+    };
     input.update_mouse(100, 200, buttons_down);
 
     assert!(input.has_left_click());
@@ -406,7 +442,11 @@ fn test_click_button_numbers() {
     input.update_mouse(100, 200, buttons_up);
 
     // Test each button individually
-    let buttons_left = MouseButtons { left: true, right: false, middle: false };
+    let buttons_left = MouseButtons {
+        left: true,
+        right: false,
+        middle: false,
+    };
     input.update_mouse(100, 200, buttons_left);
 
     let left_click = input.peek_mouse_click(1);
@@ -415,7 +455,11 @@ fn test_click_button_numbers() {
 
     input.clear_all_mouse_clicks();
 
-    let buttons_right = MouseButtons { left: false, right: true, middle: false };
+    let buttons_right = MouseButtons {
+        left: false,
+        right: true,
+        middle: false,
+    };
     input.update_mouse(100, 200, buttons_right);
 
     let right_click = input.peek_mouse_click(2);
@@ -424,7 +468,11 @@ fn test_click_button_numbers() {
 
     input.clear_all_mouse_clicks();
 
-    let buttons_middle = MouseButtons { left: false, right: false, middle: true };
+    let buttons_middle = MouseButtons {
+        left: false,
+        right: false,
+        middle: true,
+    };
     input.update_mouse(100, 200, buttons_middle);
 
     let middle_click = input.peek_mouse_click(3);

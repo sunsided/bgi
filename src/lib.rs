@@ -51,14 +51,14 @@ pub mod optimizations;
 
 pub use graphics::*;
 pub use image::*;
-pub use optimizations::{const_optimized, BatchDrawer, DrawingPool};
+pub use optimizations::{BatchDrawer, DrawingPool, const_optimized};
 pub use palette::*;
 pub use shapes::*;
 
-use backend::{create_default_backend, Backend, DrawCommand};
+use backend::{Backend, DrawCommand, create_default_backend};
 use line::{
-    draw_ellipse_arc, draw_rectangle_lines, draw_thick_circle, draw_thick_line,
-    LineStyle as LineStyleInternal,
+    LineStyle as LineStyleInternal, draw_ellipse_arc, draw_rectangle_lines, draw_thick_circle,
+    draw_thick_line,
 };
 use optimizations::optimized_ctx;
 use window::WindowId;

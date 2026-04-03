@@ -1,31 +1,33 @@
 use bgi::{
-    initgraph, closegraph, graphresult, GraphResult,
-    line, circle, rectangle,
-    setcolor, Color
+    Color, GraphResult, circle, closegraph, graphresult, initgraph, line, rectangle, setcolor,
 };
 
 #[test]
 fn test_simple_drawing_integration() {
     // Test basic drawing workflow from quickstart
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
 
     // Initialize graphics
     initgraph(&mut driver, &mut mode, "");
 
     // Check that graphics initialized successfully
     let result = graphresult();
-    assert_eq!(result, GraphResult::Ok, "Graphics should initialize successfully");
+    assert_eq!(
+        result,
+        GraphResult::Ok,
+        "Graphics should initialize successfully"
+    );
 
     // Set drawing color
     setcolor(Color::WHITE);
 
     // Draw basic shapes
-    line(10, 10, 100, 10);      // Horizontal line
-    line(10, 10, 10, 100);      // Vertical line
-    line(10, 10, 100, 100);     // Diagonal line
+    line(10, 10, 100, 10); // Horizontal line
+    line(10, 10, 10, 100); // Vertical line
+    line(10, 10, 100, 100); // Diagonal line
 
-    circle(200, 50, 30);        // Circle
+    circle(200, 50, 30); // Circle
     rectangle(300, 20, 400, 80); // Rectangle
 
     // Test that we can draw multiple shapes without issues
@@ -34,8 +36,8 @@ fn test_simple_drawing_integration() {
     }
 
     // Test drawing at boundaries
-    line(0, 0, 100, 0);         // Top edge
-    line(0, 0, 0, 100);         // Left edge
+    line(0, 0, 100, 0); // Top edge
+    line(0, 0, 0, 100); // Left edge
 
     // Clean up
     closegraph();
@@ -44,25 +46,25 @@ fn test_simple_drawing_integration() {
 #[test]
 fn test_simple_drawing_coordinates() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     setcolor(Color::WHITE);
 
     // Test various coordinate combinations
-    line(0, 0, 50, 50);         // From origin
-    line(100, 100, 150, 100);   // Horizontal at offset
-    line(100, 100, 100, 150);   // Vertical at offset
-    line(200, 50, 150, 100);    // Diagonal reverse
+    line(0, 0, 50, 50); // From origin
+    line(100, 100, 150, 100); // Horizontal at offset
+    line(100, 100, 100, 150); // Vertical at offset
+    line(200, 50, 150, 100); // Diagonal reverse
 
     // Test circles at different positions
-    circle(50, 200, 25);        // Bottom left area
-    circle(200, 200, 35);       // Bottom right area
-    circle(300, 100, 15);       // Top right area
+    circle(50, 200, 25); // Bottom left area
+    circle(200, 200, 35); // Bottom right area
+    circle(300, 100, 15); // Top right area
 
     // Test rectangles
-    rectangle(10, 250, 80, 300);    // Small rectangle
-    rectangle(100, 250, 200, 350);  // Larger rectangle
+    rectangle(10, 250, 80, 300); // Small rectangle
+    rectangle(100, 250, 200, 350); // Larger rectangle
 
     closegraph();
 }
@@ -70,7 +72,7 @@ fn test_simple_drawing_coordinates() {
 #[test]
 fn test_drawing_edge_cases() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     setcolor(Color::WHITE);
@@ -112,12 +114,16 @@ fn test_multiple_graphics_sessions() {
     // Test initializing and closing graphics multiple times
     for _session in 0..3 {
         let mut driver = 9; // VGA
-        let mut mode = 2;   // VGAHI
+        let mut mode = 2; // VGAHI
 
         initgraph(&mut driver, &mut mode, "");
 
         let result = graphresult();
-        assert_eq!(result, GraphResult::Ok, "Each graphics session should initialize successfully");
+        assert_eq!(
+            result,
+            GraphResult::Ok,
+            "Each graphics session should initialize successfully"
+        );
 
         setcolor(Color::WHITE);
         line(10, 10, 100, 100);
@@ -130,7 +136,7 @@ fn test_multiple_graphics_sessions() {
 #[test]
 fn test_drawing_order_independence() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     setcolor(Color::WHITE);

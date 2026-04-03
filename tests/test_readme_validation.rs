@@ -3,7 +3,7 @@
 
 #[cfg(test)]
 mod readme_validation {
-    use bgi::{initgraph, setcolor, circle, closegraph, Color};
+    use bgi::{Color, circle, closegraph, initgraph, setcolor};
 
     #[test]
     fn test_readme_example_compiles() {
@@ -14,7 +14,7 @@ mod readme_validation {
 
         let _classic_bgi_example = || {
             let mut driver = 9; // VGA
-            let mut mode = 2;   // VGAHI - 640x480, 16 colors
+            let mut mode = 2; // VGAHI - 640x480, 16 colors
 
             initgraph(&mut driver, &mut mode, "");
 

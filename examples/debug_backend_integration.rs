@@ -6,7 +6,7 @@ fn main() {
     println!("Testing backend integration...");
 
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI (640x480, 16 colors)
+    let mut mode = 2; // VGAHI (640x480, 16 colors)
 
     // Initialize graphics
     println!("Calling initgraph...");
@@ -34,10 +34,10 @@ fn main() {
     println!("Drawing rectangle...");
     setcolor(Color::GREEN);
     rectangle(300, 150, 400, 250);
-    
+
     println!("Drawing completed. Keeping window open for 10 seconds...");
     println!("Look for a graphics window on your desktop!");
-    
+
     // Keep the window alive by calling a BGI function periodically
     for i in 0..10 {
         println!("  {} seconds remaining...", 10 - i);

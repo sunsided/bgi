@@ -1,6 +1,6 @@
 //! Unit tests for color system.
 
-use bgi::color::{Color, RgbColor, Palette, RgbPalette};
+use bgi::color::{Color, Palette, RgbColor, RgbPalette};
 
 #[test]
 fn test_color_constants() {
@@ -116,10 +116,10 @@ fn test_default_palette() {
 #[test]
 fn test_rgb_palette() {
     let mut palette = RgbPalette::new(10);
-    
+
     assert_eq!(palette.size, 10);
     assert_eq!(palette.colors.len(), 10);
-    
+
     // Test setting and getting colors
     palette.set_color(5, 0xFF0000FF); // Blue
     assert_eq!(palette.get_color(5), Some(0xFF0000FF));
@@ -190,7 +190,13 @@ fn test_palette_operations() {
     }
 
     // Verify the colors were set correctly
-    assert_eq!(palette.get_color(0), Some(Color::BLACK.to_rgb().to_argb32()));
+    assert_eq!(
+        palette.get_color(0),
+        Some(Color::BLACK.to_rgb().to_argb32())
+    );
     assert_eq!(palette.get_color(4), Some(Color::RED.to_rgb().to_argb32()));
-    assert_eq!(palette.get_color(15), Some(Color::WHITE.to_rgb().to_argb32()));
+    assert_eq!(
+        palette.get_color(15),
+        Some(Color::WHITE.to_rgb().to_argb32())
+    );
 }

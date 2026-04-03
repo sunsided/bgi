@@ -3,15 +3,14 @@
 // They should FAIL initially until the implementation is complete
 
 use bgi::{
-    initgraph, closegraph, graphresult, grapherrormsg, getgraphmode, setgraphmode,
-    GraphResult
+    GraphResult, closegraph, getgraphmode, grapherrormsg, graphresult, initgraph, setgraphmode,
 };
 
 #[test]
 fn test_initgraph_contract() {
     // Test successful initialization
-    let mut gd = 0i32;  // VGA driver
-    let mut gm = 4i32;  // VGA mode
+    let mut gd = 0i32; // VGA driver
+    let mut gm = 4i32; // VGA mode
 
     initgraph(&mut gd, &mut gm, "");
     assert_eq!(graphresult(), GraphResult::Ok);
@@ -23,8 +22,8 @@ fn test_initgraph_contract() {
 #[test]
 fn test_initgraph_invalid_mode() {
     // Test error handling for invalid mode
-    let mut gd = -1i32;  // Invalid driver
-    let mut gm = -1i32;  // Invalid mode
+    let mut gd = -1i32; // Invalid driver
+    let mut gm = -1i32; // Invalid mode
 
     initgraph(&mut gd, &mut gm, "");
     assert_ne!(graphresult(), GraphResult::Ok);
@@ -32,8 +31,8 @@ fn test_initgraph_invalid_mode() {
 
 #[test]
 fn test_closegraph_contract() {
-    let mut gd = 0i32;  // VGA driver
-    let mut gm = 4i32;  // VGA mode
+    let mut gd = 0i32; // VGA driver
+    let mut gm = 4i32; // VGA mode
 
     initgraph(&mut gd, &mut gm, "");
     assert_eq!(graphresult(), GraphResult::Ok);
@@ -50,8 +49,8 @@ fn test_graphresult_contract() {
     assert_eq!(result, GraphResult::NotInitialized);
 
     // Test error result after failed operation
-    let mut gd = -1i32;  // Invalid driver
-    let mut gm = -1i32;  // Invalid mode
+    let mut gd = -1i32; // Invalid driver
+    let mut gm = -1i32; // Invalid mode
     initgraph(&mut gd, &mut gm, "");
     let error_result = graphresult();
     assert_ne!(error_result, GraphResult::Ok);
@@ -65,7 +64,10 @@ fn test_grapherrormsg_contract() {
 
     // Test error message for common errors
     let msg = grapherrormsg(-2); // grNotDetected
-    assert!(msg.to_lowercase().contains("graphics hardware not detected"));
+    assert!(
+        msg.to_lowercase()
+            .contains("graphics hardware not detected")
+    );
 
     let msg = grapherrormsg(-3); // grFileNotFound
     assert!(msg.to_lowercase().contains("device driver file not found"));
@@ -88,8 +90,8 @@ fn test_detectgraph_contract() {
 
 #[test]
 fn test_getgraphmode_contract() {
-    let mut gd = 0i32;  // VGA driver
-    let mut gm = 4i32;  // VGA mode
+    let mut gd = 0i32; // VGA driver
+    let mut gm = 4i32; // VGA mode
 
     initgraph(&mut gd, &mut gm, "");
     assert_eq!(graphresult(), GraphResult::Ok);
@@ -103,8 +105,8 @@ fn test_getgraphmode_contract() {
 
 #[test]
 fn test_setgraphmode_contract() {
-    let mut gd = 0i32;  // VGA driver
-    let mut gm = 3i32;  // EGA mode
+    let mut gd = 0i32; // VGA driver
+    let mut gm = 3i32; // EGA mode
 
     initgraph(&mut gd, &mut gm, "");
     assert_eq!(graphresult(), GraphResult::Ok);
@@ -121,8 +123,8 @@ fn test_setgraphmode_contract() {
 
 #[test]
 fn test_setgraphmode_invalid() {
-    let mut gd = 0i32;  // VGA driver
-    let mut gm = 4i32;  // VGA mode
+    let mut gd = 0i32; // VGA driver
+    let mut gm = 4i32; // VGA mode
 
     initgraph(&mut gd, &mut gm, "");
     assert_eq!(graphresult(), GraphResult::Ok);
@@ -137,8 +139,8 @@ fn test_setgraphmode_invalid() {
 #[test]
 fn test_graphics_context_lifecycle() {
     // Test complete lifecycle
-    let mut gd = 0i32;  // VGA driver
-    let mut gm = 4i32;  // VGA mode
+    let mut gd = 0i32; // VGA driver
+    let mut gm = 4i32; // VGA mode
 
     initgraph(&mut gd, &mut gm, "");
     assert_eq!(graphresult(), GraphResult::Ok);

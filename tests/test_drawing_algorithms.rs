@@ -8,7 +8,7 @@ fn is_white_pixel(color: Color) -> bool {
 #[test]
 fn test_all_drawing_functions_comprehensive() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     setcolor(Color::WHITE);
@@ -38,7 +38,10 @@ fn test_all_drawing_functions_comprehensive() {
         }
     }
 
-    assert!(pixels_found > 0, "Expected to find drawn pixels, but found none");
+    assert!(
+        pixels_found > 0,
+        "Expected to find drawn pixels, but found none"
+    );
 
     closegraph();
 }
@@ -46,16 +49,16 @@ fn test_all_drawing_functions_comprehensive() {
 #[test]
 fn test_line_comprehensive() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     setcolor(Color::WHITE);
 
     // Test various line orientations
-    line(25, 25, 75, 25);   // Horizontal
-    line(25, 35, 25, 85);   // Vertical
-    line(35, 25, 85, 75);   // Diagonal
-    line(35, 75, 85, 25);   // Reverse diagonal
+    line(25, 25, 75, 25); // Horizontal
+    line(25, 35, 25, 85); // Vertical
+    line(35, 25, 85, 75); // Diagonal
+    line(35, 75, 85, 25); // Reverse diagonal
 
     // Count pixels to verify lines were drawn
     let mut pixels_found = 0;
@@ -78,7 +81,7 @@ fn test_line_comprehensive() {
 #[test]
 fn test_circle_comprehensive() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     setcolor(Color::WHITE);
@@ -101,7 +104,10 @@ fn test_circle_comprehensive() {
         }
     }
 
-    assert!(pixels_found > 0, "Expected to find drawn pixels from circles");
+    assert!(
+        pixels_found > 0,
+        "Expected to find drawn pixels from circles"
+    );
 
     closegraph();
 }
@@ -109,7 +115,7 @@ fn test_circle_comprehensive() {
 #[test]
 fn test_advanced_pixel_detection() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     setcolor(Color::WHITE);
@@ -128,7 +134,11 @@ fn test_advanced_pixel_detection() {
     }
 
     // The line should have pixels, but exact count depends on the algorithm
-    assert!(pixels_found > 50, "Expected substantial number of pixels in line, found {}", pixels_found);
+    assert!(
+        pixels_found > 50,
+        "Expected substantial number of pixels in line, found {}",
+        pixels_found
+    );
 
     closegraph();
 }
@@ -136,14 +146,14 @@ fn test_advanced_pixel_detection() {
 #[test]
 fn test_multiple_primitives_together() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     setcolor(Color::WHITE);
 
     // Draw multiple primitives in different areas
-    line(50, 50, 150, 50);      // Top horizontal line
-    circle(100, 125, 25);       // Center circle
+    line(50, 50, 150, 50); // Top horizontal line
+    circle(100, 125, 25); // Center circle
     rectangle(200, 50, 300, 100); // Right rectangle
     ellipse(250, 150, 0, 360, 30, 20); // Bottom ellipse
 
@@ -161,7 +171,10 @@ fn test_multiple_primitives_together() {
     }
 
     // We should have found some non-black pixels from our drawing
-    assert!(pixels_found > 0, "Expected to find drawn pixels, but found none");
+    assert!(
+        pixels_found > 0,
+        "Expected to find drawn pixels, but found none"
+    );
 
     closegraph();
 }
@@ -169,7 +182,7 @@ fn test_multiple_primitives_together() {
 #[test]
 fn test_line_pattern_differences() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     setcolor(Color::WHITE);
@@ -210,8 +223,14 @@ fn test_line_pattern_differences() {
 
     // The exact relationships depend on the pattern implementation,
     // but they should be different
-    assert_ne!(solid_pixels, dotted_pixels, "Solid and dotted should differ");
-    assert_ne!(solid_pixels, dashed_pixels, "Solid and dashed should differ");
+    assert_ne!(
+        solid_pixels, dotted_pixels,
+        "Solid and dotted should differ"
+    );
+    assert_ne!(
+        solid_pixels, dashed_pixels,
+        "Solid and dashed should differ"
+    );
 
     closegraph();
 }

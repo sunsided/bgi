@@ -2,8 +2,8 @@
 // These tests should fail until visual output is properly implemented
 
 use bgi::{
-    bar, cleardevice, closegraph, getpixel, initgraph, line, outtextxy, putpixel, rectangle,
-    setcolor, setfillstyle, Color, SOLID_FILL,
+    Color, SOLID_FILL, bar, cleardevice, closegraph, getpixel, initgraph, line, outtextxy,
+    putpixel, rectangle, setcolor, setfillstyle,
 };
 use std::env;
 

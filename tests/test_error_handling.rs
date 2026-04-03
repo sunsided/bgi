@@ -1,18 +1,20 @@
 use bgi::{
-    initgraph, closegraph, graphresult, grapherrormsg,
-    GraphResult, BgiError,
-    setcolor, line, Color
+    BgiError, Color, GraphResult, closegraph, grapherrormsg, graphresult, initgraph, line, setcolor,
 };
 
 #[test]
 fn test_error_handling_initialization() {
     // Test successful initialization
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     let result = graphresult();
-    assert_eq!(result, GraphResult::Ok, "Graphics should initialize successfully");
+    assert_eq!(
+        result,
+        GraphResult::Ok,
+        "Graphics should initialize successfully"
+    );
 
     closegraph();
 }
@@ -27,7 +29,11 @@ fn test_error_handling_invalid_driver() {
 
     let result = graphresult();
     // Should return an error code, not Ok
-    assert_ne!(result, GraphResult::Ok, "Invalid driver should produce error");
+    assert_ne!(
+        result,
+        GraphResult::Ok,
+        "Invalid driver should produce error"
+    );
 
     // Try to close gracefully even after error
     closegraph();
@@ -102,10 +108,21 @@ fn test_error_handling_multiple_failures() {
         initgraph(&mut d, &mut m, "");
 
         let result = graphresult();
-        assert_ne!(result, GraphResult::Ok, "Invalid config ({}, {}) should fail", driver, mode);
+        assert_ne!(
+            result,
+            GraphResult::Ok,
+            "Invalid config ({}, {}) should fail",
+            driver,
+            mode
+        );
 
         let error_msg = grapherrormsg(result);
-        assert!(!error_msg.is_empty(), "Should have error message for config ({}, {})", driver, mode);
+        assert!(
+            !error_msg.is_empty(),
+            "Should have error message for config ({}, {})",
+            driver,
+            mode
+        );
 
         closegraph();
     }
@@ -121,17 +138,25 @@ fn test_error_handling_recovery() {
     initgraph(&mut driver, &mut mode, "");
 
     let first_result = graphresult();
-    assert_ne!(first_result, GraphResult::Ok, "First initialization should fail");
+    assert_ne!(
+        first_result,
+        GraphResult::Ok,
+        "First initialization should fail"
+    );
 
     closegraph();
 
     // Now initialize correctly
     let mut driver2 = 9; // VGA
-    let mut mode2 = 2;   // VGAHI
+    let mut mode2 = 2; // VGAHI
     initgraph(&mut driver2, &mut mode2, "");
 
     let second_result = graphresult();
-    assert_eq!(second_result, GraphResult::Ok, "Second initialization should succeed");
+    assert_eq!(
+        second_result,
+        GraphResult::Ok,
+        "Second initialization should succeed"
+    );
 
     // Test that graphics operations work after recovery
     setcolor(Color::WHITE);
@@ -144,7 +169,7 @@ fn test_error_handling_recovery() {
 fn test_error_handling_result_consistency() {
     // Test that graphresult() returns consistent results
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     let result1 = graphresult();
@@ -178,12 +203,22 @@ fn test_error_handling_all_error_types() {
 
         if error_type == GraphResult::Ok {
             // OK might have empty message or "No error"
-            assert!(error_msg.is_empty() || error_msg.contains("No error") || error_msg.contains("OK"),
-                    "OK result should have appropriate message");
+            assert!(
+                error_msg.is_empty() || error_msg.contains("No error") || error_msg.contains("OK"),
+                "OK result should have appropriate message"
+            );
         } else {
             // Error types should have non-empty descriptive messages
-            assert!(!error_msg.is_empty(), "Error type {:?} should have message", error_type);
-            assert!(error_msg.len() > 3, "Error message for {:?} should be descriptive", error_type);
+            assert!(
+                !error_msg.is_empty(),
+                "Error type {:?} should have message",
+                error_type
+            );
+            assert!(
+                error_msg.len() > 3,
+                "Error message for {:?} should be descriptive",
+                error_type
+            );
         }
     }
 }
@@ -203,11 +238,17 @@ fn test_error_handling_bgi_error_conversion() {
 
         // Test that the error has a proper string representation
         let error_string = format!("{}", bgi_error);
-        assert!(!error_string.is_empty(), "BgiError should have string representation");
+        assert!(
+            !error_string.is_empty(),
+            "BgiError should have string representation"
+        );
 
         // Test that the error has a proper debug representation
         let debug_string = format!("{:?}", bgi_error);
-        assert!(!debug_string.is_empty(), "BgiError should have debug representation");
+        assert!(
+            !debug_string.is_empty(),
+            "BgiError should have debug representation"
+        );
     }
 
     closegraph();
@@ -218,8 +259,8 @@ fn test_error_handling_graceful_degradation() {
     // Test that the system handles errors gracefully without crashing
 
     // Try various invalid operations
-    setcolor(Color::WHITE);  // Without graphics init
-    line(10, 10, 100, 100);  // Without graphics init
+    setcolor(Color::WHITE); // Without graphics init
+    line(10, 10, 100, 100); // Without graphics init
 
     let result = graphresult(); // Check result without init
     // Should return some error, not crash
@@ -273,7 +314,11 @@ fn test_error_handling_concurrent_operations() {
 
         let result = graphresult();
         // Should remain OK throughout
-        assert_eq!(result, GraphResult::Ok, "Operations should not cause errors");
+        assert_eq!(
+            result,
+            GraphResult::Ok,
+            "Operations should not cause errors"
+        );
     }
 
     closegraph();
@@ -287,12 +332,16 @@ fn test_error_handling_edge_cases() {
 
     // Test error handling with extreme coordinates
     setcolor(Color::WHITE);
-    line(-10000, -10000, 10000, 10000);  // Very large coordinates
-    line(0, 0, 0, 0);                    // Zero-length line
+    line(-10000, -10000, 10000, 10000); // Very large coordinates
+    line(0, 0, 0, 0); // Zero-length line
 
     // Should handle gracefully without errors
     let result = graphresult();
-    assert_eq!(result, GraphResult::Ok, "Extreme coordinates should not cause errors");
+    assert_eq!(
+        result,
+        GraphResult::Ok,
+        "Extreme coordinates should not cause errors"
+    );
 
     closegraph();
 }

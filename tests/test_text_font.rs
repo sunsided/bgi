@@ -1,14 +1,12 @@
 use bgi::{
-    initgraph, closegraph,
-    outtextxy, settextstyle, textwidth, textheight,
-    settextjustify, gettextsettings, BgiTextSettings,
-    setcolor, Color
+    BgiTextSettings, Color, closegraph, gettextsettings, initgraph, outtextxy, setcolor,
+    settextjustify, settextstyle, textheight, textwidth,
 };
 
 #[test]
 fn test_text_font_integration() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     setcolor(Color::WHITE);
@@ -30,7 +28,7 @@ fn test_text_font_integration() {
 #[test]
 fn test_text_styles_integration() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     setcolor(Color::WHITE);
@@ -58,7 +56,7 @@ fn test_text_styles_integration() {
 #[test]
 fn test_text_measurement_integration() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     setcolor(Color::WHITE);
@@ -76,7 +74,10 @@ fn test_text_measurement_integration() {
     let short_width = textwidth("Hi");
     let long_width = textwidth("This is a longer string");
 
-    assert!(long_width > short_width, "Longer text should have greater width");
+    assert!(
+        long_width > short_width,
+        "Longer text should have greater width"
+    );
 
     // Test empty string measurement
     let empty_width = textwidth("");
@@ -84,7 +85,10 @@ fn test_text_measurement_integration() {
 
     // Test single character
     let char_width = textwidth("A");
-    assert!(char_width > 0, "Single character should have positive width");
+    assert!(
+        char_width > 0,
+        "Single character should have positive width"
+    );
 
     closegraph();
 }
@@ -92,7 +96,7 @@ fn test_text_measurement_integration() {
 #[test]
 fn test_text_justification_integration() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     setcolor(Color::WHITE);
@@ -132,7 +136,7 @@ fn test_text_justification_integration() {
 #[test]
 fn test_text_settings_retrieval() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     // Set specific text settings
@@ -154,15 +158,20 @@ fn test_text_settings_retrieval() {
 #[test]
 fn test_text_with_different_colors() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     settextstyle(0, 0, 2);
 
     // Test text with different colors
     let colors = [
-        Color::WHITE, Color::RED, Color::GREEN, Color::BLUE,
-        Color::YELLOW, Color::CYAN, Color::MAGENTA
+        Color::WHITE,
+        Color::RED,
+        Color::GREEN,
+        Color::BLUE,
+        Color::YELLOW,
+        Color::CYAN,
+        Color::MAGENTA,
     ];
 
     for (i, &color) in colors.iter().enumerate() {
@@ -177,7 +186,7 @@ fn test_text_with_different_colors() {
 #[test]
 fn test_text_positioning_precision() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     setcolor(Color::WHITE);
@@ -203,7 +212,7 @@ fn test_text_positioning_precision() {
 #[test]
 fn test_text_measurement_consistency() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     setcolor(Color::WHITE);
@@ -217,11 +226,23 @@ fn test_text_measurement_consistency() {
         let width_aaa = textwidth("AAA");
 
         // Width should generally increase with more characters
-        assert!(width_aa >= width_a, "Two characters should be at least as wide as one at size {}", size);
-        assert!(width_aaa >= width_aa, "Three characters should be at least as wide as two at size {}", size);
+        assert!(
+            width_aa >= width_a,
+            "Two characters should be at least as wide as one at size {}",
+            size
+        );
+        assert!(
+            width_aaa >= width_aa,
+            "Three characters should be at least as wide as two at size {}",
+            size
+        );
 
         let height = textheight("Test");
-        assert!(height > 0, "Text height should be positive at size {}", size);
+        assert!(
+            height > 0,
+            "Text height should be positive at size {}",
+            size
+        );
     }
 
     closegraph();
@@ -241,14 +262,20 @@ fn test_text_without_graphics() {
     let height = textheight("Test");
 
     // Should return some reasonable default values or 0
-    assert!(width >= 0, "textwidth should return non-negative value without graphics");
-    assert!(height >= 0, "textheight should return non-negative value without graphics");
+    assert!(
+        width >= 0,
+        "textwidth should return non-negative value without graphics"
+    );
+    assert!(
+        height >= 0,
+        "textheight should return non-negative value without graphics"
+    );
 }
 
 #[test]
 fn test_text_special_characters() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     setcolor(Color::WHITE);
@@ -273,7 +300,7 @@ fn test_text_special_characters() {
 #[test]
 fn test_text_font_size_scaling() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     setcolor(Color::WHITE);
@@ -290,8 +317,14 @@ fn test_text_font_size_scaling() {
         let height = textheight(test_string);
 
         if size > 1 {
-            assert!(width >= previous_width, "Width should not decrease with larger size");
-            assert!(height >= previous_height, "Height should not decrease with larger size");
+            assert!(
+                width >= previous_width,
+                "Width should not decrease with larger size"
+            );
+            assert!(
+                height >= previous_height,
+                "Height should not decrease with larger size"
+            );
         }
 
         // Output the text to visually verify scaling

@@ -38,14 +38,14 @@ fn main() {
 
     println!("6. Drawing test pattern...");
     setcolor(Color::YELLOW);
-    
+
     // Draw a very obvious test pattern
     for i in 0..10 {
         let y = 50 + i * 20;
         line(50, y, 550, y);
         outtextxy(560, y - 5, &format!("Line {}", i + 1));
     }
-    
+
     // Draw a big obvious circle
     setcolor(Color::WHITE);
     circle(320, 240, 100);
@@ -54,9 +54,9 @@ fn main() {
     // Draw corner markers
     setcolor(Color::CYAN);
     putpixel(0, 0, Color::CYAN);
-    putpixel(width-1, 0, Color::CYAN);
-    putpixel(0, height-1, Color::CYAN);
-    putpixel(width-1, height-1, Color::CYAN);
+    putpixel(width - 1, 0, Color::CYAN);
+    putpixel(0, height - 1, Color::CYAN);
+    putpixel(width - 1, height - 1, Color::CYAN);
 
     println!("7. 🔴 RED BACKGROUND + YELLOW LINES + WHITE CIRCLE should be visible");
     println!("   Window should be VERY obvious with bright red background");
@@ -64,7 +64,10 @@ fn main() {
 
     // Extended wait with detailed countdown
     for i in (1..=15).rev() {
-        println!("⏰ Window open for {} more seconds... LOOK FOR BRIGHT RED WINDOW!", i);
+        println!(
+            "⏰ Window open for {} more seconds... LOOK FOR BRIGHT RED WINDOW!",
+            i
+        );
         thread::sleep(Duration::from_secs(1));
     }
 

@@ -1,6 +1,6 @@
 //! Unit tests for viewport management.
 
-use bgi::{viewport::Viewport, types::Rect};
+use bgi::{types::Rect, viewport::Viewport};
 
 #[test]
 fn test_viewport_creation() {
@@ -87,9 +87,18 @@ fn test_viewport_clip_coordinates() {
     assert_eq!(viewport_clipping.clip_coordinates(10, 20), Some((10, 20))); // Boundary
 
     // Test with clipping disabled
-    assert_eq!(viewport_no_clipping.clip_coordinates(50, 100), Some((50, 100))); // Inside
-    assert_eq!(viewport_no_clipping.clip_coordinates(5, 100), Some((5, 100))); // Outside but allowed
-    assert_eq!(viewport_no_clipping.clip_coordinates(-10, -20), Some((-10, -20))); // Way outside but allowed
+    assert_eq!(
+        viewport_no_clipping.clip_coordinates(50, 100),
+        Some((50, 100))
+    ); // Inside
+    assert_eq!(
+        viewport_no_clipping.clip_coordinates(5, 100),
+        Some((5, 100))
+    ); // Outside but allowed
+    assert_eq!(
+        viewport_no_clipping.clip_coordinates(-10, -20),
+        Some((-10, -20))
+    ); // Way outside but allowed
 }
 
 #[test]
@@ -133,13 +142,13 @@ fn test_viewport_normalization() {
     // Test normalizing inverted viewport
     let inverted = Viewport::new(100, 200, 50, 100, true);
     let normalized = inverted.normalize();
-    
+
     assert_eq!(normalized.left, 50);
     assert_eq!(normalized.top, 100);
     assert_eq!(normalized.right, 100);
     assert_eq!(normalized.bottom, 200);
     assert!(normalized.clip);
-    
+
     // Test normalizing already valid viewport (should be unchanged)
     let valid = Viewport::new(10, 20, 90, 180, false);
     let normalized_valid = valid.normalize();
@@ -212,8 +221,13 @@ fn test_viewport_edge_cases() {
 
 #[test]
 fn test_viewport_large_coordinates() {
-    let large_viewport = Viewport::new(i32::MIN + 1000, i32::MIN + 2000,
-                                      i32::MAX - 1000, i32::MAX - 2000, true);
+    let large_viewport = Viewport::new(
+        i32::MIN + 1000,
+        i32::MIN + 2000,
+        i32::MAX - 1000,
+        i32::MAX - 2000,
+        true,
+    );
 
     assert!(large_viewport.is_valid());
 

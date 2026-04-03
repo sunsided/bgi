@@ -7,7 +7,7 @@ fn main() {
     println!("Demonstrating classic BGI API compatibility");
 
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI (640x480, 16 colors)
+    let mut mode = 2; // VGAHI (640x480, 16 colors)
 
     // Classic BGI initialization
     initgraph(&mut driver, &mut mode, "");
@@ -19,7 +19,10 @@ fn main() {
             println!("Driver: {}, Mode: {}", driver, mode);
         }
         _ => {
-            eprintln!("Graphics initialization failed: {}", grapherrormsg(graphresult() as i32));
+            eprintln!(
+                "Graphics initialization failed: {}",
+                grapherrormsg(graphresult() as i32)
+            );
             return;
         }
     }
@@ -107,7 +110,7 @@ fn main() {
     setcolor(Color::LIGHTGREEN);
     moveto(300, 300);
     outtextxy(getx(), gety(), "Current Position");
-    
+
     moverel(50, 50);
     outtextxy(getx(), gety(), "Moved Relative");
 
