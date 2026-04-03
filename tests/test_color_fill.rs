@@ -1,30 +1,48 @@
 use bgi::{
-    initgraph, closegraph, graphresult, GraphResult,
-    setcolor, getcolor, setfillstyle, setfillpattern,
-    floodfill, bar, fillellipse, line, circle,
-    Color
+    Color, GraphResult, bar, circle, closegraph, fillellipse, floodfill, getcolor, graphresult,
+    initgraph, line, setcolor, setfillpattern, setfillstyle,
 };
 
 #[test]
 fn test_color_fill_integration() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     let result = graphresult();
-    assert_eq!(result, GraphResult::Ok, "Graphics should initialize successfully");
+    assert_eq!(
+        result,
+        GraphResult::Ok,
+        "Graphics should initialize successfully"
+    );
 
     // Test color setting and getting
     setcolor(Color::RED);
     let current_color = getcolor();
-    assert_eq!(current_color, Color::RED, "Color should be set and retrieved correctly");
+    assert_eq!(
+        current_color,
+        Color::RED,
+        "Color should be set and retrieved correctly"
+    );
 
     // Test different colors
     let test_colors = [
-        Color::BLACK, Color::BLUE, Color::GREEN, Color::CYAN,
-        Color::RED, Color::MAGENTA, Color::BROWN, Color::LIGHTGRAY,
-        Color::DARKGRAY, Color::LIGHTBLUE, Color::LIGHTGREEN, Color::LIGHTCYAN,
-        Color::LIGHTRED, Color::LIGHTMAGENTA, Color::YELLOW, Color::WHITE
+        Color::BLACK,
+        Color::BLUE,
+        Color::GREEN,
+        Color::CYAN,
+        Color::RED,
+        Color::MAGENTA,
+        Color::BROWN,
+        Color::LIGHTGRAY,
+        Color::DARKGRAY,
+        Color::LIGHTBLUE,
+        Color::LIGHTGREEN,
+        Color::LIGHTCYAN,
+        Color::LIGHTRED,
+        Color::LIGHTMAGENTA,
+        Color::YELLOW,
+        Color::WHITE,
     ];
 
     for (i, &color) in test_colors.iter().enumerate() {
@@ -39,25 +57,25 @@ fn test_color_fill_integration() {
 #[test]
 fn test_fill_styles_integration() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     setcolor(Color::WHITE);
 
     // Test different fill styles
-    setfillstyle(1, Color::RED);     // Solid fill
+    setfillstyle(1, Color::RED); // Solid fill
     bar(10, 10, 60, 60);
 
-    setfillstyle(2, Color::BLUE);    // Line fill
+    setfillstyle(2, Color::BLUE); // Line fill
     bar(70, 10, 120, 60);
 
-    setfillstyle(3, Color::GREEN);   // Light slash fill
+    setfillstyle(3, Color::GREEN); // Light slash fill
     bar(130, 10, 180, 60);
 
-    setfillstyle(4, Color::YELLOW);  // Slash fill
+    setfillstyle(4, Color::YELLOW); // Slash fill
     bar(190, 10, 240, 60);
 
-    setfillstyle(5, Color::CYAN);    // Back slash fill
+    setfillstyle(5, Color::CYAN); // Back slash fill
     bar(250, 10, 300, 60);
 
     closegraph();
@@ -66,7 +84,7 @@ fn test_fill_styles_integration() {
 #[test]
 fn test_pattern_fill_integration() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     setcolor(Color::WHITE);
@@ -90,7 +108,7 @@ fn test_pattern_fill_integration() {
 #[test]
 fn test_filled_shapes_integration() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     setcolor(Color::WHITE);
@@ -121,17 +139,17 @@ fn test_filled_shapes_integration() {
 #[test]
 fn test_floodfill_integration() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     setcolor(Color::WHITE);
 
     // Draw an enclosed area to fill
     // Create a simple rectangle outline
-    line(50, 50, 150, 50);   // Top
+    line(50, 50, 150, 50); // Top
     line(150, 50, 150, 150); // Right
     line(150, 150, 50, 150); // Bottom
-    line(50, 150, 50, 50);   // Left
+    line(50, 150, 50, 50); // Left
 
     // Set fill style and flood fill the enclosed area
     setfillstyle(1, Color::RED);
@@ -150,7 +168,7 @@ fn test_floodfill_integration() {
 #[test]
 fn test_color_fill_combinations() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     // Test various combinations of colors and fill styles
@@ -183,14 +201,16 @@ fn test_fill_without_initialization_fails_gracefully() {
 
     let color = getcolor();
     // Should return some default or error value, not crash
-    assert!(color == Color::BLACK || color == Color::WHITE || color == Color::RED,
-            "getcolor should return a valid color even without graphics");
+    assert!(
+        color == Color::BLACK || color == Color::WHITE || color == Color::RED,
+        "getcolor should return a valid color even without graphics"
+    );
 }
 
 #[test]
 fn test_fill_operations_sequence() {
     let mut driver = 9; // VGA
-    let mut mode = 2;   // VGAHI
+    let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
     // Test a sequence of fill operations to ensure they work together

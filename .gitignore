@@ -7,3 +7,4 @@
 /test_*
 /debug_*
 /*.rlib
+/.task

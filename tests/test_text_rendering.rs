@@ -1,6 +1,6 @@
 use bgi::{
-    outtextxy, settextstyle, gettextsettings, textwidth, textheight, getmaxx, getmaxy,
-    initgraph, closegraph, graphresult, GraphResult, Color, setcolor
+    Color, GraphResult, closegraph, getmaxx, getmaxy, gettextsettings, graphresult, initgraph,
+    outtextxy, setcolor, settextstyle, textheight, textwidth,
 };
 
 #[test]
@@ -15,7 +15,7 @@ fn test_outtextxy_basic() {
     // Should not crash when called
     outtextxy(10, 10, "Hello, World!");
     outtextxy(50, 50, "Test text");
-    outtextxy(0, 0, "");  // Empty string
+    outtextxy(0, 0, ""); // Empty string
 
     // Should handle special characters
     outtextxy(100, 100, "Special: !@#$%^&*()");
@@ -33,10 +33,10 @@ fn test_settextstyle_configurations() {
     assert_eq!(graphresult(), GraphResult::Ok);
 
     // Test different font configurations
-    settextstyle(0, 0, 1);  // Default font, horizontal, size 1
-    settextstyle(1, 0, 2);  // Triplex font, horizontal, size 2
-    settextstyle(2, 1, 3);  // Small font, vertical, size 3
-    settextstyle(3, 0, 4);  // Sans serif, horizontal, size 4
+    settextstyle(0, 0, 1); // Default font, horizontal, size 1
+    settextstyle(1, 0, 2); // Triplex font, horizontal, size 2
+    settextstyle(2, 1, 3); // Small font, vertical, size 3
+    settextstyle(3, 0, 4); // Sans serif, horizontal, size 4
 
     // Should not crash with any values
     settextstyle(8, 1, 10); // Gothic font, vertical, size 10
@@ -60,9 +60,9 @@ fn test_gettextsettings_retrieval() {
     let size = settings.charsize;
 
     // Should return valid values
-    assert!(font >= 0 && font <= 10);      // Valid font range
+    assert!(font >= 0 && font <= 10); // Valid font range
     assert!(direction >= 0 && direction <= 1); // 0=horizontal, 1=vertical
-    assert!(size >= 1);                     // Size should be positive
+    assert!(size >= 1); // Size should be positive
 
     // Set new style and verify change
     settextstyle(2, 1, 5);
@@ -147,11 +147,12 @@ fn test_text_with_colors() {
     // Test different text colors
     setcolor(Color::RED);
     outtextxy(20, 20, "Red Text");
-    
+
     setcolor(Color::BLUE);
     outtextxy(20, 40, "Blue Text");
-    
-    setcolor(Color::GREEN);    closegraph();
+
+    setcolor(Color::GREEN);
+    closegraph();
 }
 
 #[test]

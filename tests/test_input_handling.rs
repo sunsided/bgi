@@ -1,7 +1,4 @@
-use bgi::{
-    getch, kbhit, getmouse, ismouseclick,
-    initgraph, closegraph, graphresult, GraphResult
-};
+use bgi::{GraphResult, closegraph, getch, getmouse, graphresult, initgraph, ismouseclick, kbhit};
 
 #[test]
 fn test_keyboard_input_contract() {
@@ -116,12 +113,24 @@ fn test_mouse_coordinate_range() {
         let mouse_state = getmouse();
 
         // In TDD phase, coordinates should be valid (>= 0)
-        assert!(mouse_state.x >= 0, "Mouse X coordinate should be non-negative");
-        assert!(mouse_state.y >= 0, "Mouse Y coordinate should be non-negative");
+        assert!(
+            mouse_state.x >= 0,
+            "Mouse X coordinate should be non-negative"
+        );
+        assert!(
+            mouse_state.y >= 0,
+            "Mouse Y coordinate should be non-negative"
+        );
 
         // Coordinates should be reasonable (not extremely large)
-        assert!(mouse_state.x < 10000, "Mouse X coordinate should be reasonable");
-        assert!(mouse_state.y < 10000, "Mouse Y coordinate should be reasonable");
+        assert!(
+            mouse_state.x < 10000,
+            "Mouse X coordinate should be reasonable"
+        );
+        assert!(
+            mouse_state.y < 10000,
+            "Mouse Y coordinate should be reasonable"
+        );
     }
 
     closegraph();

@@ -1,10 +1,6 @@
 //! Unit tests for drawing state management.
 
-use bgi::{
-    drawing_state::*,
-    Color,
-    constants::*,
-};
+use bgi::{Color, constants::*, drawing_state::*};
 
 #[test]
 fn test_line_style_default() {
@@ -180,13 +176,13 @@ fn test_write_mode_operations() {
 #[test]
 fn test_reset_state() {
     let mut state = DrawingState::new();
-    
+
     // Modify the state
     state.set_color(Color::RED);
     state.set_background_color(Color::BLUE);
     state.move_to(100, 200);
     state.set_write_mode(XOR_PUT);
-    
+
     // Reset and verify defaults
     state.reset();
 
@@ -254,9 +250,21 @@ fn test_line_pattern_generation() {
 
 #[test]
 fn test_structures_equality() {
-    let line1 = LineStyle { style: SOLID_LINE, pattern: 0xFFFF, thickness: NORM_WIDTH };
-    let line2 = LineStyle { style: SOLID_LINE, pattern: 0xFFFF, thickness: NORM_WIDTH };
-    let line3 = LineStyle { style: DOTTED_LINE, pattern: 0xFFFF, thickness: NORM_WIDTH };
+    let line1 = LineStyle {
+        style: SOLID_LINE,
+        pattern: 0xFFFF,
+        thickness: NORM_WIDTH,
+    };
+    let line2 = LineStyle {
+        style: SOLID_LINE,
+        pattern: 0xFFFF,
+        thickness: NORM_WIDTH,
+    };
+    let line3 = LineStyle {
+        style: DOTTED_LINE,
+        pattern: 0xFFFF,
+        thickness: NORM_WIDTH,
+    };
 
     assert_eq!(line1, line2);
     assert_ne!(line1, line3);
@@ -268,9 +276,27 @@ fn test_structures_equality() {
     assert_eq!(pos1, pos2);
     assert_ne!(pos1, pos3);
 
-    let viewport1 = Viewport { left: 0, top: 0, right: 100, bottom: 100, clip: true };
-    let viewport2 = Viewport { left: 0, top: 0, right: 100, bottom: 100, clip: true };
-    let viewport3 = Viewport { left: 0, top: 0, right: 100, bottom: 100, clip: false };
+    let viewport1 = Viewport {
+        left: 0,
+        top: 0,
+        right: 100,
+        bottom: 100,
+        clip: true,
+    };
+    let viewport2 = Viewport {
+        left: 0,
+        top: 0,
+        right: 100,
+        bottom: 100,
+        clip: true,
+    };
+    let viewport3 = Viewport {
+        left: 0,
+        top: 0,
+        right: 100,
+        bottom: 100,
+        clip: false,
+    };
 
     assert_eq!(viewport1, viewport2);
     assert_ne!(viewport1, viewport3);

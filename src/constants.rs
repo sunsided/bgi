@@ -1,5 +1,45 @@
 //! Constants used throughout the BGI library.
 
+// ============================================================================
+// BGI Graphics Result Constants (C-style, for API compatibility)
+// ============================================================================
+
+// These constants use non-standard Rust naming to match the original BGI API.
+#![allow(non_upper_case_globals)]
+
+/// Success - graphics operation completed successfully.
+pub const grOk: i32 = 0;
+/// Graphics not initialized - initgraph() not called.
+pub const grNoInitGraph: i32 = -1;
+/// Graphics hardware not detected.
+pub const grNotDetected: i32 = -2;
+/// Device driver file not found.
+pub const grFileNotFound: i32 = -3;
+/// Invalid device driver file.
+pub const grInvalidDriver: i32 = -4;
+/// Not enough memory to load driver.
+pub const grNoLoadMem: i32 = -5;
+/// Out of memory in scan fill.
+pub const grNoScanMem: i32 = -6;
+/// Out of memory in flood fill.
+pub const grNoFloodMem: i32 = -7;
+/// Font file not found.
+pub const grFontNotFound: i32 = -8;
+/// Not enough memory to load font.
+pub const grNoFontMem: i32 = -9;
+/// Invalid graphics mode for selected driver.
+pub const grInvalidMode: i32 = -10;
+/// Graphics error.
+pub const grError: i32 = -11;
+/// Graphics I/O error.
+pub const grIOerror: i32 = -12;
+/// Invalid font file.
+pub const grInvalidFont: i32 = -13;
+/// Invalid font number.
+pub const grInvalidFontNum: i32 = -14;
+/// Invalid device driver version.
+pub const grInvalidVersion: i32 = -15;
+
 /// Maximum number of colors in the default palette.
 pub const MAX_COLORS: usize = 15;
 
@@ -61,7 +101,7 @@ pub const CGAMED: i32 = 2;
 /// CGA Low resolution mode (320x200, 2 colors).
 pub const CGALO: i32 = 3;
 
-// EGA/VGA Modes  
+// EGA/VGA Modes
 /// EGA Low resolution mode (640x200, 16 colors).
 pub const EGALO: i32 = 2;
 /// EGA High resolution mode (640x350, 16 colors).

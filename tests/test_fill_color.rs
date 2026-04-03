@@ -1,13 +1,12 @@
 use bgi::{
-    floodfill, setfillstyle, setfillpattern, setcolor, getcolor,
-    setpalette, getpalette, getpalettesize, getmaxcolor,
-    initgraph, closegraph, graphresult, GraphResult, Color
+    Color, GraphResult, closegraph, floodfill, getcolor, getmaxcolor, getpalette, getpalettesize,
+    graphresult, initgraph, setcolor, setfillpattern, setfillstyle, setpalette,
 };
 
 #[test]
 fn test_setcolor_getcolor_cycle() {
     // Contract: setcolor should change current drawing color, getcolor should return it
-    
+
     let mut gd = 0i32;
     let mut gm = 4i32; // VGA mode
     initgraph(&mut gd, &mut gm, "");
@@ -21,7 +20,7 @@ fn test_setcolor_getcolor_cycle() {
 
     setcolor(Color::GREEN);
     assert_eq!(getcolor(), Color::GREEN);
-    
+
     closegraph();
 }
 
@@ -35,7 +34,7 @@ fn test_setfillstyle_solid() {
 
     // Should not panic or crash
     setfillstyle(1, Color::YELLOW); // SOLID_FILL = 1
-    setfillstyle(0, Color::BLACK);  // EMPTY_FILL = 0
+    setfillstyle(0, Color::BLACK); // EMPTY_FILL = 0
 
     // Cleanup
     closegraph();
@@ -142,10 +141,22 @@ fn test_color_boundaries() {
 
     // Test with all basic colors
     let colors = [
-        Color::BLACK, Color::BLUE, Color::GREEN, Color::CYAN,
-        Color::RED, Color::MAGENTA, Color::BROWN, Color::LIGHTGRAY,
-        Color::DARKGRAY, Color::LIGHTBLUE, Color::LIGHTGREEN, Color::LIGHTCYAN,
-        Color::LIGHTRED, Color::LIGHTMAGENTA, Color::YELLOW, Color::WHITE
+        Color::BLACK,
+        Color::BLUE,
+        Color::GREEN,
+        Color::CYAN,
+        Color::RED,
+        Color::MAGENTA,
+        Color::BROWN,
+        Color::LIGHTGRAY,
+        Color::DARKGRAY,
+        Color::LIGHTBLUE,
+        Color::LIGHTGREEN,
+        Color::LIGHTCYAN,
+        Color::LIGHTRED,
+        Color::LIGHTMAGENTA,
+        Color::YELLOW,
+        Color::WHITE,
     ];
 
     for color in colors.iter() {

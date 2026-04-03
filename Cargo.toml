@@ -1,8 +1,8 @@
 [package]
 name = "bgi"
 version = "0.1.0"
-edition = "2021"
-rust-version = "1.80"
+edition = "2024"
+rust-version = "1.90"
 authors = ["Your Name <your.email@example.com>"]
 license = "MIT OR Apache-2.0"
 description = "A modern Rust port of the Borland Graphics Interface (BGI) with extensible backends"
@@ -15,25 +15,120 @@ categories = ["graphics", "multimedia", "game-development"]
 [features]
 default = []
 winit-backend = ["winit", "pixels"]
+visual-backend = ["minifb"]
+pgm-backend = []
 
 [dependencies]
 # Core dependencies
 thiserror = "1.0"
 bitflags = "2.4"
 
-# Winit backend dependencies
+# Visual backend dependencies
+minifb = { version = "0.25", optional = true }
+
+# Font rendering dependency
+bgi-stroked-fonts = "0.1"
+
+# Winit backend dependencies (legacy)
 winit = { version = "0.29", optional = true }
 pixels = { version = "0.13", optional = true }
 
 [dev-dependencies]
 # For examples and tests
 env_logger = "0.11"
+rand = "0.8"
 
-# Examples will be added later
-# [[example]]
-# name = "simple"
-# path = "examples/simple.rs"
+[[example]]
+name = "simple"
+path = "examples/simple.rs"
+required-features = ["visual-backend"]
+
+[[example]]
+name = "test_backend"
+path = "examples/test_backend.rs"
+required-features = ["visual-backend"]
+
+[[example]]
+name = "mandelbrot"
+path = "examples/mandelbrot.rs"
+required-features = ["visual-backend"]
+
+[[example]]
+name = "mandelbrot_batched"
+path = "examples/mandelbrot_batched.rs"
+required-features = ["visual-backend"]
+
+[[example]]
+name = "batch_test"
+path = "examples/batch_test.rs"
+required-features = ["visual-backend"]
+
+[[example]]
+name = "input_debug"
+path = "examples/input_debug.rs"
+required-features = ["visual-backend"]
+
+[[example]]
+name = "debug_backend_integration"
+path = "examples/debug_backend_integration.rs"
+required-features = ["visual-backend"]
+
+[[example]]
+name = "debug_window"
+path = "examples/debug_window.rs"
+required-features = ["visual-backend"]
+
+[[example]]
+name = "minimal_demo"
+path = "examples/minimal_demo.rs"
+required-features = ["visual-backend"]
+
+[[example]]
+name = "window_test"
+path = "examples/window_test.rs"
+required-features = ["visual-backend"]
+
+[[example]]
+name = "interactive_demo"
+path = "examples/interactive_demo.rs"
+required-features = ["visual-backend"]
+
+[[example]]
+name = "compatibility"
+path = "examples/compatibility.rs"
+required-features = ["visual-backend"]
+
+[[example]]
+name = "bgi_device_modes"
+path = "examples/bgi_device_modes.rs"
+required-features = ["visual-backend"]
+
+[[example]]
+name = "bgi_example"
+path = "examples/bgi_example.rs"
+required-features = ["visual-backend"]
 
 [package.metadata.docs.rs]
 all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
+
+# Skeleton tests for TDD development (in subdirectories)
+[[test]]
+name = "test_graphics_state"
+path = "tests/graphics/test_state.rs"
+
+[[test]]
+name = "test_graphics_fonts"
+path = "tests/graphics/test_fonts.rs"
+
+[[test]]
+name = "test_integration_coordinates"
+path = "tests/integration/test_coordinates.rs"
+
+[[test]]
+name = "test_integration_backend_selection"
+path = "tests/integration/test_backend_selection.rs"
+
+[[test]]
+name = "test_integration_visual_output"
+path = "tests/integration/test_visual_output.rs"

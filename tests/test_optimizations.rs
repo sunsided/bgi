@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod tests {
-    use bgi::*;
     use bgi::optimizations::{BatchDrawer, DrawingPool, const_optimized, optimized_ctx};
+    use bgi::*;
     use std::time::Instant;
 
     /// Test optimized context validation performance
@@ -14,7 +14,13 @@ mod tests {
 
         // Test optimized functions
         for i in 0..1000 {
-            let _ = optimized_ctx::line_ctx(&mut context, i % 100, i % 100, (i + 10) % 100, (i + 10) % 100);
+            let _ = optimized_ctx::line_ctx(
+                &mut context,
+                i % 100,
+                i % 100,
+                (i + 10) % 100,
+                (i + 10) % 100,
+            );
             let _ = optimized_ctx::circle_ctx(&mut context, i % 100, i % 100, 10);
             let _ = optimized_ctx::putpixel_ctx(&mut context, i % 100, i % 100, Color::RED);
         }
@@ -23,7 +29,11 @@ mod tests {
         println!("Optimized operations took: {:?}", duration);
 
         // Should complete in reasonable time (< 100ms for 3000 operations)
-        assert!(duration.as_millis() < 100, "Operations took too long: {:?}", duration);
+        assert!(
+            duration.as_millis() < 100,
+            "Operations took too long: {:?}",
+            duration
+        );
     }
 
     /// Test batch drawing performance
@@ -49,7 +59,11 @@ mod tests {
         assert_eq!(result, GraphResult::Ok);
 
         // Batch operations should be faster than individual operations
-        assert!(duration.as_millis() < 50, "Batch operations took too long: {:?}", duration);
+        assert!(
+            duration.as_millis() < 50,
+            "Batch operations took too long: {:?}",
+            duration
+        );
     }
 
     /// Test compile-time optimized shapes
@@ -74,7 +88,11 @@ mod tests {
         println!("Const optimized shapes took: {:?}", duration);
 
         // Should complete efficiently
-        assert!(duration.as_millis() < 50, "Const optimized shapes took too long: {:?}", duration);
+        assert!(
+            duration.as_millis() < 50,
+            "Const optimized shapes took too long: {:?}",
+            duration
+        );
     }
 
     /// Test drawing pool memory efficiency
@@ -153,15 +171,28 @@ mod tests {
         // Test new optimized style
         let start = Instant::now();
         for i in 0..1000 {
-            let _ = optimized_ctx::line_ctx(&mut context, i % 100, i % 100, (i + 10) % 100, (i + 10) % 100);
+            let _ = optimized_ctx::line_ctx(
+                &mut context,
+                i % 100,
+                i % 100,
+                (i + 10) % 100,
+                (i + 10) % 100,
+            );
         }
         let new_duration = start.elapsed();
 
-        println!("Old approach: {:?}, New approach: {:?}", old_duration, new_duration);
+        println!(
+            "Old approach: {:?}, New approach: {:?}",
+            old_duration, new_duration
+        );
 
         // New approach should be at least as fast (allowing for measurement variance)
         let improvement_ratio = old_duration.as_nanos() as f64 / new_duration.as_nanos() as f64;
-        assert!(improvement_ratio >= 0.8, "Performance regression detected: {:.2}x", improvement_ratio);
+        assert!(
+            improvement_ratio >= 0.8,
+            "Performance regression detected: {:.2}x",
+            improvement_ratio
+        );
     }
 
     /// Test that macro validation is equivalent to if statement

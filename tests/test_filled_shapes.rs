@@ -1,6 +1,6 @@
 use bgi::{
-    fillellipse, sector, pieslice, bar, fillpoly,
-    initgraph, closegraph, graphresult, GraphResult, Color, setcolor, setfillstyle
+    Color, GraphResult, bar, closegraph, fillellipse, fillpoly, graphresult, initgraph, pieslice,
+    sector, setcolor, setfillstyle,
 };
 
 #[test]
@@ -14,14 +14,14 @@ fn test_fillellipse_basic() {
 
     // Test basic filled ellipses
     setcolor(Color::RED);
-    fillellipse(100, 100, 50, 30);  // Wide ellipse
-    fillellipse(200, 200, 25, 25);  // Circle (equal radii)
-    fillellipse(300, 150, 40, 60);  // Tall ellipse
+    fillellipse(100, 100, 50, 30); // Wide ellipse
+    fillellipse(200, 200, 25, 25); // Circle (equal radii)
+    fillellipse(300, 150, 40, 60); // Tall ellipse
 
     // Test edge cases
-    fillellipse(0, 0, 10, 10);      // At origin
-    fillellipse(500, 400, 1, 1);    // Minimal size
-    fillellipse(250, 250, 0, 0);    // Zero size (should handle gracefully)
+    fillellipse(0, 0, 10, 10); // At origin
+    fillellipse(500, 400, 1, 1); // Minimal size
+    fillellipse(250, 250, 0, 0); // Zero size (should handle gracefully)
 
     closegraph();
 }
@@ -38,21 +38,21 @@ fn test_sector_drawing() {
     setcolor(Color::BLUE);
 
     // Test various sector angles
-    sector(150, 150, 0, 90, 40, 40);    // Quarter circle (0-90°)
-    sector(250, 150, 90, 180, 35, 35);  // Second quarter (90-180°)
+    sector(150, 150, 0, 90, 40, 40); // Quarter circle (0-90°)
+    sector(250, 150, 90, 180, 35, 35); // Second quarter (90-180°)
     sector(350, 150, 180, 270, 30, 30); // Third quarter (180-270°)
     sector(450, 150, 270, 360, 25, 25); // Fourth quarter (270-360°)
 
     // Test full circle
-    sector(300, 250, 0, 360, 45, 45);   // Full circle
+    sector(300, 250, 0, 360, 45, 45); // Full circle
 
     // Test partial arcs
-    sector(200, 300, 45, 135, 50, 30);  // 90° elliptical sector
-    sector(400, 300, 30, 60, 60, 20);   // 30° elliptical sector
+    sector(200, 300, 45, 135, 50, 30); // 90° elliptical sector
+    sector(400, 300, 30, 60, 60, 20); // 30° elliptical sector
 
     // Test edge cases
-    sector(100, 400, 0, 0, 20, 20);     // Zero angle
-    sector(500, 400, 0, 1, 15, 15);     // Minimal angle
+    sector(100, 400, 0, 0, 20, 20); // Zero angle
+    sector(500, 400, 0, 1, 15, 15); // Minimal angle
 
     closegraph();
 }
@@ -69,20 +69,20 @@ fn test_pieslice_circular() {
     setcolor(Color::GREEN);
 
     // Test pie slices at different angles
-    pieslice(150, 150, 0, 60, 40);      // 60° slice
-    pieslice(250, 150, 60, 120, 40);    // Another 60° slice
-    pieslice(350, 150, 120, 240, 40);   // 120° slice
-    pieslice(450, 150, 240, 360, 40);   // 120° slice to complete circle
+    pieslice(150, 150, 0, 60, 40); // 60° slice
+    pieslice(250, 150, 60, 120, 40); // Another 60° slice
+    pieslice(350, 150, 120, 240, 40); // 120° slice
+    pieslice(450, 150, 240, 360, 40); // 120° slice to complete circle
 
     // Test various slice sizes
-    pieslice(200, 250, 0, 90, 30);      // Quarter pie
-    pieslice(300, 250, 0, 180, 35);     // Half pie
-    pieslice(400, 250, 0, 270, 25);     // Three-quarter pie
+    pieslice(200, 250, 0, 90, 30); // Quarter pie
+    pieslice(300, 250, 0, 180, 35); // Half pie
+    pieslice(400, 250, 0, 270, 25); // Three-quarter pie
 
     // Test edge cases
-    pieslice(150, 350, 0, 360, 50);     // Full circle
-    pieslice(250, 350, 45, 45, 20);     // Zero angle
-    pieslice(350, 350, 0, 5, 30);       // Very small slice
+    pieslice(150, 350, 0, 360, 50); // Full circle
+    pieslice(250, 350, 45, 45, 20); // Zero angle
+    pieslice(350, 350, 0, 5, 30); // Very small slice
 
     closegraph();
 }
@@ -99,22 +99,22 @@ fn test_bar_rectangles() {
     setcolor(Color::YELLOW);
 
     // Test various bar sizes and positions
-    bar(50, 50, 150, 100);      // Horizontal bar
-    bar(200, 75, 250, 175);     // Vertical bar
-    bar(300, 50, 450, 125);     // Wide bar
-    bar(500, 60, 550, 140);     // Narrow bar
+    bar(50, 50, 150, 100); // Horizontal bar
+    bar(200, 75, 250, 175); // Vertical bar
+    bar(300, 50, 450, 125); // Wide bar
+    bar(500, 60, 550, 140); // Narrow bar
 
     // Test edge cases
-    bar(100, 200, 100, 200);    // Zero-size bar
-    bar(150, 225, 149, 224);    // Inverted coordinates
-    bar(0, 0, 50, 50);          // At origin
-    bar(550, 450, 600, 500);    // Near viewport edge
+    bar(100, 200, 100, 200); // Zero-size bar
+    bar(150, 225, 149, 224); // Inverted coordinates
+    bar(0, 0, 50, 50); // At origin
+    bar(550, 450, 600, 500); // Near viewport edge
 
     // Test with fill style
     setfillstyle(1, Color::MAGENTA); // Solid fill
     bar(250, 200, 350, 250);
 
-    setfillstyle(0, Color::CYAN);    // Empty fill
+    setfillstyle(0, Color::CYAN); // Empty fill
     bar(400, 200, 500, 250);
 
     closegraph();
@@ -140,16 +140,17 @@ fn test_fillpoly_polygons() {
     fillpoly(&quad);
 
     // Test pentagon
-    let pentagon = [
-        (400, 50), (450, 75), (440, 125),
-        (360, 125), (350, 75)
-    ];
+    let pentagon = [(400, 50), (450, 75), (440, 125), (360, 125), (350, 75)];
     fillpoly(&pentagon);
 
     // Test more complex polygon (hexagon)
     let hexagon = [
-        (150, 200), (200, 175), (250, 200),
-        (250, 250), (200, 275), (150, 250)
+        (150, 200),
+        (200, 175),
+        (250, 200),
+        (250, 250),
+        (200, 275),
+        (150, 250),
     ];
     fillpoly(&hexagon);
 
@@ -210,10 +211,10 @@ fn test_filled_shapes_boundary_cases() {
     assert_eq!(graphresult(), GraphResult::Ok);
 
     // Test at viewport boundaries
-    fillellipse(0, 0, 50, 50);        // Top-left corner
-    fillellipse(600, 0, 40, 40);      // Top-right corner
-    fillellipse(0, 450, 35, 35);      // Bottom-left corner
-    fillellipse(600, 450, 30, 30);    // Bottom-right corner
+    fillellipse(0, 0, 50, 50); // Top-left corner
+    fillellipse(600, 0, 40, 40); // Top-right corner
+    fillellipse(0, 450, 35, 35); // Bottom-left corner
+    fillellipse(600, 450, 30, 30); // Bottom-right corner
 
     // Test with large coordinates
     pieslice(1000, 1000, 0, 90, 100);
@@ -224,8 +225,8 @@ fn test_filled_shapes_boundary_cases() {
     sector(-100, 200, 0, 180, 60, 40);
 
     // Test shapes extending beyond viewport
-    fillellipse(300, 240, 200, 200);  // Large ellipse
-    bar(-50, -50, 100, 100);          // Bar crossing origin
+    fillellipse(300, 240, 200, 200); // Large ellipse
+    bar(-50, -50, 100, 100); // Bar crossing origin
 
     closegraph();
 }
@@ -258,28 +259,26 @@ fn test_filled_shapes_parameter_validation() {
     assert_eq!(graphresult(), GraphResult::Ok);
 
     // Test zero and negative radii
-    fillellipse(100, 100, 0, 0);      // Zero radii
-    fillellipse(150, 100, -10, 20);   // Negative X radius
-    fillellipse(200, 100, 20, -10);   // Negative Y radius
-    fillellipse(250, 100, -15, -25);  // Both negative
+    fillellipse(100, 100, 0, 0); // Zero radii
+    fillellipse(150, 100, -10, 20); // Negative X radius
+    fillellipse(200, 100, 20, -10); // Negative Y radius
+    fillellipse(250, 100, -15, -25); // Both negative
 
     // Test zero radius circles
-    pieslice(300, 150, 0, 90, 0);     // Zero radius
-    pieslice(350, 150, 0, 90, -20);   // Negative radius
+    pieslice(300, 150, 0, 90, 0); // Zero radius
+    pieslice(350, 150, 0, 90, -20); // Negative radius
 
     // Test invalid angles (should be handled gracefully)
-    sector(100, 200, 400, 500, 30, 30);   // Angles > 360
-    pieslice(200, 200, -45, -90, 35);     // Negative angles
-    sector(300, 200, 180, 90, 25, 25);    // End < start
+    sector(100, 200, 400, 500, 30, 30); // Angles > 360
+    pieslice(200, 200, -45, -90, 35); // Negative angles
+    sector(300, 200, 180, 90, 25, 25); // End < start
 
     // Test degenerate bars
-    bar(400, 200, 400, 200);          // Zero area
-    bar(450, 200, 400, 150);          // Inverted coordinates
+    bar(400, 200, 400, 200); // Zero area
+    bar(450, 200, 400, 150); // Inverted coordinates
 
     // Test self-intersecting polygon
-    let self_intersect = [
-        (500, 180), (550, 220), (500, 220), (550, 180)
-    ];
+    let self_intersect = [(500, 180), (550, 220), (500, 220), (550, 180)];
     fillpoly(&self_intersect);
 
     closegraph();

@@ -104,10 +104,18 @@ impl Color {
 
     /// Create color from integer value.
     pub fn from_int(value: i32) -> Option<Self> {
-        if value >= 0 && value <= 15 {
+        if (0..=15).contains(&value) {
             Some(Self::Indexed(value as u8))
         } else {
             None
+        }
+    }
+
+    /// Convert color to palette index (0-15 for indexed colors, 0 for RGB).
+    pub fn to_index(self) -> u8 {
+        match self {
+            Self::Indexed(idx) => idx,
+            Self::Rgb(_) => 0, // RGB colors don't have a palette index
         }
     }
 }
@@ -192,9 +200,9 @@ pub struct Palette {
 impl Default for Palette {
     fn default() -> Self {
         let mut colors = [0u32; MAX_COLORS + 1];
-        for i in 0..=MAX_COLORS {
+        for (i, color_slot) in colors.iter_mut().enumerate() {
             if let Some(color) = Color::from_int(i as i32) {
-                colors[i] = color.to_rgb().to_argb32();
+                *color_slot = color.to_rgb().to_argb32();
             }
         }
 

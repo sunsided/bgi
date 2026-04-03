@@ -1,0 +1,228 @@
+//! Event queue management tests
+//!
+//! Tests for the InputEventQueue implementation and event ordering.
+
+use bgi::input::{InputEvent, InputEventQueue, KeyCode, MouseButton, KeyModifiers};
+
+/// Test event queue creation and basic properties
+#[test]
+fn test_event_queue_creation() {
+    let queue = InputEventQueue::new(100);
+    assert!(queue.is_empty());
+    assert_eq!(queue.len(), 0);
+    assert!(!queue.has_events());
+    assert_eq!(queue.mouse_position(), (0, 0));
+
+    let default_queue = InputEventQueue::default();
+    assert!(default_queue.is_empty());
+    assert_eq!(default_queue.len(), 0);
+}
+
+/// Test FIFO ordering of mixed event types
+#[test]
+fn test_fifo_ordering() {
+    let mut queue = InputEventQueue::new(10);
+
+    let events = vec![
+        InputEvent::Keyboard {
+            key_code: KeyCode::Ascii(b'A'),
+            ascii_code: b'A',
+            is_pressed: true,
+            modifiers: KeyModifiers::default(),
+        },
+        InputEvent::MouseMove { x: 10, y: 20 },
+        InputEvent::Mouse {
+            x: 30, y: 40,
+            button: MouseButton::Left,
+            is_pressed: true,
+        },
+        InputEvent::Keyboard {
+            key_code: KeyCode::Enter,
+            ascii_code: 13,
+            is_pressed: true,
+            modifiers: KeyModifiers::default(),
+        },
+        InputEvent::WindowClose,
+    ];
+
+    // Add all events
+    for event in &events {
+        queue.push_event(*event);
+    }
+
+    assert_eq!(queue.len(), 4); // Mouse moves should be deduplicated
+
+    // Verify they come out in order (except for mouse move deduplication)
+    let first = queue.pop_event().unwrap();
+    assert!(matches!(first, InputEvent::Keyboard { ascii_code: b'A', .. }));
+
+    let second = queue.pop_event().unwrap();
+    assert!(matches!(second, InputEvent::Mouse { x: 30, y: 40, .. }));
+
+    let third = queue.pop_event().unwrap();
+    assert!(matches!(third, InputEvent::Keyboard { ascii_code: 13, .. }));
+
+    let fourth = queue.pop_event().unwrap();
+    assert!(matches!(fourth, InputEvent::WindowClose));
+}
+
+/// Test queue capacity management
+#[test]
+fn test_queue_capacity() {
+    let mut queue = InputEventQueue::new(3);
+
+    // Fill queue
+    for i in 0..3 {
+        queue.push_event(InputEvent::Keyboard {
+            key_code: KeyCode::Ascii(b'A' + i),
+            ascii_code: b'A' + i,
+            is_pressed: true,
+            modifiers: KeyModifiers::default(),
+        });
+    }
+
+    assert_eq!(queue.len(), 3);
+
+    // Add one more - should drop oldest
+    queue.push_event(InputEvent::Keyboard {
+        key_code: KeyCode::Ascii(b'D'),
+        ascii_code: b'D',
+        is_pressed: true,
+        modifiers: KeyModifiers::default(),
+    });
+
+    assert_eq!(queue.len(), 3);
+
+    // First event should now be 'B'
+    if let Some(InputEvent::Keyboard { ascii_code, .. }) = queue.pop_event() {
+        assert_eq!(ascii_code, b'B');
+    } else {
+        panic!("Expected keyboard event");
+    }
+}
+
+/// Test mouse move event deduplication
+#[test]
+fn test_mouse_move_deduplication() {
+    let mut queue = InputEventQueue::new(10);
+
+    // Add multiple mouse moves
+    queue.push_event(InputEvent::MouseMove { x: 1, y: 1 });
+    queue.push_event(InputEvent::MouseMove { x: 2, y: 2 });
+    queue.push_event(InputEvent::MouseMove { x: 3, y: 3 });
+
+    // Should only have one event (the last one)
+    assert_eq!(queue.len(), 1);
+    assert_eq!(queue.mouse_position(), (3, 3));
+
+    if let Some(InputEvent::MouseMove { x, y }) = queue.pop_event() {
+        assert_eq!(x, 3);
+        assert_eq!(y, 3);
+    } else {
+        panic!("Expected mouse move event");
+    }
+
+    // Test that non-move events don't get deduplicated
+    queue.push_event(InputEvent::Mouse { x: 10, y: 10, button: MouseButton::Left, is_pressed: true });
+    queue.push_event(InputEvent::MouseMove { x: 11, y: 11 });
+    queue.push_event(InputEvent::MouseMove { x: 12, y: 12 });
+    queue.push_event(InputEvent::Mouse { x: 13, y: 13, button: MouseButton::Right, is_pressed: true });
+
+    assert_eq!(queue.len(), 3); // Button + move + button
+}
+
+/// Test mouse position caching
+#[test]
+fn test_mouse_position_caching() {
+    let mut queue = InputEventQueue::new(10);
+
+    // Initial position
+    assert_eq!(queue.mouse_position(), (0, 0));
+
+    // Add mouse events
+    queue.push_event(InputEvent::MouseMove { x: 100, y: 200 });
+    assert_eq!(queue.mouse_position(), (100, 200));
+
+    queue.push_event(InputEvent::Mouse {
+        x: 150, y: 250,
+        button: MouseButton::Left,
+        is_pressed: true,
+    });
+    assert_eq!(queue.mouse_position(), (150, 250));
+
+    // Position should persist after events are consumed
+    queue.clear();
+    assert_eq!(queue.mouse_position(), (150, 250));
+}
+
+/// Test queue clearing
+#[test]
+fn test_queue_clear() {
+    let mut queue = InputEventQueue::new(10);
+
+    // Add some events
+    queue.push_event(InputEvent::Keyboard {
+        key_code: KeyCode::Ascii(b'A'),
+        ascii_code: b'A',
+        is_pressed: true,
+        modifiers: KeyModifiers::default(),
+    });
+    queue.push_event(InputEvent::MouseMove { x: 10, y: 20 });
+
+    assert!(!queue.is_empty());
+    assert_eq!(queue.len(), 2);
+
+    queue.clear();
+
+    assert!(queue.is_empty());
+    assert_eq!(queue.len(), 0);
+    assert!(!queue.has_events());
+}
+
+/// Test event queue with complex scenarios
+#[test]
+fn test_complex_event_scenarios() {
+    let mut queue = InputEventQueue::new(5);
+
+    // Scenario: rapid typing with mouse movement
+    queue.push_event(InputEvent::Keyboard {
+        key_code: KeyCode::Ascii(b'H'),
+        ascii_code: b'H',
+        is_pressed: true,
+        modifiers: KeyModifiers::default(),
+    });
+    queue.push_event(InputEvent::MouseMove { x: 1, y: 1 });
+    queue.push_event(InputEvent::Keyboard {
+        key_code: KeyCode::Ascii(b'e'),
+        ascii_code: b'e',
+        is_pressed: true,
+        modifiers: KeyModifiers::default(),
+    });
+    queue.push_event(InputEvent::MouseMove { x: 2, y: 2 });
+    queue.push_event(InputEvent::Keyboard {
+        key_code: KeyCode::Ascii(b'l'),
+        ascii_code: b'l',
+        is_pressed: true,
+        modifiers: KeyModifiers::default(),
+    });
+    queue.push_event(InputEvent::MouseMove { x: 3, y: 3 });
+
+    // Should have: H, e, l, move(3,3) due to mouse move deduplication
+    assert_eq!(queue.len(), 4);
+    assert_eq!(queue.mouse_position(), (3, 3));
+
+    // Verify order
+    assert!(matches!(queue.pop_event(), Some(InputEvent::Keyboard { ascii_code: b'H', .. })));
+    assert!(matches!(queue.pop_event(), Some(InputEvent::Keyboard { ascii_code: b'e', .. })));
+    assert!(matches!(queue.pop_event(), Some(InputEvent::Keyboard { ascii_code: b'l', .. })));
+    assert!(matches!(queue.pop_event(), Some(InputEvent::MouseMove { x: 3, y: 3 })));
+}
+
+/// Placeholder test that will fail until implementation is complete
+#[test]
+#[should_panic(expected = "Event queue integration not implemented")]
+fn test_event_queue_integration_placeholder() {
+    // This will fail until the InputEventQueue is properly integrated
+    // with the backend system and BGI functions
+    panic!("Event queue integration not implemented");
+}

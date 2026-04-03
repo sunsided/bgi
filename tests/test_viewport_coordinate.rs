@@ -1,6 +1,6 @@
 use bgi::{
-    setviewport, getviewport, getmaxx, getmaxy, moveto, moverel, getx, gety,
-    initgraph, closegraph, graphresult, GraphResult, line, circle
+    GraphResult, circle, closegraph, getmaxx, getmaxy, getviewport, getx, gety, graphresult,
+    initgraph, line, moverel, moveto, setviewport,
 };
 
 #[test]
@@ -160,11 +160,11 @@ fn test_viewport_drawing_boundaries() {
     // Drawing operations should work within viewport
     moveto(60, 60);
     line(60, 60, 190, 140); // Within viewport
-    circle(125, 100, 25);   // Within viewport
+    circle(125, 100, 25); // Within viewport
 
     // Operations outside viewport should still work (clipped by implementation)
-    line(0, 0, 300, 300);   // Crosses viewport boundaries
-    circle(300, 300, 50);   // Outside viewport
+    line(0, 0, 300, 300); // Crosses viewport boundaries
+    circle(300, 300, 50); // Outside viewport
 
     // Verify viewport hasn't changed
     let (left, top, right, bottom) = getviewport();

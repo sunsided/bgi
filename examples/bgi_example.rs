@@ -2,15 +2,18 @@
 use bgi::*;
 
 fn main() {
-    let mut gd = 0i32;  // graphics driver
-    let mut gm = 4i32;  // graphics mode (VGA)
+    let mut gd = 0i32; // graphics driver
+    let mut gm = 4i32; // graphics mode (VGA)
 
     // Initialize graphics
     initgraph(&mut gd, &mut gm, "");
 
     // Check if initialization succeeded
     if graphresult() != GraphResult::Ok {
-        eprintln!("Graphics initialization failed: {}", grapherrormsg(graphresult() as i32));
+        eprintln!(
+            "Graphics initialization failed: {}",
+            grapherrormsg(graphresult() as i32)
+        );
         return;
     }
 

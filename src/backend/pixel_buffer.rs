@@ -1,9 +1,9 @@
 //! Simple pixel buffer backend for testing and headless rendering.
 
+use crate::backend::InputEvent; // Using temporary placeholder
 use crate::backend::{Backend, BackendCapabilities, DrawCommand};
 use crate::color::RgbColor;
 use crate::error::{BgiError, BgiResult};
-use crate::backend::InputEvent; // Using temporary placeholder
 use crate::types::{GraphicsMode, Rect};
 use crate::window::WindowId;
 use std::collections::HashMap;
@@ -31,7 +31,7 @@ impl PixelBufferWindow {
 
     pub fn put_pixel(&mut self, x: i32, y: i32, color: RgbColor) -> BgiResult<()> {
         if x < 0 || y < 0 || x >= self.width as i32 || y >= self.height as i32 {
-            return Ok(());  // Clip out-of-bounds pixels silently
+            return Ok(()); // Clip out-of-bounds pixels silently
         }
 
         let index = (y as u32 * self.width + x as u32) as usize;
@@ -60,7 +60,14 @@ impl PixelBufferWindow {
     }
 
     /// Simple line drawing using Bresenham's algorithm.
-    pub fn draw_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32, color: RgbColor) -> BgiResult<()> {
+    pub fn draw_line(
+        &mut self,
+        x1: i32,
+        y1: i32,
+        x2: i32,
+        y2: i32,
+        color: RgbColor,
+    ) -> BgiResult<()> {
         let mut x1 = x1;
         let mut y1 = y1;
         let x2 = x2;
@@ -93,7 +100,15 @@ impl PixelBufferWindow {
     }
 
     /// Simple rectangle drawing.
-    pub fn draw_rectangle(&mut self, left: i32, top: i32, right: i32, bottom: i32, color: RgbColor, filled: bool) -> BgiResult<()> {
+    pub fn draw_rectangle(
+        &mut self,
+        left: i32,
+        top: i32,
+        right: i32,
+        bottom: i32,
+        color: RgbColor,
+        filled: bool,
+    ) -> BgiResult<()> {
         if filled {
             for y in top..=bottom {
                 for x in left..=right {
@@ -102,16 +117,23 @@ impl PixelBufferWindow {
             }
         } else {
             // Draw outline
-            self.draw_line(left, top, right, top, color)?;       // Top
-            self.draw_line(right, top, right, bottom, color)?;   // Right
+            self.draw_line(left, top, right, top, color)?; // Top
+            self.draw_line(right, top, right, bottom, color)?; // Right
             self.draw_line(right, bottom, left, bottom, color)?; // Bottom
-            self.draw_line(left, bottom, left, top, color)?;     // Left
+            self.draw_line(left, bottom, left, top, color)?; // Left
         }
         Ok(())
     }
 
     /// Simple circle drawing using midpoint circle algorithm.
-    pub fn draw_circle(&mut self, cx: i32, cy: i32, radius: i32, color: RgbColor, filled: bool) -> BgiResult<()> {
+    pub fn draw_circle(
+        &mut self,
+        cx: i32,
+        cy: i32,
+        radius: i32,
+        color: RgbColor,
+        filled: bool,
+    ) -> BgiResult<()> {
         if filled {
             // Filled circle - draw horizontal lines
             for y in -radius..=radius {
@@ -174,9 +196,11 @@ impl PixelBufferBackend {
             message: "No current window".to_string(),
         })?;
 
-        self.windows.get(&window_id).ok_or_else(|| BgiError::General {
-            message: "Invalid window".to_string(),
-        })
+        self.windows
+            .get(&window_id)
+            .ok_or_else(|| BgiError::General {
+                message: "Invalid window".to_string(),
+            })
     }
 
     /// Get a mutable reference to the current window.
@@ -185,9 +209,11 @@ impl PixelBufferBackend {
             message: "No current window".to_string(),
         })?;
 
-        self.windows.get_mut(&window_id).ok_or_else(|| BgiError::General {
-            message: "Invalid window".to_string(),
-        })
+        self.windows
+            .get_mut(&window_id)
+            .ok_or_else(|| BgiError::General {
+                message: "Invalid window".to_string(),
+            })
     }
 
     /// Get the pixel buffer for the current window (for testing).
@@ -207,11 +233,22 @@ impl PixelBufferBackend {
     pub fn count_drawn_pixels(&self) -> BgiResult<usize> {
         let window = self.current_window_ref()?;
         let black = RgbColor::new(0, 0, 0).to_argb32();
-        Ok(window.pixels.iter().filter(|&&pixel| pixel != black).count())
+        Ok(window
+            .pixels
+            .iter()
+            .filter(|&&pixel| pixel != black)
+            .count())
     }
 
     /// Verify that a line was drawn between two points (for testing).
-    pub fn verify_line_drawn(&self, x1: i32, y1: i32, x2: i32, y2: i32, color: RgbColor) -> BgiResult<bool> {
+    pub fn verify_line_drawn(
+        &self,
+        x1: i32,
+        y1: i32,
+        x2: i32,
+        y2: i32,
+        color: RgbColor,
+    ) -> BgiResult<bool> {
         let window = self.current_window_ref()?;
         let color_u32 = color.to_argb32();
 
@@ -281,11 +318,8 @@ impl Backend for PixelBufferBackend {
         let window_id = WindowId(self.next_window_id);
         self.next_window_id += 1;
 
-        let window = PixelBufferWindow::new(
-            width,
-            height,
-            title.unwrap_or("BGI Window").to_string(),
-        );
+        let window =
+            PixelBufferWindow::new(width, height, title.unwrap_or("BGI Window").to_string());
 
         self.windows.insert(window_id, window);
 
@@ -327,16 +361,22 @@ impl Backend for PixelBufferBackend {
     }
 
     fn window_size(&self, window_id: WindowId) -> BgiResult<(u32, u32)> {
-        let window = self.windows.get(&window_id).ok_or_else(|| BgiError::General {
-            message: "Window not found".to_string(),
-        })?;
+        let window = self
+            .windows
+            .get(&window_id)
+            .ok_or_else(|| BgiError::General {
+                message: "Window not found".to_string(),
+            })?;
         Ok((window.width, window.height))
     }
 
     fn set_window_title(&mut self, window_id: WindowId, title: &str) -> BgiResult<()> {
-        let window = self.windows.get_mut(&window_id).ok_or_else(|| BgiError::General {
-            message: "Window not found".to_string(),
-        })?;
+        let window = self
+            .windows
+            .get_mut(&window_id)
+            .ok_or_else(|| BgiError::General {
+                message: "Window not found".to_string(),
+            })?;
         window.title = title.to_string();
         Ok(())
     }
@@ -346,9 +386,12 @@ impl Backend for PixelBufferBackend {
     }
 
     fn draw(&mut self, window_id: WindowId, commands: &[DrawCommand]) -> BgiResult<()> {
-        let window = self.windows.get_mut(&window_id).ok_or_else(|| BgiError::General {
-            message: "Window not found".to_string(),
-        })?;
+        let window = self
+            .windows
+            .get_mut(&window_id)
+            .ok_or_else(|| BgiError::General {
+                message: "Window not found".to_string(),
+            })?;
 
         for command in commands {
             match command {
@@ -358,13 +401,32 @@ impl Backend for PixelBufferBackend {
                 DrawCommand::Pixel { x, y, color } => {
                     window.put_pixel(*x, *y, *color)?;
                 }
-                DrawCommand::Line { x1, y1, x2, y2, color } => {
+                DrawCommand::Line {
+                    x1,
+                    y1,
+                    x2,
+                    y2,
+                    color,
+                } => {
                     window.draw_line(*x1, *y1, *x2, *y2, *color)?;
                 }
-                DrawCommand::Rectangle { x1, y1, x2, y2, color, filled } => {
+                DrawCommand::Rectangle {
+                    x1,
+                    y1,
+                    x2,
+                    y2,
+                    color,
+                    filled,
+                } => {
                     window.draw_rectangle(*x1, *y1, *x2, *y2, *color, *filled)?;
                 }
-                DrawCommand::Circle { x, y, radius, color, filled } => {
+                DrawCommand::Circle {
+                    x,
+                    y,
+                    radius,
+                    color,
+                    filled,
+                } => {
                     window.draw_circle(*x, *y, *radius, *color, *filled)?;
                 }
                 DrawCommand::Ellipse { .. } => {
@@ -391,24 +453,33 @@ impl Backend for PixelBufferBackend {
     }
 
     fn get_pixel(&self, window_id: WindowId, x: i32, y: i32) -> BgiResult<RgbColor> {
-        let window = self.windows.get(&window_id).ok_or_else(|| BgiError::General {
-            message: "Window not found".to_string(),
-        })?;
+        let window = self
+            .windows
+            .get(&window_id)
+            .ok_or_else(|| BgiError::General {
+                message: "Window not found".to_string(),
+            })?;
         window.get_pixel(x, y)
     }
 
     fn set_viewport(&mut self, window_id: WindowId, rect: Rect) -> BgiResult<()> {
-        let window = self.windows.get_mut(&window_id).ok_or_else(|| BgiError::General {
-            message: "Window not found".to_string(),
-        })?;
+        let window = self
+            .windows
+            .get_mut(&window_id)
+            .ok_or_else(|| BgiError::General {
+                message: "Window not found".to_string(),
+            })?;
         window.viewport = rect;
         Ok(())
     }
 
     fn viewport(&self, window_id: WindowId) -> BgiResult<Rect> {
-        let window = self.windows.get(&window_id).ok_or_else(|| BgiError::General {
-            message: "Window not found".to_string(),
-        })?;
+        let window = self
+            .windows
+            .get(&window_id)
+            .ok_or_else(|| BgiError::General {
+                message: "Window not found".to_string(),
+            })?;
         Ok(window.viewport)
     }
 
@@ -443,21 +514,31 @@ impl Backend for PixelBufferBackend {
     }
 
     fn get_buffer(&self, window_id: WindowId) -> BgiResult<Vec<u32>> {
-        let window = self.windows.get(&window_id).ok_or_else(|| BgiError::General {
-            message: "Window not found".to_string(),
-        })?;
+        let window = self
+            .windows
+            .get(&window_id)
+            .ok_or_else(|| BgiError::General {
+                message: "Window not found".to_string(),
+            })?;
         Ok(window.pixels.clone())
     }
 
     fn set_buffer(&mut self, window_id: WindowId, buffer: &[u32]) -> BgiResult<()> {
-        let window = self.windows.get_mut(&window_id).ok_or_else(|| BgiError::General {
-            message: "Window not found".to_string(),
-        })?;
+        let window = self
+            .windows
+            .get_mut(&window_id)
+            .ok_or_else(|| BgiError::General {
+                message: "Window not found".to_string(),
+            })?;
 
         let expected_size = (window.width * window.height) as usize;
         if buffer.len() != expected_size {
             return Err(BgiError::General {
-                message: format!("Buffer size mismatch: expected {}, got {}", expected_size, buffer.len()),
+                message: format!(
+                    "Buffer size mismatch: expected {}, got {}",
+                    expected_size,
+                    buffer.len()
+                ),
             });
         }
 
@@ -472,7 +553,13 @@ impl Backend for PixelBufferBackend {
         })
     }
 
-    fn save_image(&self, _filename: &str, _width: u32, _height: u32, _pixels: &[u32]) -> BgiResult<()> {
+    fn save_image(
+        &self,
+        _filename: &str,
+        _width: u32,
+        _height: u32,
+        _pixels: &[u32],
+    ) -> BgiResult<()> {
         // TODO: Implement image saving
         Err(BgiError::General {
             message: "Image saving not implemented".to_string(),

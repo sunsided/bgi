@@ -3,8 +3,8 @@
 // They should FAIL initially until the implementation is complete
 
 use bgi::{
-    initgraph, closegraph, line, circle, rectangle, arc, putpixel, getpixel, ellipse, graphresult,
-    GraphResult, Color
+    Color, GraphResult, arc, circle, closegraph, ellipse, getpixel, graphresult, initgraph, line,
+    putpixel, rectangle,
 };
 
 #[test]

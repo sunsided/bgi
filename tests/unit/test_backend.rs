@@ -28,7 +28,7 @@ fn test_backend_capabilities() {
 #[test]
 fn test_draw_command_variants() {
     let clear_cmd = DrawCommand::Clear {
-        color: RgbColor::new(255, 0, 0)
+        color: RgbColor::new(255, 0, 0),
     };
 
     match clear_cmd {
@@ -43,7 +43,7 @@ fn test_draw_command_variants() {
     let pixel_cmd = DrawCommand::Pixel {
         x: 100,
         y: 200,
-        color: RgbColor::new(0, 255, 0)
+        color: RgbColor::new(0, 255, 0),
     };
 
     match pixel_cmd {
@@ -60,11 +60,17 @@ fn test_draw_command_variants() {
         y1: 0,
         x2: 100,
         y2: 100,
-        color: RgbColor::new(0, 0, 255)
+        color: RgbColor::new(0, 0, 255),
     };
 
     match line_cmd {
-        DrawCommand::Line { x1, y1, x2, y2, color } => {
+        DrawCommand::Line {
+            x1,
+            y1,
+            x2,
+            y2,
+            color,
+        } => {
             assert_eq!(x1, 0);
             assert_eq!(y1, 0);
             assert_eq!(x2, 100);
@@ -87,7 +93,14 @@ fn test_draw_command_shapes() {
     };
 
     match rect_cmd {
-        DrawCommand::Rectangle { x1, y1, x2, y2, color, filled } => {
+        DrawCommand::Rectangle {
+            x1,
+            y1,
+            x2,
+            y2,
+            color,
+            filled,
+        } => {
             assert_eq!(x1, 10);
             assert_eq!(y1, 20);
             assert_eq!(x2, 110);
@@ -107,7 +120,13 @@ fn test_draw_command_shapes() {
     };
 
     match circle_cmd {
-        DrawCommand::Circle { x, y, radius, color, filled } => {
+        DrawCommand::Circle {
+            x,
+            y,
+            radius,
+            color,
+            filled,
+        } => {
             assert_eq!(x, 50);
             assert_eq!(y, 75);
             assert_eq!(radius, 25);
@@ -128,7 +147,14 @@ fn test_draw_command_shapes() {
     };
 
     match ellipse_cmd {
-        DrawCommand::Ellipse { x, y, rx, ry, color, filled } => {
+        DrawCommand::Ellipse {
+            x,
+            y,
+            rx,
+            ry,
+            color,
+            filled,
+        } => {
             assert_eq!(x, 100);
             assert_eq!(y, 150);
             assert_eq!(rx, 30);
@@ -149,11 +175,18 @@ fn test_draw_command_arc() {
         start_angle: 0,
         end_angle: 90,
         radius: 40,
-        color: RgbColor::new(0, 255, 255)
+        color: RgbColor::new(0, 255, 255),
     };
 
     match arc_cmd {
-        DrawCommand::Arc { x, y, start_angle, end_angle, radius, color } => {
+        DrawCommand::Arc {
+            x,
+            y,
+            start_angle,
+            end_angle,
+            radius,
+            color,
+        } => {
             assert_eq!(x, 200);
             assert_eq!(y, 250);
             assert_eq!(start_angle, 0);
@@ -172,7 +205,7 @@ fn test_draw_command_text() {
         x: 300,
         y: 350,
         text: "Hello World".to_string(),
-        color: RgbColor::new(64, 128, 192)
+        color: RgbColor::new(64, 128, 192),
     };
 
     match text_cmd {
@@ -196,11 +229,17 @@ fn test_draw_command_image() {
         y: 450,
         width: 2,
         height: 2,
-        pixels: pixels.clone()
+        pixels: pixels.clone(),
     };
 
     match image_cmd {
-        DrawCommand::Image { x, y, width, height, pixels } => {
+        DrawCommand::Image {
+            x,
+            y,
+            width,
+            height,
+            pixels,
+        } => {
             assert_eq!(x, 400);
             assert_eq!(y, 450);
             assert_eq!(width, 2);
@@ -228,8 +267,20 @@ fn test_draw_command_clone() {
     let cloned = original.clone();
 
     match (original, cloned) {
-        (DrawCommand::Circle { x: x1, y: y1, radius: r1, .. },
-         DrawCommand::Circle { x: x2, y: y2, radius: r2, .. }) => {
+        (
+            DrawCommand::Circle {
+                x: x1,
+                y: y1,
+                radius: r1,
+                ..
+            },
+            DrawCommand::Circle {
+                x: x2,
+                y: y2,
+                radius: r2,
+                ..
+            },
+        ) => {
             assert_eq!(x1, x2);
             assert_eq!(y1, y2);
             assert_eq!(r1, r2);
@@ -326,7 +377,13 @@ impl Backend for MockBackend {
         Ok(())
     }
 
-    fn create_window(&mut self, width: u32, height: u32, _title: Option<&str>, _mode: GraphicsMode) -> BgiResult<WindowId> {
+    fn create_window(
+        &mut self,
+        width: u32,
+        height: u32,
+        _title: Option<&str>,
+        _mode: GraphicsMode,
+    ) -> BgiResult<WindowId> {
         if !self.initialized {
             return Err(BgiError::NotInitialized);
         }
@@ -369,7 +426,8 @@ impl Backend for MockBackend {
     }
 
     fn window_size(&self, window_id: WindowId) -> BgiResult<(u32, u32)> {
-        self.windows.get(&window_id)
+        self.windows
+            .get(&window_id)
             .copied()
             .ok_or(BgiError::InvalidWindow)
     }
@@ -439,7 +497,13 @@ impl Backend for MockBackend {
         Ok((1920, 1080))
     }
 
-    fn copy_surface(&mut self, window_id: WindowId, _src_rect: Rect, _dst_x: i32, _dst_y: i32) -> BgiResult<()> {
+    fn copy_surface(
+        &mut self,
+        window_id: WindowId,
+        _src_rect: Rect,
+        _dst_x: i32,
+        _dst_y: i32,
+    ) -> BgiResult<()> {
         if !self.windows.contains_key(&window_id) {
             return Err(BgiError::InvalidWindow);
         }
@@ -464,7 +528,13 @@ impl Backend for MockBackend {
         Ok((10, 10, vec![0xFFFFFFFF; 100]))
     }
 
-    fn save_image(&self, _filename: &str, _width: u32, _height: u32, _pixels: &[u32]) -> BgiResult<()> {
+    fn save_image(
+        &self,
+        _filename: &str,
+        _width: u32,
+        _height: u32,
+        _pixels: &[u32],
+    ) -> BgiResult<()> {
         Ok(())
     }
 }
@@ -506,8 +576,12 @@ fn test_mock_backend_multiple_windows() {
     backend.init().unwrap();
 
     // Create multiple windows
-    let window1 = backend.create_window(640, 480, None, GraphicsMode::default()).unwrap();
-    let window2 = backend.create_window(800, 600, None, GraphicsMode::default()).unwrap();
+    let window1 = backend
+        .create_window(640, 480, None, GraphicsMode::default())
+        .unwrap();
+    let window2 = backend
+        .create_window(800, 600, None, GraphicsMode::default())
+        .unwrap();
 
     // Test switching current window
     assert!(backend.set_current_window(window2).is_ok());
@@ -536,7 +610,9 @@ fn test_mock_backend_error_conditions() {
 
     // Initialize and create window
     backend.init().unwrap();
-    let window = backend.create_window(640, 480, None, GraphicsMode::default()).unwrap();
+    let window = backend
+        .create_window(640, 480, None, GraphicsMode::default())
+        .unwrap();
 
     // Operations on invalid window should fail
     let invalid_window = WindowId(999);
@@ -546,7 +622,11 @@ fn test_mock_backend_error_conditions() {
     assert!(backend.draw(invalid_window, &[]).is_err());
     assert!(backend.present(invalid_window).is_err());
     assert!(backend.get_pixel(invalid_window, 0, 0).is_err());
-    assert!(backend.set_viewport(invalid_window, Rect::new(0, 0, 100, 100)).is_err());
+    assert!(
+        backend
+            .set_viewport(invalid_window, Rect::new(0, 0, 100, 100))
+            .is_err()
+    );
     assert!(backend.viewport(invalid_window).is_err());
 }
 
@@ -554,13 +634,27 @@ fn test_mock_backend_error_conditions() {
 fn test_mock_backend_drawing_operations() {
     let mut backend = MockBackend::new();
     backend.init().unwrap();
-    let window = backend.create_window(640, 480, None, GraphicsMode::default()).unwrap();
+    let window = backend
+        .create_window(640, 480, None, GraphicsMode::default())
+        .unwrap();
 
     // Test drawing commands
     let commands = vec![
-        DrawCommand::Clear { color: RgbColor::new(0, 0, 0) },
-        DrawCommand::Pixel { x: 100, y: 200, color: RgbColor::new(255, 0, 0) },
-        DrawCommand::Line { x1: 0, y1: 0, x2: 100, y2: 100, color: RgbColor::new(0, 255, 0) },
+        DrawCommand::Clear {
+            color: RgbColor::new(0, 0, 0),
+        },
+        DrawCommand::Pixel {
+            x: 100,
+            y: 200,
+            color: RgbColor::new(255, 0, 0),
+        },
+        DrawCommand::Line {
+            x1: 0,
+            y1: 0,
+            x2: 100,
+            y2: 100,
+            color: RgbColor::new(0, 255, 0),
+        },
     ];
 
     assert!(backend.draw(window, &commands).is_ok());
@@ -582,7 +676,9 @@ fn test_mock_backend_drawing_operations() {
 fn test_mock_backend_viewport_operations() {
     let mut backend = MockBackend::new();
     backend.init().unwrap();
-    let window = backend.create_window(640, 480, None, GraphicsMode::default()).unwrap();
+    let window = backend
+        .create_window(640, 480, None, GraphicsMode::default())
+        .unwrap();
 
     // Test viewport operations
     let viewport = Rect::new(10, 20, 300, 400);
@@ -596,13 +692,15 @@ fn test_mock_backend_viewport_operations() {
 fn test_mock_backend_fullscreen_and_screen_size() {
     let mut backend = MockBackend::new();
     backend.init().unwrap();
-    let window = backend.create_window(640, 480, None, GraphicsMode::default()).unwrap();
-    
+    let window = backend
+        .create_window(640, 480, None, GraphicsMode::default())
+        .unwrap();
+
     // Test screen size
     let screen_size = backend.screen_size();
     assert!(screen_size.is_ok());
     assert_eq!(screen_size.unwrap(), (1920, 1080));
-    
+
     // Test fullscreen
     assert!(backend.set_fullscreen(window, true).is_ok());
     assert!(backend.set_fullscreen(window, false).is_ok());
@@ -622,7 +720,11 @@ fn test_mock_backend_image_operations() {
     assert_eq!(pixels.len(), 100);
 
     // Test image saving
-    assert!(backend.save_image("output.png", width, height, &pixels).is_ok());
+    assert!(
+        backend
+            .save_image("output.png", width, height, &pixels)
+            .is_ok()
+    );
 }
 
 #[test]
@@ -630,8 +732,12 @@ fn test_mock_backend_shutdown() {
     let mut backend = MockBackend::new();
     backend.init().unwrap();
 
-    let _window1 = backend.create_window(640, 480, None, GraphicsMode::default()).unwrap();
-    let _window2 = backend.create_window(800, 600, None, GraphicsMode::default()).unwrap();
+    let _window1 = backend
+        .create_window(640, 480, None, GraphicsMode::default())
+        .unwrap();
+    let _window2 = backend
+        .create_window(800, 600, None, GraphicsMode::default())
+        .unwrap();
 
     // Shutdown should clear everything
     assert!(backend.shutdown().is_ok());
@@ -662,6 +768,12 @@ fn test_input_event_placeholder() {
     match input_event {
         InputEvent::Placeholder => {
             // This is expected
+        }
+        InputEvent::Key { .. } => {
+            // Key events from actual backend
+        }
+        InputEvent::Mouse { .. } => {
+            // Mouse events from actual backend
         }
     }
 }

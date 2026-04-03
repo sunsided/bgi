@@ -31,7 +31,7 @@ Complete compatibility with the classic Borland Graphics Interface API is mandat
 
 ### III. Modern Rust Standards
 
-Code MUST follow modern Rust practices: Edition 2021 or later, MSRV 1.80+, zero unsafe code unless absolutely necessary with explicit justification. All public APIs MUST use appropriate Rust types (Results for errors, Options for nullability, iterators over indices). Clippy warnings MUST be addressed. Code MUST be formatted with rustfmt. All dependencies MUST be actively maintained and security-audited.
+Code MUST follow modern Rust practices: Edition 2024, MSRV 1.90+, zero unsafe code unless absolutely necessary with explicit justification. Internal APIs and implementation details MUST use appropriate Rust types (Results for errors, Options for nullability, iterators over indices) while preserving BGI-compatible public API surfaces. Clippy warnings MUST be addressed. Code MUST be formatted with rustfmt. All dependencies MUST be actively maintained and security-audited.
 
 ### IV. Zero-Cost Abstractions
 

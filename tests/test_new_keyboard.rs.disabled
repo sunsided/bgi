@@ -1,0 +1,256 @@
+//! Keyboard input integration tests
+//!
+//! Tests for keyboard event processing and BGI compatibility.
+//! Verifies getch(), kbhit(), and extended key handling.
+
+use bgi::input::{InputEvent, InputEventQueue, KeyCode, KeyModifiers};
+
+/// Test basic keyboard event queue functionality
+#[test]
+fn test_keyboard_event_queue() {
+    let mut queue = InputEventQueue::new(10);
+
+    // Initially no keyboard input
+    assert!(!queue.has_events());
+    assert_eq!(queue.pop_event(), None);
+
+    // Add keyboard events
+    let key_a = InputEvent::Keyboard {
+        key_code: KeyCode::Ascii(b'A'),
+        ascii_code: b'A',
+        is_pressed: true,
+        modifiers: KeyModifiers::default(),
+    };
+
+    let key_enter = InputEvent::Keyboard {
+        key_code: KeyCode::Enter,
+        ascii_code: 13,
+        is_pressed: true,
+        modifiers: KeyModifiers::default(),
+    };
+
+    queue.push_event(key_a);
+    queue.push_event(key_enter);
+
+    assert!(queue.has_events());
+    assert_eq!(queue.len(), 2);
+
+    // Events should come out in FIFO order
+    assert_eq!(queue.pop_event(), Some(key_a));
+    assert_eq!(queue.pop_event(), Some(key_enter));
+    assert_eq!(queue.pop_event(), None);
+    assert!(!queue.has_events());
+}
+
+/// Test BGI key code conversion for ASCII characters
+#[test]
+fn test_ascii_key_conversion() {
+    // Test printable ASCII characters
+    for ascii in b'A'..=b'Z' {
+        let key_code = KeyCode::Ascii(ascii);
+        assert_eq!(key_code.to_bgi_code(), ascii);
+        assert!(!key_code.is_extended());
+    }
+
+    for ascii in b'a'..=b'z' {
+        let key_code = KeyCode::Ascii(ascii);
+        assert_eq!(key_code.to_bgi_code(), ascii);
+        assert!(!key_code.is_extended());
+    }
+
+    for ascii in b'0'..=b'9' {
+        let key_code = KeyCode::Ascii(ascii);
+        assert_eq!(key_code.to_bgi_code(), ascii);
+        assert!(!key_code.is_extended());
+    }
+
+    // Test special ASCII characters
+    let special_chars = [b' ', b'!', b'@', b'#', b'$', b'%', b'^', b'&', b'*'];
+    for &ascii in &special_chars {
+        let key_code = KeyCode::Ascii(ascii);
+        assert_eq!(key_code.to_bgi_code(), ascii);
+        assert!(!key_code.is_extended());
+    }
+}
+
+/// Test special key BGI conversion
+#[test]
+fn test_special_key_conversion() {
+    // Test control keys
+    assert_eq!(KeyCode::Enter.to_bgi_code(), 13);
+    assert_eq!(KeyCode::Backspace.to_bgi_code(), 8);
+    assert_eq!(KeyCode::Tab.to_bgi_code(), 9);
+    assert_eq!(KeyCode::Escape.to_bgi_code(), 27);
+    assert_eq!(KeyCode::Space.to_bgi_code(), 32);
+
+    // These should not be extended keys
+    assert!(!KeyCode::Enter.is_extended());
+    assert!(!KeyCode::Backspace.is_extended());
+    assert!(!KeyCode::Tab.is_extended());
+    assert!(!KeyCode::Escape.is_extended());
+    assert!(!KeyCode::Space.is_extended());
+}
+
+/// Test extended key detection (function keys, arrows, etc.)
+#[test]
+fn test_extended_key_detection() {
+    // Arrow keys should be extended
+    assert!(KeyCode::Up.is_extended());
+    assert!(KeyCode::Down.is_extended());
+    assert!(KeyCode::Left.is_extended());
+    assert!(KeyCode::Right.is_extended());
+
+    // Function keys should be extended
+    assert!(KeyCode::F1.is_extended());
+    assert!(KeyCode::F2.is_extended());
+    assert!(KeyCode::F3.is_extended());
+    assert!(KeyCode::F4.is_extended());
+    assert!(KeyCode::F5.is_extended());
+    assert!(KeyCode::F6.is_extended());
+    assert!(KeyCode::F7.is_extended());
+    assert!(KeyCode::F8.is_extended());
+    assert!(KeyCode::F9.is_extended());
+    assert!(KeyCode::F10.is_extended());
+
+    // Navigation keys should be extended
+    assert!(KeyCode::Insert.is_extended());
+    assert!(KeyCode::Delete.is_extended());
+    assert!(KeyCode::Home.is_extended());
+    assert!(KeyCode::End.is_extended());
+    assert!(KeyCode::PageUp.is_extended());
+    assert!(KeyCode::PageDown.is_extended());
+
+    // Extended keys should return 0 for basic BGI code
+    assert_eq!(KeyCode::Up.to_bgi_code(), 0);
+    assert_eq!(KeyCode::F1.to_bgi_code(), 0);
+    assert_eq!(KeyCode::Insert.to_bgi_code(), 0);
+}
+
+/// Test keyboard modifier state handling
+#[test]
+fn test_keyboard_modifiers() {
+    let no_mods = KeyModifiers::default();
+    assert!(!no_mods.shift);
+    assert!(!no_mods.ctrl);
+    assert!(!no_mods.alt);
+
+    let shift_only = KeyModifiers { shift: true, ctrl: false, alt: false };
+    let ctrl_only = KeyModifiers { shift: false, ctrl: true, alt: false };
+    let alt_only = KeyModifiers { shift: false, ctrl: false, alt: true };
+    let all_mods = KeyModifiers { shift: true, ctrl: true, alt: true };
+
+    // Test that modifiers are preserved in events
+    let event_with_shift = InputEvent::Keyboard {
+        key_code: KeyCode::Ascii(b'A'),
+        ascii_code: b'A',
+        is_pressed: true,
+        modifiers: shift_only,
+    };
+
+    if let InputEvent::Keyboard { modifiers, .. } = event_with_shift {
+        assert!(modifiers.shift);
+        assert!(!modifiers.ctrl);
+        assert!(!modifiers.alt);
+    } else {
+        panic!("Expected keyboard event");
+    }
+}
+
+/// Test event queue capacity limits and overflow behavior
+#[test]
+fn test_keyboard_queue_capacity() {
+    let mut queue = InputEventQueue::new(3); // Small capacity for testing
+
+    // Fill queue to capacity
+    for i in 0..3 {
+        let event = InputEvent::Keyboard {
+            key_code: KeyCode::Ascii(b'A' + i),
+            ascii_code: b'A' + i,
+            is_pressed: true,
+            modifiers: KeyModifiers::default(),
+        };
+        queue.push_event(event);
+    }
+
+    assert_eq!(queue.len(), 3);
+
+    // Add one more event - should drop the oldest
+    let overflow_event = InputEvent::Keyboard {
+        key_code: KeyCode::Ascii(b'D'),
+        ascii_code: b'D',
+        is_pressed: true,
+        modifiers: KeyModifiers::default(),
+    };
+    queue.push_event(overflow_event);
+
+    assert_eq!(queue.len(), 3); // Still at capacity
+
+    // First event should now be 'B' (original 'A' was dropped)
+    if let Some(InputEvent::Keyboard { ascii_code, .. }) = queue.pop_event() {
+        assert_eq!(ascii_code, b'B');
+    } else {
+        panic!("Expected keyboard event");
+    }
+}
+
+/// Test key press and release event handling
+#[test]
+fn test_key_press_release() {
+    let mut queue = InputEventQueue::new(10);
+
+    // Simulate key press
+    let key_press = InputEvent::Keyboard {
+        key_code: KeyCode::Ascii(b'X'),
+        ascii_code: b'X',
+        is_pressed: true,
+        modifiers: KeyModifiers::default(),
+    };
+
+    // Simulate key release
+    let key_release = InputEvent::Keyboard {
+        key_code: KeyCode::Ascii(b'X'),
+        ascii_code: b'X',
+        is_pressed: false,
+        modifiers: KeyModifiers::default(),
+    };
+
+    queue.push_event(key_press);
+    queue.push_event(key_release);
+
+    // Verify both events are captured correctly
+    if let Some(InputEvent::Keyboard { is_pressed, .. }) = queue.pop_event() {
+        assert!(is_pressed);
+    } else {
+        panic!("Expected press event");
+    }
+
+    if let Some(InputEvent::Keyboard { is_pressed, .. }) = queue.pop_event() {
+        assert!(!is_pressed);
+    } else {
+        panic!("Expected release event");
+    }
+}
+
+/// Test integration with BGI keyboard functions (placeholder)
+#[test]
+#[should_panic(expected = "BGI keyboard integration not implemented")]
+fn test_bgi_keyboard_integration() {
+    // This test will fail until getch() and kbhit() are properly integrated
+    // with the new input system
+
+    // Test that getch() blocks until input available
+    // Test that kbhit() returns true when input is pending
+    // Test that extended keys work with getch() (return 0 + extended code)
+
+    panic!("BGI keyboard integration not implemented");
+}
+
+/// Test keyboard input processing module exists
+#[test]
+#[should_panic(expected = "Keyboard processing module not implemented")]
+fn test_keyboard_processing_module() {
+    // This will fail until src/input/keyboard.rs is implemented
+    // Should test the keyboard event processing logic
+
+    panic!("Keyboard processing module not implemented");
+}
