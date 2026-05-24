@@ -102,7 +102,7 @@ impl Default for GraphicsPages {
 }
 
 /// Complete window state for BGI graphics.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct WindowState {
     /// Graphics driver information
     pub driver_info: DriverInfo,
@@ -118,20 +118,6 @@ pub struct WindowState {
     pub error_code: i32,
     /// Path to BGI driver files
     pub driver_path: String,
-}
-
-impl Default for WindowState {
-    fn default() -> Self {
-        Self {
-            driver_info: DriverInfo::default(),
-            screen_mode: ScreenMode::default(),
-            properties: WindowProperties::default(),
-            pages: GraphicsPages::default(),
-            initialized: false,
-            error_code: 0, // grOk
-            driver_path: String::new(),
-        }
-    }
 }
 
 impl WindowState {

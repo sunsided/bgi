@@ -94,7 +94,7 @@ fn test_getpixel_contract() {
     assert_eq!(graphresult(), GraphResult::Ok);
 
     // Test successful pixel getting - BGI getpixel returns Color directly
-    let color = getpixel(5, 5);
+    let _color = getpixel(5, 5);
     // In BGI, getpixel always returns a color value (could be background color)
 
     closegraph();
@@ -103,7 +103,7 @@ fn test_getpixel_contract() {
 #[test]
 fn test_getpixel_uninitialized() {
     // Test getpixel with uninitialized context - BGI may return default color
-    let color = getpixel(5, 5);
+    let _color = getpixel(5, 5);
     // Note: In BGI, uninitialized operations typically return default values
     // rather than throwing errors
 }
@@ -137,7 +137,7 @@ fn test_drawing_primitives_sequence() {
     arc(200, 200, 45, 135, 25);
     putpixel(250, 250, Color::BLUE);
 
-    let pixel_color = getpixel(250, 250);
+    let _pixel_color = getpixel(250, 250);
     // In BGI, getpixel returns the actual color at that pixel
 
     closegraph();

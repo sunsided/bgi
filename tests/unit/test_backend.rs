@@ -4,7 +4,7 @@ use bgi::{
     backend::*,
     color::RgbColor,
     error::{BgiError, BgiResult},
-    types::{GraphicsMode, Point, Rect},
+    types::{GraphicsMode, Rect},
     window::WindowId,
 };
 
@@ -610,7 +610,7 @@ fn test_mock_backend_error_conditions() {
 
     // Initialize and create window
     backend.init().unwrap();
-    let window = backend
+    let _window = backend
         .create_window(640, 480, None, GraphicsMode::default())
         .unwrap();
 

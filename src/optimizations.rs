@@ -146,9 +146,12 @@ pub mod optimized_ctx {
     }
 }
 
+/// A single deferred drawing operation queued in a [`BatchDrawer`].
+type BatchOp = Box<dyn FnOnce(&mut GraphicsContext) -> Result<(), crate::error::BgiError>>;
+
 /// Batch operation support for improved performance
 pub struct BatchDrawer {
-    operations: Vec<Box<dyn FnOnce(&mut GraphicsContext) -> Result<(), crate::error::BgiError>>>,
+    operations: Vec<BatchOp>,
 }
 
 impl BatchDrawer {
@@ -184,7 +187,7 @@ impl BatchDrawer {
         crate::validate_context!(context);
 
         for operation in self.operations {
-            if let Err(_) = operation(context) {
+            if operation(context).is_err() {
                 return GraphResult::InvalidDriver;
             }
         }
@@ -255,7 +258,7 @@ pub mod const_optimized {
                 let new_x = self.center_x + (self.radius as f64 * angle.cos()) as i32;
                 let new_y = self.center_y + (self.radius as f64 * angle.sin()) as i32;
 
-                if let Err(_) = context.draw_line(prev_x, prev_y, new_x, new_y) {
+                if context.draw_line(prev_x, prev_y, new_x, new_y).is_err() {
                     return GraphResult::InvalidDriver;
                 }
 
@@ -315,21 +318,21 @@ impl DrawingPool {
 
         // Draw all lines
         for &(x1, y1, x2, y2) in &self.line_buffer {
-            if let Err(_) = context.draw_line(x1, y1, x2, y2) {
+            if context.draw_line(x1, y1, x2, y2).is_err() {
                 return GraphResult::InvalidDriver;
             }
         }
 
         // Draw all circles
         for &(x, y, radius) in &self.circle_buffer {
-            if let Err(_) = context.draw_circle(x, y, radius) {
+            if context.draw_circle(x, y, radius).is_err() {
                 return GraphResult::InvalidDriver;
             }
         }
 
         // Draw all pixels
         for &(x, y, color) in &self.pixel_buffer {
-            if let Err(_) = context.put_pixel(x, y, color) {
+            if context.put_pixel(x, y, color).is_err() {
                 return GraphResult::InvalidDriver;
             }
         }

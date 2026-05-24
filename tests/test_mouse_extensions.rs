@@ -1,6 +1,6 @@
 use bgi::{
-    Color, clearmouseclick, closegraph, getmouse, initgraph, ismouseclick, mouseclick, mousex,
-    mousey, setmouse,
+    clearmouseclick, closegraph, getmouse, initgraph, ismouseclick, mouseclick, mousex, mousey,
+    setmouse,
 };
 
 #[test]
@@ -30,28 +30,14 @@ fn test_mouseclick_contract() {
     let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
-    // Test getting mouse click state
-    let left_click = mouseclick(1); // Left button
-    let right_click = mouseclick(2); // Right button
-    let middle_click = mouseclick(3); // Middle button
-
-    // Should return valid button states (true or false)
-    assert!(
-        left_click == true || left_click == false,
-        "Left click should return boolean"
-    );
-    assert!(
-        right_click == true || right_click == false,
-        "Right click should return boolean"
-    );
-    assert!(
-        middle_click == true || middle_click == false,
-        "Middle click should return boolean"
-    );
+    // Querying valid buttons should not panic (return type guarantees a bool).
+    let _ = mouseclick(1); // Left button
+    let _ = mouseclick(2); // Right button
+    let _ = mouseclick(3); // Middle button
 
     // Test invalid button
     let invalid_button = mouseclick(99);
-    assert_eq!(invalid_button, false, "Invalid button should return false");
+    assert!(!invalid_button, "Invalid button should return false");
 
     closegraph();
 }
@@ -62,23 +48,13 @@ fn test_ismouseclick_contract() {
     let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
-    // Test checking for mouse clicks
-    let left_clicked = ismouseclick(1);
-    let right_clicked = ismouseclick(2);
-
-    // Should return boolean values
-    assert!(
-        left_clicked == true || left_clicked == false,
-        "ismouseclick should return boolean"
-    );
-    assert!(
-        right_clicked == true || right_clicked == false,
-        "ismouseclick should return boolean"
-    );
+    // Checking valid buttons should not panic (return type guarantees a bool).
+    let _ = ismouseclick(1);
+    let _ = ismouseclick(2);
 
     // Test invalid button
     let invalid_clicked = ismouseclick(99);
-    assert_eq!(invalid_clicked, false, "Invalid button should return false");
+    assert!(!invalid_clicked, "Invalid button should return false");
 
     closegraph();
 }
@@ -95,20 +71,6 @@ fn test_getmouse_contract() {
     // Should return a valid mouse state structure
     assert!(mouse_state.x >= 0, "Mouse state X should be non-negative");
     assert!(mouse_state.y >= 0, "Mouse state Y should be non-negative");
-
-    // Button states should be boolean
-    assert!(
-        mouse_state.left == true || mouse_state.left == false,
-        "Left button state should be boolean"
-    );
-    assert!(
-        mouse_state.right == true || mouse_state.right == false,
-        "Right button state should be boolean"
-    );
-    assert!(
-        mouse_state.middle == true || mouse_state.middle == false,
-        "Middle button state should be boolean"
-    );
 
     closegraph();
 }
@@ -152,20 +114,10 @@ fn test_clearmouseclick_contract() {
     clearmouseclick(2); // Clear right button
     clearmouseclick(3); // Clear middle button
 
-    // After clearing, ismouseclick should return false
-    let left_after_clear = ismouseclick(1);
-    let right_after_clear = ismouseclick(2);
-
-    // Note: This assumes no actual clicks happen during test
-    // In a real scenario, these might still be true if user clicks during test
-    assert!(
-        left_after_clear == true || left_after_clear == false,
-        "Should return valid boolean after clear"
-    );
-    assert!(
-        right_after_clear == true || right_after_clear == false,
-        "Should return valid boolean after clear"
-    );
+    // After clearing, querying state should not panic.
+    // Note: we cannot assert the value, since the user may click during the test.
+    let _ = ismouseclick(1);
+    let _ = ismouseclick(2);
 
     closegraph();
 }
@@ -186,17 +138,9 @@ fn test_mouse_operations_without_graphics() {
         "mousey should return non-negative value even without graphics"
     );
 
-    let click_state = mouseclick(1);
-    assert!(
-        click_state == true || click_state == false,
-        "mouseclick should return boolean without graphics"
-    );
-
-    let is_clicked = ismouseclick(1);
-    assert!(
-        is_clicked == true || is_clicked == false,
-        "ismouseclick should return boolean without graphics"
-    );
+    // Should not panic without graphics initialized.
+    let _ = mouseclick(1);
+    let _ = ismouseclick(1);
 }
 
 #[test]
@@ -235,21 +179,10 @@ fn test_mouse_button_range() {
     let mut mode = 2; // VGAHI
     initgraph(&mut driver, &mut mode, "");
 
-    // Test all standard mouse buttons
+    // Test all standard mouse buttons: querying should not panic.
     for button in 1..=3 {
-        let click_state = mouseclick(button);
-        let is_clicked = ismouseclick(button);
-
-        assert!(
-            click_state == true || click_state == false,
-            "Button {} should return valid state",
-            button
-        );
-        assert!(
-            is_clicked == true || is_clicked == false,
-            "Button {} ismouseclick should return valid state",
-            button
-        );
+        let _ = mouseclick(button);
+        let _ = ismouseclick(button);
     }
 
     // Test invalid button numbers
@@ -257,13 +190,13 @@ fn test_mouse_button_range() {
         let click_state = mouseclick(button);
         let is_clicked = ismouseclick(button);
 
-        assert_eq!(
-            click_state, false,
+        assert!(
+            !click_state,
             "Invalid button {} should return false",
             button
         );
-        assert_eq!(
-            is_clicked, false,
+        assert!(
+            !is_clicked,
             "Invalid button {} ismouseclick should return false",
             button
         );

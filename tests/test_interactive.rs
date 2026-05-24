@@ -1,6 +1,6 @@
 use bgi::{
-    Color, circle, closegraph, delay, getch, initgraph, ismouseclick, kbhit, line, mouseclick,
-    mousex, mousey, setcolor,
+    Color, circle, closegraph, delay, initgraph, ismouseclick, kbhit, line, mouseclick, mousex,
+    mousey, setcolor,
 };
 
 #[test]
@@ -15,11 +15,8 @@ fn test_interactive_keyboard_simulation() {
     // Note: These may not produce actual input in automated tests,
     // but they should not crash and should return consistent values
 
-    let has_input = kbhit();
-    assert!(
-        has_input == true || has_input == false,
-        "kbhit should return boolean"
-    );
+    // kbhit should not panic (return type guarantees a bool).
+    let _ = kbhit();
 
     // Test delay function
     let start_time = std::time::Instant::now();
@@ -56,36 +53,14 @@ fn test_interactive_mouse_simulation() {
     assert!(x <= 10000, "Mouse X should be within reasonable range");
     assert!(y <= 10000, "Mouse Y should be within reasonable range");
 
-    // Test mouse button functions
-    let left_pressed = mouseclick(1);
-    let right_pressed = mouseclick(2);
-    let middle_pressed = mouseclick(3);
-
-    assert!(
-        left_pressed == true || left_pressed == false,
-        "Left button state should be boolean"
-    );
-    assert!(
-        right_pressed == true || right_pressed == false,
-        "Right button state should be boolean"
-    );
-    assert!(
-        middle_pressed == true || middle_pressed == false,
-        "Middle button state should be boolean"
-    );
+    // Test mouse button functions: querying should not panic.
+    let _ = mouseclick(1);
+    let _ = mouseclick(2);
+    let _ = mouseclick(3);
 
     // Test click detection
-    let left_clicked = ismouseclick(1);
-    let right_clicked = ismouseclick(2);
-
-    assert!(
-        left_clicked == true || left_clicked == false,
-        "Left click detection should be boolean"
-    );
-    assert!(
-        right_clicked == true || right_clicked == false,
-        "Right click detection should be boolean"
-    );
+    let _ = ismouseclick(1);
+    let _ = ismouseclick(2);
 
     closegraph();
 }
@@ -106,22 +81,18 @@ fn test_interactive_drawing_loop_simulation() {
 
         circle(x, y, 5);
 
-        // Check input state each frame
-        let has_key = kbhit();
+        // Check input state each frame (kbhit should not panic).
+        let _ = kbhit();
         let mouse_x = mousex();
         let mouse_y = mousey();
 
         // Values should be consistent within reasonable bounds
         assert!(
-            has_key == true || has_key == false,
-            "kbhit should return boolean in loop"
-        );
-        assert!(
-            mouse_x >= 0 && mouse_x <= 10000,
+            (0..=10000).contains(&mouse_x),
             "Mouse X should be valid in loop"
         );
         assert!(
-            mouse_y >= 0 && mouse_y <= 10000,
+            (0..=10000).contains(&mouse_y),
             "Mouse Y should be valid in loop"
         );
 
@@ -140,11 +111,10 @@ fn test_interactive_event_consistency() {
 
     // Test that input functions return consistent values over multiple calls
     let mut mouse_positions = Vec::new();
-    let mut key_states = Vec::new();
 
     for _ in 0..5 {
         mouse_positions.push((mousex(), mousey()));
-        key_states.push(kbhit());
+        let _ = kbhit(); // Should not panic
         delay(1); // Small delay between checks
     }
 
@@ -157,14 +127,6 @@ fn test_interactive_event_consistency() {
         assert!(
             *y >= 0 && *y <= 10000,
             "All mouse Y positions should be valid"
-        );
-    }
-
-    // Key states should be boolean
-    for &state in &key_states {
-        assert!(
-            state == true || state == false,
-            "All key states should be boolean"
         );
     }
 
@@ -242,22 +204,16 @@ fn test_interactive_without_graphics() {
     // Test interactive functions without graphics initialization
     // Should not crash and should return reasonable values
 
-    let has_input = kbhit();
-    assert!(
-        has_input == true || has_input == false,
-        "kbhit should work without graphics"
-    );
+    // kbhit should not panic without graphics.
+    let _ = kbhit();
 
     let x = mousex();
     let y = mousey();
     assert!(x >= 0, "mousex should return non-negative without graphics");
     assert!(y >= 0, "mousey should return non-negative without graphics");
 
-    let clicked = mouseclick(1);
-    assert!(
-        clicked == true || clicked == false,
-        "mouseclick should work without graphics"
-    );
+    // mouseclick should not panic without graphics.
+    let _ = mouseclick(1);
 
     // Delay should still work
     let start = std::time::Instant::now();
@@ -277,23 +233,17 @@ fn test_interactive_input_boundaries() {
     // Test invalid mouse button numbers
     let invalid_click1 = mouseclick(0);
     let invalid_click2 = mouseclick(99);
-    assert_eq!(
-        invalid_click1, false,
-        "Invalid button 0 should return false"
-    );
-    assert_eq!(
-        invalid_click2, false,
-        "Invalid button 99 should return false"
-    );
+    assert!(!invalid_click1, "Invalid button 0 should return false");
+    assert!(!invalid_click2, "Invalid button 99 should return false");
 
     let invalid_clicked1 = ismouseclick(0);
     let invalid_clicked2 = ismouseclick(99);
-    assert_eq!(
-        invalid_clicked1, false,
+    assert!(
+        !invalid_clicked1,
         "Invalid button 0 ismouseclick should return false"
     );
-    assert_eq!(
-        invalid_clicked2, false,
+    assert!(
+        !invalid_clicked2,
         "Invalid button 99 ismouseclick should return false"
     );
 

@@ -77,38 +77,34 @@ pub struct FontSettings {
 
 impl Default for FontSettings {
     fn default() -> Self {
-        let mut fonts = Vec::new();
-
-        // Add default BGI fonts
-        fonts.push(FontInfo {
-            font: DEFAULT_FONT,
-            name: "Default".to_string(),
-            filename: None,
-        });
-
-        fonts.push(FontInfo {
-            font: TRIPLEX_FONT,
-            name: "Triplex".to_string(),
-            filename: None,
-        });
-
-        fonts.push(FontInfo {
-            font: SMALL_FONT,
-            name: "Small".to_string(),
-            filename: None,
-        });
-
-        fonts.push(FontInfo {
-            font: SANS_SERIF_FONT,
-            name: "SansSerif".to_string(),
-            filename: None,
-        });
-
-        fonts.push(FontInfo {
-            font: GOTHIC_FONT,
-            name: "Gothic".to_string(),
-            filename: None,
-        });
+        // Default BGI fonts
+        let fonts = vec![
+            FontInfo {
+                font: DEFAULT_FONT,
+                name: "Default".to_string(),
+                filename: None,
+            },
+            FontInfo {
+                font: TRIPLEX_FONT,
+                name: "Triplex".to_string(),
+                filename: None,
+            },
+            FontInfo {
+                font: SMALL_FONT,
+                name: "Small".to_string(),
+                filename: None,
+            },
+            FontInfo {
+                font: SANS_SERIF_FONT,
+                name: "SansSerif".to_string(),
+                filename: None,
+            },
+            FontInfo {
+                font: GOTHIC_FONT,
+                name: "Gothic".to_string(),
+                filename: None,
+            },
+        ];
 
         Self {
             style: TextStyle::default(),

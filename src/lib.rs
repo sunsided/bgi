@@ -456,9 +456,9 @@ pub fn ellipse_ctx(
 
 // TDD: Thread-local storage for current color and error state
 thread_local! {
-    static CURRENT_COLOR: RefCell<Color> = RefCell::new(Color::WHITE);
-    static LAST_RESULT: RefCell<GraphResult> = RefCell::new(GraphResult::Ok);
-    static CURRENT_MODE: RefCell<i32> = RefCell::new(4); // Default to VGA mode
+    static CURRENT_COLOR: RefCell<Color> = const { RefCell::new(Color::WHITE) };
+    static LAST_RESULT: RefCell<GraphResult> = const { RefCell::new(GraphResult::Ok) };
+    static CURRENT_MODE: RefCell<i32> = const { RefCell::new(4) }; // Default to VGA mode
 }
 
 /// Set the last graphics result (for graphresult() function)
@@ -473,8 +473,8 @@ fn set_graph_result(result: GraphResult) {
 
 // TDD: Thread-local storage for viewport and cursor position
 thread_local! {
-    static VIEWPORT: RefCell<(i32, i32, i32, i32)> = RefCell::new((0, 0, 639, 479)); // Default 640x480
-    static CURSOR_POS: RefCell<(i32, i32)> = RefCell::new((0, 0));
+    static VIEWPORT: RefCell<(i32, i32, i32, i32)> = const { RefCell::new((0, 0, 639, 479)) }; // Default 640x480
+    static CURSOR_POS: RefCell<(i32, i32)> = const { RefCell::new((0, 0)) };
 }
 
 // Viewport and coordinate functions

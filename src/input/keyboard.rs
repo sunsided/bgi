@@ -39,5 +39,5 @@ pub fn keycode_to_ascii(key: KeyCode) -> Option<u8> {
 
 /// Check if a KeyCode represents a printable ASCII character.
 pub fn is_printable(key: KeyCode) -> bool {
-    matches!(key, KeyCode::Ascii(c) if c >= 0x20 && c <= 0x7E)
+    matches!(key, KeyCode::Ascii(c) if (0x20..=0x7E).contains(&c))
 }

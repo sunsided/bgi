@@ -1,6 +1,6 @@
 use bgi::{
-    BgiTextSettings, Color, closegraph, gettextsettings, initgraph, outtextxy, setcolor,
-    settextjustify, settextstyle, textheight, textwidth,
+    Color, closegraph, gettextsettings, initgraph, outtextxy, setcolor, settextjustify,
+    settextstyle, textheight, textwidth,
 };
 
 #[test]

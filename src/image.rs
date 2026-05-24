@@ -9,7 +9,7 @@ use std::collections::HashMap;
 thread_local! {
     /// Stored images for putimage/getimage operations.
     static IMAGE_STORE: std::cell::RefCell<HashMap<u32, Vec<u8>>> = std::cell::RefCell::new(HashMap::new());
-    static NEXT_IMAGE_ID: std::cell::RefCell<u32> = std::cell::RefCell::new(1);
+    static NEXT_IMAGE_ID: std::cell::RefCell<u32> = const { std::cell::RefCell::new(1) };
 }
 
 /// Image data structure for BGI compatibility.

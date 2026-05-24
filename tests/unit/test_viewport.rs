@@ -185,7 +185,7 @@ fn test_viewport_equality() {
 fn test_viewport_copy_and_clone() {
     let original = Viewport::new(25, 50, 125, 250, false);
     let copied = original; // Copy semantics for simple structs
-    let cloned = original.clone();
+    let cloned = original;
 
     assert_eq!(original, copied);
     assert_eq!(original, cloned);

@@ -1,6 +1,6 @@
 //! Unit tests for font settings and text rendering configuration.
 
-use bgi::{Color, constants::*, font_settings::*};
+use bgi::{constants::*, font_settings::*};
 
 #[test]
 fn test_font_info_default() {

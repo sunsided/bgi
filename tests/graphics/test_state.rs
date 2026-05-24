@@ -148,7 +148,7 @@ fn test_viewport_state_management() {
     assert_eq!(viewport1.top, 10, "Viewport top should be 10");
     assert_eq!(viewport1.right, 100, "Viewport right should be 100");
     assert_eq!(viewport1.bottom, 100, "Viewport bottom should be 100");
-    assert_eq!(viewport1.clip, true, "Viewport clipping should be enabled");
+    assert!(viewport1.clip, "Viewport clipping should be enabled");
 
     setviewport(0, 0, 200, 200, false);
     let viewport2 = getviewsettings();
@@ -156,10 +156,7 @@ fn test_viewport_state_management() {
     assert_eq!(viewport2.top, 0, "Viewport top should be 0");
     assert_eq!(viewport2.right, 200, "Viewport right should be 200");
     assert_eq!(viewport2.bottom, 200, "Viewport bottom should be 200");
-    assert_eq!(
-        viewport2.clip, false,
-        "Viewport clipping should be disabled"
-    );
+    assert!(!viewport2.clip, "Viewport clipping should be disabled");
 
     closegraph();
 }
@@ -216,7 +213,7 @@ fn test_graphics_state_persistence() {
 
     let viewport = getviewsettings();
     assert_eq!(viewport.left, 5, "Viewport should persist");
-    assert_eq!(viewport.clip, true, "Viewport clipping should persist");
+    assert!(viewport.clip, "Viewport clipping should persist");
 
     closegraph();
 }

@@ -1,6 +1,6 @@
 use bgi::{
-    Color, circle, clearviewport, closegraph, getviewport, getviewsettings, initgraph, line,
-    linerel, lineto, moverel, moveto, rectangle, setcolor, setviewport,
+    Color, circle, clearviewport, closegraph, getviewport, initgraph, line, linerel, lineto,
+    moverel, moveto, rectangle, setcolor, setviewport,
 };
 
 #[test]

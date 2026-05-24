@@ -239,7 +239,7 @@ fn test_pixel_buffer_colors() {
             for x in (i * 20)..(i * 20 + 20) {
                 commands.push(DrawCommand::Pixel {
                     x: x as i32,
-                    y: y as i32,
+                    y,
                     color: *color,
                 });
             }

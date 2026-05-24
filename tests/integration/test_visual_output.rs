@@ -318,7 +318,7 @@ fn test_visual_performance_basic() {
 
     // Perform basic graphics operations
     for i in 0..1000 {
-        putpixel((i % 100) as i32, ((i / 100) % 100) as i32, Color::WHITE);
+        putpixel(i % 100, (i / 100) % 100, Color::WHITE);
     }
 
     let duration = start.elapsed();

@@ -1,6 +1,6 @@
 use bgi::{
-    Color, GraphResult, closegraph, floodfill, getcolor, getmaxcolor, getpalette, getpalettesize,
-    graphresult, initgraph, setcolor, setfillpattern, setfillstyle, setpalette,
+    Color, closegraph, floodfill, getcolor, getmaxcolor, getpalette, getpalettesize, initgraph,
+    setcolor, setfillpattern, setfillstyle, setpalette,
 };
 
 #[test]

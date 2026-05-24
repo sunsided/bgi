@@ -6,7 +6,6 @@
 #[cfg(feature = "visual-backend")]
 mod minifb_tests {
     use bgi::backend::{Backend, minifb::MiniFbBackend};
-    use bgi::color::RgbColor;
     use bgi::types::GraphicsMode;
 
     /// Test that minifb backend can be created and initialized
@@ -103,10 +102,10 @@ mod minifb_tests {
 
             // Create multiple windows
             let window1 = backend
-                .create_window(320, 240, Some("Window 1"), mode.clone())
+                .create_window(320, 240, Some("Window 1"), mode)
                 .expect("First window creation should succeed");
             let window2 = backend
-                .create_window(320, 240, Some("Window 2"), mode.clone())
+                .create_window(320, 240, Some("Window 2"), mode)
                 .expect("Second window creation should succeed");
 
             assert!(

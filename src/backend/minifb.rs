@@ -25,6 +25,12 @@ pub struct MiniFbBackend {
     previous_mouse_states: HashMap<WindowId, (bool, bool, bool)>, // (left, right, middle)
 }
 
+impl Default for MiniFbBackend {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl MiniFbBackend {
     /// Create a new MiniFB backend
     pub fn new() -> Self {
@@ -213,10 +219,12 @@ impl Backend for MiniFbBackend {
         let window_title = title.unwrap_or("BGI Graphics");
 
         // Create window with explicit options for better visibility
-        let mut options = WindowOptions::default();
-        options.resize = false;
-        options.scale = minifb::Scale::X1;
-        options.topmost = true; // Try to keep window on top
+        let options = WindowOptions {
+            resize: false,
+            scale: minifb::Scale::X1,
+            topmost: true, // Try to keep window on top
+            ..WindowOptions::default()
+        };
 
         let mut window = Window::new(window_title, width as usize, height as usize, options)
             .map_err(|e| BgiError::BackendError {
@@ -286,7 +294,7 @@ impl Backend for MiniFbBackend {
 
     fn is_window_valid(&self, window_id: WindowId) -> bool {
         self.windows.contains_key(&window_id)
-            && self.windows.get(&window_id).map_or(false, |w| w.is_open())
+            && self.windows.get(&window_id).is_some_and(|w| w.is_open())
     }
 
     fn draw(&mut self, window_id: WindowId, commands: &[DrawCommand]) -> BgiResult<()> {
@@ -434,10 +442,7 @@ impl Backend for MiniFbBackend {
             }
 
             // Get previous key states for this window
-            let prev_states = self
-                .previous_key_states
-                .entry(*window_id)
-                .or_insert_with(HashMap::new);
+            let prev_states = self.previous_key_states.entry(*window_id).or_default();
 
             // Check all keys we care about
             let keys_to_check = [

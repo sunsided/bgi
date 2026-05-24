@@ -26,7 +26,7 @@ impl KeyEvent {
 }
 
 /// Mouse button states.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct MouseButtons {
     /// Left mouse button pressed
     pub left: bool,
@@ -34,16 +34,6 @@ pub struct MouseButtons {
     pub right: bool,
     /// Middle mouse button pressed
     pub middle: bool,
-}
-
-impl Default for MouseButtons {
-    fn default() -> Self {
-        Self {
-            left: false,
-            right: false,
-            middle: false,
-        }
-    }
 }
 
 /// Mouse event information.

@@ -60,8 +60,8 @@ fn test_gettextsettings_retrieval() {
     let size = settings.charsize;
 
     // Should return valid values
-    assert!(font >= 0 && font <= 10); // Valid font range
-    assert!(direction >= 0 && direction <= 1); // 0=horizontal, 1=vertical
+    assert!((0..=10).contains(&font)); // Valid font range
+    assert!((0..=1).contains(&direction)); // 0=horizontal, 1=vertical
     assert!(size >= 1); // Size should be positive
 
     // Set new style and verify change
@@ -73,7 +73,7 @@ fn test_gettextsettings_retrieval() {
 
     // In TDD phase, these may not change yet (stub behavior)
     assert!(new_font >= 0);
-    assert!(new_direction >= 0 && new_direction <= 1);
+    assert!((0..=1).contains(&new_direction));
     assert!(new_size >= 1);
 
     closegraph();

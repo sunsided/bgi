@@ -37,14 +37,12 @@ pub fn line(x1: i32, y1: i32, x2: i32, y2: i32) {
                     y2,
                     color: rgb_color,
                 }];
-                if let Err(_) = backend.draw(window_id, &commands) {
-                    // Ignore draw errors to maintain BGI compatibility
-                }
+                // Ignore draw errors to maintain BGI compatibility
+                let _ = backend.draw(window_id, &commands);
                 // Only present if not in batch mode
                 if !state.drawing_state.batch_mode {
-                    if let Err(_) = backend.present(window_id) {
-                        // Ignore present errors to maintain BGI compatibility
-                    }
+                    // Ignore present errors to maintain BGI compatibility
+                    let _ = backend.present(window_id);
                 }
             }
         }
@@ -105,14 +103,12 @@ pub fn circle(x: i32, y: i32, radius: i32) {
                     color: rgb_color,
                     filled: false,
                 }];
-                if let Err(_) = backend.draw(window_id, &commands) {
-                    // Ignore draw errors to maintain BGI compatibility
-                }
+                // Ignore draw errors to maintain BGI compatibility
+                let _ = backend.draw(window_id, &commands);
                 // Only present if not in batch mode
                 if !state.drawing_state.batch_mode {
-                    if let Err(_) = backend.present(window_id) {
-                        // Ignore present errors to maintain BGI compatibility
-                    }
+                    // Ignore present errors to maintain BGI compatibility
+                    let _ = backend.present(window_id);
                 }
             }
         }
@@ -202,14 +198,12 @@ pub fn rectangle(left: i32, top: i32, right: i32, bottom: i32) {
                     color: rgb_color,
                     filled: false,
                 }];
-                if let Err(_) = backend.draw(window_id, &commands) {
-                    // Ignore draw errors to maintain BGI compatibility
-                }
+                // Ignore draw errors to maintain BGI compatibility
+                let _ = backend.draw(window_id, &commands);
                 // Only present if not in batch mode
                 if !state.drawing_state.batch_mode {
-                    if let Err(_) = backend.present(window_id) {
-                        // Ignore present errors to maintain BGI compatibility
-                    }
+                    // Ignore present errors to maintain BGI compatibility
+                    let _ = backend.present(window_id);
                 }
             }
         }
@@ -254,15 +248,13 @@ pub fn putpixel(x: i32, y: i32, color: Color) {
                     y,
                     color: rgb_color,
                 }];
-                if let Err(_) = backend.draw(window_id, &commands) {
-                    // Ignore draw errors to maintain BGI compatibility
-                }
+                // Ignore draw errors to maintain BGI compatibility
+                let _ = backend.draw(window_id, &commands);
 
                 // Only present if not in batch mode
                 if !state.drawing_state.batch_mode {
-                    if let Err(_) = backend.present(window_id) {
-                        // Ignore present errors to maintain BGI compatibility
-                    }
+                    // Ignore present errors to maintain BGI compatibility
+                    let _ = backend.present(window_id);
                 }
             }
         }
@@ -411,6 +403,7 @@ fn draw_arc_to_page(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 fn draw_ellipse_to_page(
     pages: &mut HashMap<i32, Vec<u8>>,
     page: i32,
@@ -441,30 +434,36 @@ pub fn set_pixel_in_page(
     y: i32,
     color: Color,
 ) {
-    if let Some(page_data) = pages.get_mut(&page) {
-        if x >= 0 && y >= 0 && x < 640 && y < 480 {
-            let index = ((y * 640 + x) * 3) as usize;
-            if index + 2 < page_data.len() {
-                let rgb = color.to_rgb();
-                page_data[index] = rgb.r;
-                page_data[index + 1] = rgb.g;
-                page_data[index + 2] = rgb.b;
-            }
+    if let Some(page_data) = pages.get_mut(&page)
+        && x >= 0
+        && y >= 0
+        && x < 640
+        && y < 480
+    {
+        let index = ((y * 640 + x) * 3) as usize;
+        if index + 2 < page_data.len() {
+            let rgb = color.to_rgb();
+            page_data[index] = rgb.r;
+            page_data[index + 1] = rgb.g;
+            page_data[index + 2] = rgb.b;
         }
     }
 }
 
 /// Get pixel color from a specific page.
 pub fn get_pixel_from_page(pages: &HashMap<i32, Vec<u8>>, page: i32, x: i32, y: i32) -> Color {
-    if let Some(page_data) = pages.get(&page) {
-        if x >= 0 && y >= 0 && x < 640 && y < 480 {
-            let index = ((y * 640 + x) * 3) as usize;
-            if index + 2 < page_data.len() {
-                let r = page_data[index];
-                let g = page_data[index + 1];
-                let b = page_data[index + 2];
-                return Color::Rgb(RgbColor::new(r, g, b));
-            }
+    if let Some(page_data) = pages.get(&page)
+        && x >= 0
+        && y >= 0
+        && x < 640
+        && y < 480
+    {
+        let index = ((y * 640 + x) * 3) as usize;
+        if index + 2 < page_data.len() {
+            let r = page_data[index];
+            let g = page_data[index + 1];
+            let b = page_data[index + 2];
+            return Color::Rgb(RgbColor::new(r, g, b));
         }
     }
     Color::BLACK

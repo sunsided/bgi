@@ -115,19 +115,19 @@ fn main() {
         }
 
         // Check for keyboard input
-        if kbhit() {
-            if let Some(ch) = getch() {
-                println!("Key pressed: '{}'", ch);
-                if ch == 'q' || ch == 'Q' || ch as u8 == 27 {
-                    // ESC = 27
-                    println!("Exiting...");
-                    break;
-                }
-                // Display last key pressed
-                setcolor(Color::YELLOW);
-                outtextxy(10, 110, &format!("Last key: '{}'", ch));
-                refresh();
+        if kbhit()
+            && let Some(ch) = getch()
+        {
+            println!("Key pressed: '{}'", ch);
+            if ch == 'q' || ch == 'Q' || ch as u8 == 27 {
+                // ESC = 27
+                println!("Exiting...");
+                break;
             }
+            // Display last key pressed
+            setcolor(Color::YELLOW);
+            outtextxy(10, 110, &format!("Last key: '{}'", ch));
+            refresh();
         }
 
         frame_count = frame_count.wrapping_add(1);

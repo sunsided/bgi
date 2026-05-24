@@ -70,8 +70,6 @@ impl PixelBufferWindow {
     ) -> BgiResult<()> {
         let mut x1 = x1;
         let mut y1 = y1;
-        let x2 = x2;
-        let y2 = y2;
 
         let dx = (x2 - x1).abs();
         let dy = (y2 - y1).abs();

@@ -80,7 +80,7 @@ pub enum MouseButton {
 }
 
 /// Keyboard modifier state
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct KeyModifiers {
     pub shift: bool,
     pub ctrl: bool,
@@ -116,11 +116,11 @@ impl InputEventQueue {
         }
 
         // Deduplicate consecutive mouse moves
-        if let InputEvent::MouseMove { .. } = event {
-            if let Some(InputEvent::MouseMove { .. }) = self.events.back() {
-                // Replace the last mouse move with the new one
-                self.events.pop_back();
-            }
+        if let InputEvent::MouseMove { .. } = event
+            && let Some(InputEvent::MouseMove { .. }) = self.events.back()
+        {
+            // Replace the last mouse move with the new one
+            self.events.pop_back();
         }
 
         // Add event, dropping oldest if at capacity
@@ -308,16 +308,6 @@ mod tests {
             assert_eq!(ascii_code, b'B');
         } else {
             panic!("Expected keyboard event");
-        }
-    }
-}
-
-impl Default for KeyModifiers {
-    fn default() -> Self {
-        Self {
-            shift: false,
-            ctrl: false,
-            alt: false,
         }
     }
 }

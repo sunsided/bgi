@@ -36,6 +36,7 @@ impl Default for LineStyle {
 /// Draw a line using the Bresenham algorithm with line patterns.
 /// This is the core line drawing function that implements the same algorithm
 /// as the original BGI line_copy() function.
+#[allow(clippy::too_many_arguments)]
 pub fn draw_line_bresenham(
     backend: &mut dyn Backend,
     window_id: WindowId,
@@ -98,6 +99,7 @@ pub fn draw_line_bresenham(
 
 /// Draw a thick line by drawing multiple parallel lines.
 /// This mimics the thick line implementation in the original BGI.
+#[allow(clippy::too_many_arguments)]
 pub fn draw_thick_line(
     backend: &mut dyn Backend,
     window_id: WindowId,
@@ -269,6 +271,7 @@ pub fn draw_thick_circle(
 /// Draw a rectangle using four line calls, just like the original BGI.
 /// This ensures that line patterns and drawing modes are applied consistently
 /// to all edges of the rectangle.
+#[allow(clippy::too_many_arguments)]
 pub fn draw_rectangle_lines(
     backend: &mut dyn Backend,
     window_id: WindowId,
@@ -422,6 +425,7 @@ pub fn draw_ellipse_bresenham(
 
 /// Draw an elliptical arc using line approximation.
 /// This matches the approach in the original BGI ellipse() function.
+#[allow(clippy::too_many_arguments)]
 pub fn draw_ellipse_arc(
     backend: &mut dyn Backend,
     window_id: WindowId,
@@ -495,12 +499,10 @@ fn get_octant(dx: i32, dy: i32) -> i32 {
             } else {
                 3 // Third octant
             }
+        } else if neg_dx >= -dy {
+            5 // Fifth octant
         } else {
-            if neg_dx >= -dy {
-                5 // Fifth octant
-            } else {
-                6 // Sixth octant
-            }
+            6 // Sixth octant
         }
     }
 }

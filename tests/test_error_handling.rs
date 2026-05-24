@@ -265,7 +265,7 @@ fn test_error_handling_graceful_degradation() {
     let result = graphresult(); // Check result without init
     // Should return some error, not crash
 
-    let error_msg = grapherrormsg(result);
+    let _error_msg = grapherrormsg(result);
     // Should return some message, not crash
 
     // Try to close without init

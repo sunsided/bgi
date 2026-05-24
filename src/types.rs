@@ -138,11 +138,6 @@ impl GraphicsMode {
         }
     }
 
-    /// Create a default graphics mode (VGA High resolution).
-    pub fn default() -> Self {
-        GraphicsMode::VgaHi
-    }
-
     /// Get the resolution (width, height) for this graphics mode.
     pub fn resolution(self) -> (i32, i32) {
         match self {
@@ -197,6 +192,13 @@ impl GraphicsMode {
             GraphicsMode::Pc3270Hi => 2,
             GraphicsMode::Ibm8514Lo | GraphicsMode::Ibm8514Hi => 256,
         }
+    }
+}
+
+impl Default for GraphicsMode {
+    /// The default graphics mode (VGA High resolution).
+    fn default() -> Self {
+        GraphicsMode::VgaHi
     }
 }
 

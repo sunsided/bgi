@@ -63,16 +63,10 @@ impl Default for TextJustification {
 }
 
 /// Current drawing position.
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct Position {
     pub x: i32,
     pub y: i32,
-}
-
-impl Default for Position {
-    fn default() -> Self {
-        Self { x: 0, y: 0 }
-    }
 }
 
 /// Viewport settings for clipping and coordinate system.

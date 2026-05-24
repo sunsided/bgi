@@ -60,7 +60,7 @@ fn main() {
 
     println!("7. 🔴 RED BACKGROUND + YELLOW LINES + WHITE CIRCLE should be visible");
     println!("   Window should be VERY obvious with bright red background");
-    println!("");
+    println!();
 
     // Extended wait with detailed countdown
     for i in (1..=15).rev() {
@@ -75,7 +75,7 @@ fn main() {
     closegraph();
     println!("9. ✅ Complete!");
 
-    println!("");
+    println!();
     println!("SUMMARY:");
     println!("- Graphics initialization: SUCCESS");
     println!("- Window should have been: 640x480 with bright red background");

@@ -87,7 +87,7 @@ impl GraphicsState {
         {
             match create_default_backend() {
                 Ok(mut backend) => {
-                    if let Err(_) = backend.init() {
+                    if backend.init().is_err() {
                         // Backend initialization failed, continue without visual output
                         self.backend = None;
                         self.current_window = None;
@@ -160,7 +160,7 @@ impl GraphicsState {
 
 // Thread-local storage for global graphics state
 thread_local! {
-    static GRAPHICS_STATE: RefCell<Option<GraphicsState>> = RefCell::new(None);
+    static GRAPHICS_STATE: RefCell<Option<GraphicsState>> = const { RefCell::new(None) };
 }
 
 /// Initialize graphics system (BGI-compatible).
@@ -215,7 +215,7 @@ pub fn closegraph() {
 /// Get graphics error code.
 pub fn graphresult() -> GraphResult {
     GRAPHICS_STATE.with(|state_ref| {
-        if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
+        if let Some(graphics_state) = state_ref.borrow().as_ref() {
             match graphics_state.get_error_code() {
                 0 => GraphResult::Ok,
                 -2 => GraphResult::InvalidDriver,
@@ -258,7 +258,7 @@ pub fn detectgraph(driver: &mut i32, mode: &mut i32) {
 /// Get current graphics mode.
 pub fn getgraphmode() -> i32 {
     GRAPHICS_STATE.with(|state_ref| {
-        if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
+        if let Some(graphics_state) = state_ref.borrow().as_ref() {
             graphics_state.window_state.screen_mode.mode
         } else {
             -1
@@ -279,7 +279,7 @@ pub fn setgraphmode(mode: i32) {
 /// Get maximum X coordinate.
 pub fn getmaxx() -> i32 {
     GRAPHICS_STATE.with(|state_ref| {
-        if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
+        if let Some(graphics_state) = state_ref.borrow().as_ref() {
             let viewport = graphics_state.drawing_state.get_viewport();
             viewport.right
         } else {
@@ -291,7 +291,7 @@ pub fn getmaxx() -> i32 {
 /// Get maximum Y coordinate.
 pub fn getmaxy() -> i32 {
     GRAPHICS_STATE.with(|state_ref| {
-        if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
+        if let Some(graphics_state) = state_ref.borrow().as_ref() {
             let viewport = graphics_state.drawing_state.get_viewport();
             viewport.bottom
         } else {
@@ -312,7 +312,7 @@ pub fn setcolor(color: Color) {
 /// Get current drawing color.
 pub fn getcolor() -> Color {
     GRAPHICS_STATE.with(|state_ref| {
-        if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
+        if let Some(graphics_state) = state_ref.borrow().as_ref() {
             graphics_state.drawing_state.get_color()
         } else {
             Color::WHITE
@@ -332,7 +332,7 @@ pub fn setbkcolor(color: Color) {
 /// Get background color.
 pub fn getbkcolor() -> Color {
     GRAPHICS_STATE.with(|state_ref| {
-        if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
+        if let Some(graphics_state) = state_ref.borrow().as_ref() {
             graphics_state.window_state.properties.background_color
         } else {
             Color::BLACK
@@ -354,7 +354,7 @@ pub fn setlinestyle(line_style: i32, pattern: u16, thickness: i32) {
 /// Get line style settings.
 pub fn getlinesettings() -> crate::types::BgiLineSettings {
     GRAPHICS_STATE.with(|state_ref| {
-        if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
+        if let Some(graphics_state) = state_ref.borrow().as_ref() {
             let (linestyle, upattern, thickness) = graphics_state.drawing_state.get_line_style();
             crate::types::BgiLineSettings {
                 linestyle,
@@ -390,7 +390,7 @@ pub fn setfillpattern(pattern: &[u8; 8], color: Color) {
 /// Get fill style settings.
 pub fn getfillsettings() -> crate::types::BgiFillSettings {
     GRAPHICS_STATE.with(|state_ref| {
-        if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
+        if let Some(graphics_state) = state_ref.borrow().as_ref() {
             let (pattern, color) = graphics_state.drawing_state.get_fill_style();
             crate::types::BgiFillSettings {
                 pattern,
@@ -414,7 +414,7 @@ pub fn setwritemode(mode: i32) {
 /// Get current write mode.
 pub fn getwritemode() -> i32 {
     GRAPHICS_STATE.with(|state_ref| {
-        if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
+        if let Some(graphics_state) = state_ref.borrow().as_ref() {
             graphics_state.drawing_state.get_write_mode()
         } else {
             COPY_PUT
@@ -436,7 +436,7 @@ pub fn setviewport(left: i32, top: i32, right: i32, bottom: i32, clip: bool) {
 /// Get current viewport settings.
 pub fn getviewport() -> (i32, i32, i32, i32) {
     GRAPHICS_STATE.with(|state_ref| {
-        if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
+        if let Some(graphics_state) = state_ref.borrow().as_ref() {
             let viewport = graphics_state.drawing_state.get_viewport();
             (viewport.left, viewport.top, viewport.right, viewport.bottom)
         } else {
@@ -448,7 +448,7 @@ pub fn getviewport() -> (i32, i32, i32, i32) {
 /// Get current viewport settings (extended version with clip flag).
 pub fn getviewsettings() -> crate::types::BgiViewportSettings {
     GRAPHICS_STATE.with(|state_ref| {
-        if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
+        if let Some(graphics_state) = state_ref.borrow().as_ref() {
             let viewport = graphics_state.drawing_state.get_viewport();
             crate::types::BgiViewportSettings {
                 left: viewport.left,
@@ -484,14 +484,12 @@ pub fn cleardevice() {
                     use crate::backend::DrawCommand;
                     let rgb_color = bg_color.to_rgb();
                     let commands = vec![DrawCommand::Clear { color: rgb_color }];
-                    if let Err(_) = backend.draw(window_id, &commands) {
-                        // Ignore draw errors to maintain BGI compatibility
-                    }
+                    // Ignore draw errors to maintain BGI compatibility
+                    let _ = backend.draw(window_id, &commands);
                     // Only present if not in batch mode
                     if !graphics_state.drawing_state.batch_mode {
-                        if let Err(_) = backend.present(window_id) {
-                            // Ignore present errors to maintain BGI compatibility
-                        }
+                        // Ignore present errors to maintain BGI compatibility
+                        let _ = backend.present(window_id);
                     }
                 }
             }
@@ -520,7 +518,7 @@ pub fn setvisualpage(page: i32) {
 /// Get current active page.
 pub fn getactivepage() -> i32 {
     GRAPHICS_STATE.with(|state_ref| {
-        if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
+        if let Some(graphics_state) = state_ref.borrow().as_ref() {
             graphics_state.window_state.get_active_page()
         } else {
             0
@@ -531,7 +529,7 @@ pub fn getactivepage() -> i32 {
 /// Get current visual page.
 pub fn getvisualpage() -> i32 {
     GRAPHICS_STATE.with(|state_ref| {
-        if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
+        if let Some(graphics_state) = state_ref.borrow().as_ref() {
             graphics_state.window_state.get_visual_page()
         } else {
             0
@@ -567,7 +565,7 @@ pub fn is_graphics_initialized() -> bool {
         state_ref
             .borrow()
             .as_ref()
-            .map_or(false, |gs| gs.is_initialized())
+            .is_some_and(|gs| gs.is_initialized())
     })
 }
 
@@ -608,7 +606,7 @@ pub fn moverel(dx: i32, dy: i32) {
 /// Get current X position.
 pub fn getx() -> i32 {
     GRAPHICS_STATE.with(|state_ref| {
-        if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
+        if let Some(graphics_state) = state_ref.borrow().as_ref() {
             graphics_state.drawing_state.get_position().0
         } else {
             0
@@ -619,7 +617,7 @@ pub fn getx() -> i32 {
 /// Get current Y position.
 pub fn gety() -> i32 {
     GRAPHICS_STATE.with(|state_ref| {
-        if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
+        if let Some(graphics_state) = state_ref.borrow().as_ref() {
             graphics_state.drawing_state.get_position().1
         } else {
             0
@@ -880,7 +878,7 @@ pub fn settextjustify(horiz: i32, vert: i32) {
 /// Get current text settings.
 pub fn gettextsettings() -> crate::types::BgiTextSettings {
     GRAPHICS_STATE.with(|state_ref| {
-        if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
+        if let Some(graphics_state) = state_ref.borrow().as_ref() {
             let text_style = &graphics_state.font_settings.style;
             let alignment = &graphics_state.font_settings.alignment;
             crate::types::BgiTextSettings {
@@ -911,7 +909,7 @@ pub fn outtextxy(_x: i32, _y: i32, _text: &str) {
 /// Calculate the width of a text string in pixels.
 pub fn textwidth(text: &str) -> i32 {
     GRAPHICS_STATE.with(|state_ref| {
-        if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
+        if let Some(graphics_state) = state_ref.borrow().as_ref() {
             graphics_state.font_settings.text_width(text)
         } else {
             // Fallback: 8 pixels per character
@@ -923,7 +921,7 @@ pub fn textwidth(text: &str) -> i32 {
 /// Calculate the height of a text string in pixels.
 pub fn textheight(text: &str) -> i32 {
     GRAPHICS_STATE.with(|state_ref| {
-        if let Some(ref graphics_state) = state_ref.borrow().as_ref() {
+        if let Some(graphics_state) = state_ref.borrow().as_ref() {
             graphics_state.font_settings.text_height(text)
         } else {
             // Fallback: 16 pixels height
@@ -953,9 +951,8 @@ pub fn refresh() {
     #[cfg(feature = "visual-backend")]
     with_graphics_state_mut(|state| {
         if let (Some(backend), Some(window_id)) = (&mut state.backend, state.current_window) {
-            if let Err(_) = backend.present(window_id) {
-                // Ignore present errors to maintain BGI compatibility
-            }
+            // Ignore present errors to maintain BGI compatibility
+            let _ = backend.present(window_id);
         }
     });
 }

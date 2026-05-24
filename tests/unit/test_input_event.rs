@@ -1,7 +1,7 @@
 //! Unit tests for input event handling.
 
 use bgi::input_event::*;
-use std::time::{Duration, Instant};
+use std::time::Instant;
 
 #[test]
 fn test_key_event_creation() {
