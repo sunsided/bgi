@@ -1,95 +1,202 @@
-//! Interactive BGI demo showing visual output with minifb backend
-//! Press ESC to exit, other keys to draw different shapes
+//! Interactive BGI demo with the minifb visual backend.
+//!
+//! Mouse-driven drawing:
+//! - Move the mouse: a preview of the current shape follows the cursor.
+//! - Left click: stamp the current shape at the cursor (stamps persist).
+//! - Right click or 'c': cycle the drawing color.
+//! - 's': cycle the shape (circle / square / triangle).
+//! - Middle click or 'x': clear all stamps.
+//! - ESC or 'q': quit.
 
 use bgi::*;
-use std::thread;
-use std::time::Duration;
+
+/// A shape stamped onto the canvas by a click.
+#[derive(Clone, Copy)]
+struct Stamp {
+    kind: usize,
+    x: i32,
+    y: i32,
+    color: Color,
+}
+
+const SHAPE_NAMES: [&str; 3] = ["Circle", "Square", "Triangle"];
+const STAMP_RADIUS: i32 = 24;
+
+fn palette() -> [(&'static str, Color); 7] {
+    [
+        ("RED", Color::RED),
+        ("GREEN", Color::GREEN),
+        ("BLUE", Color::LIGHTBLUE),
+        ("YELLOW", Color::YELLOW),
+        ("CYAN", Color::CYAN),
+        ("MAGENTA", Color::MAGENTA),
+        ("WHITE", Color::WHITE),
+    ]
+}
+
+/// Draw the animated backdrop: a set of orbiting circles linked by lines.
+/// `frame` advances the animation; `(cx, cy)` is the screen center.
+fn draw_background(frame: u32, cx: i32, cy: i32) {
+    const ORBIT_COLORS: [Color; 5] = [
+        Color::DARKGRAY,
+        Color::LIGHTBLUE,
+        Color::LIGHTGREEN,
+        Color::LIGHTCYAN,
+        Color::LIGHTMAGENTA,
+    ];
+
+    let t = frame as f32 * 0.06;
+    let mut prev: Option<(i32, i32)> = None;
+
+    for i in 0..5i32 {
+        let speed = (i + 1) as f32;
+        // Multiply by the orbit radius *before* casting (casting a unit-range
+        // cos/sin to i32 first would truncate it to 0 and kill the motion).
+        let rx = (40 + i * 18) as f32;
+        let ry = (28 + i * 9) as f32;
+        let ox = cx + ((t * speed).cos() * rx) as i32;
+        let oy = cy + ((t * speed).sin() * ry) as i32;
+
+        // Connecting line from the previous orbit body.
+        if let Some((px, py)) = prev {
+            setcolor(Color::DARKGRAY);
+            line(px, py, ox, oy);
+        }
+        prev = Some((ox, oy));
+
+        setcolor(ORBIT_COLORS[i as usize]);
+        circle(ox, oy, 10 + i * 6);
+    }
+}
+
+/// Draw a shape outline of the given kind centered at (x, y).
+fn draw_shape(kind: usize, x: i32, y: i32, radius: i32) {
+    match kind {
+        // Circle
+        0 => circle(x, y, radius),
+        // Square
+        1 => rectangle(x - radius, y - radius, x + radius, y + radius),
+        // Triangle
+        _ => {
+            let (ax, ay) = (x, y - radius);
+            let (bx, by) = (x - radius, y + radius);
+            let (cx, cy) = (x + radius, y + radius);
+            line(ax, ay, bx, by);
+            line(bx, by, cx, cy);
+            line(cx, cy, ax, ay);
+        }
+    }
+}
 
 fn main() {
     let mut driver = 9; // VGA
     let mut mode = 2; // VGAHI (640x480, 16 colors)
 
-    // Initialize graphics with visual backend
     initgraph(&mut driver, &mut mode, "");
-
     if graphresult() != GraphResult::Ok {
         eprintln!("Graphics initialization failed!");
         return;
     }
 
-    println!("Interactive BGI Demo with minifb visual backend");
-    println!("Screen resolution: {}x{}", getmaxx() + 1, getmaxy() + 1);
-    println!("Watch the graphics window for visual output!");
-    println!("This demo will automatically draw shapes for 10 seconds...");
+    // Batch mode + refresh() per frame keeps the window flicker-free.
+    set_batch_mode(true);
+    setbkcolor(Color::BLACK);
 
-    // Clear screen and set initial color
-    cleardevice();
-    setcolor(Color::WHITE);
+    let colors = palette();
+    let mut color_idx = 0usize;
+    let mut shape_idx = 0usize;
+    let mut stamps: Vec<Stamp> = Vec::new();
+    let mut frame = 0u32;
 
-    // Draw initial frame
-    outtextxy(10, 10, "BGI with minifb Visual Backend");
-    setcolor(Color::YELLOW);
-    outtextxy(10, 30, "Animated graphics demo - 10 seconds");
+    println!("Interactive BGI Demo");
+    println!("Left click: stamp shape | Right click / 'c': color | 's': shape");
+    println!("Middle click / 'x': clear | ESC or 'q': quit");
 
-    // Create an animated demo
-    for frame in 0..100 {
-        // Clear previous frame (keeping text)
-        setcolor(Color::BLACK);
-        bar(50, 100, 590, 450);
+    loop {
+        let mx = mousex();
+        let my = mousey();
+        let current_color = colors[color_idx].1;
 
-        // Calculate animation values
-        let t = frame as f32 * 0.1;
-        let center_x = 320;
-        let center_y = 275;
+        // --- Handle mouse clicks (clear after handling so each physical
+        //     click is processed exactly once). ---
+        if ismouseclick(1) {
+            stamps.push(Stamp {
+                kind: shape_idx,
+                x: mx,
+                y: my,
+                color: current_color,
+            });
+            clearmouseclick(1);
+        }
+        if ismouseclick(2) {
+            color_idx = (color_idx + 1) % colors.len();
+            clearmouseclick(2);
+        }
+        if ismouseclick(4) {
+            stamps.clear();
+            clearmouseclick(4);
+        }
 
-        // Draw animated circles
-        for i in 0..5 {
-            let radius = 20 + i * 15;
-            let x = center_x + (t * (i + 1) as f32).cos() as i32 * (30 + i * 10);
-            let y = center_y + (t * (i + 1) as f32).sin() as i32 * (20 + i * 5);
-
-            match i {
-                0 => setcolor(Color::RED),
-                1 => setcolor(Color::GREEN),
-                2 => setcolor(Color::BLUE),
-                3 => setcolor(Color::CYAN),
-                4 => setcolor(Color::MAGENTA),
-                _ => setcolor(Color::WHITE),
+        // --- Handle keyboard ---
+        if kbhit()
+            && let Some(ch) = getch()
+        {
+            match ch {
+                'q' | 'Q' => break,
+                c if c as u8 == 27 => break, // ESC
+                'c' | 'C' => color_idx = (color_idx + 1) % colors.len(),
+                's' | 'S' => shape_idx = (shape_idx + 1) % SHAPE_NAMES.len(),
+                'x' | 'X' => stamps.clear(),
+                _ => {}
             }
-
-            circle(x, y, radius);
         }
 
-        // Draw connecting lines
+        // --- Render frame ---
+        cleardevice();
+
+        // Animated backdrop (always running, behind everything)
+        draw_background(frame, getmaxx() / 2, getmaxy() / 2);
+
+        // Persistent stamps
+        for stamp in &stamps {
+            setcolor(stamp.color);
+            draw_shape(stamp.kind, stamp.x, stamp.y, STAMP_RADIUS);
+        }
+
+        // Live preview of the current shape at the cursor
+        setcolor(current_color);
+        draw_shape(shape_idx, mx, my, STAMP_RADIUS);
+
+        // Crosshair at the cursor
         setcolor(Color::WHITE);
-        for i in 0..4 {
-            let x1 = center_x + (t * (i + 1) as f32).cos() as i32 * (30 + i * 10);
-            let y1 = center_y + (t * (i + 1) as f32).sin() as i32 * (20 + i * 5);
-            let x2 = center_x + (t * (i + 2) as f32).cos() as i32 * (30 + (i + 1) * 10);
-            let y2 = center_y + (t * (i + 2) as f32).sin() as i32 * (20 + (i + 1) * 5);
-            line(x1, y1, x2, y2);
-        }
+        line(mx - 10, my, mx + 10, my);
+        line(mx, my - 10, mx, my + 10);
 
-        // Draw frame counter
-        setcolor(Color::YELLOW);
-        let frame_text = format!("Frame: {}/100", frame + 1);
-        outtextxy(10, 50, &frame_text);
+        // HUD
+        setcolor(Color::WHITE);
+        outtextxy(10, 10, "Interactive BGI Demo (minifb)");
+        outtextxy(10, 30, &format!("Mouse: ({}, {})", mx, my));
+        outtextxy(
+            10,
+            50,
+            &format!(
+                "Color: {}   Shape: {}",
+                colors[color_idx].0, SHAPE_NAMES[shape_idx]
+            ),
+        );
+        outtextxy(10, 70, &format!("Stamps: {}", stamps.len()));
+        outtextxy(
+            10,
+            getmaxy() - 40,
+            "L-click: stamp  R-click/c: color  s: shape",
+        );
+        outtextxy(10, getmaxy() - 20, "middle/x: clear   ESC/q: quit");
 
-        // Small delay to make animation visible
-        thread::sleep(Duration::from_millis(100));
+        refresh();
+        frame = frame.wrapping_add(1);
+        delay(16); // ~60 FPS
     }
 
-    // Final message
-    setcolor(Color::GREEN);
-    outtextxy(10, 70, "Animation complete! Visual backend working!");
-
-    println!("Animation complete!");
-    println!("Check the graphics window - you should see animated circles!");
-    println!("The window will close automatically in 3 seconds...");
-
-    // Keep window open for a bit longer
-    thread::sleep(Duration::from_secs(3));
-
     closegraph();
-    println!("Graphics closed. Visual backend demo complete!");
+    println!("Graphics closed.");
 }
