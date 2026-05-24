@@ -144,6 +144,7 @@ fn test_mouse_operations_without_graphics() {
 }
 
 #[test]
+#[ignore = "Reads the live mouse across calls; only consistent with a headless (non-live) backend. mousex()/mousey()/getmouse() each poll the backend independently, so under a real window they can observe the cursor at different instants."]
 fn test_mouse_coordinate_consistency() {
     let mut driver = 9; // VGA
     let mut mode = 2; // VGAHI

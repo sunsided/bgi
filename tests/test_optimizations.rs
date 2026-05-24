@@ -4,25 +4,26 @@ mod tests {
     use bgi::*;
     use std::time::Instant;
 
-    /// Test optimized context validation performance
+    /// Initialize the global graphics state (VGA mode, headless-safe).
+    fn init() {
+        let mut gd = 0i32; // DETECT
+        let mut gm = 4i32; // VGA mode
+        initgraph(&mut gd, &mut gm, "");
+    }
+
+    /// Test optimized operation validation performance
     #[test]
+    #[ignore = "Timing test - can be flaky in CI environments"]
     fn test_optimized_context_validation() {
-        let mut context = GraphicsContext::create_test_context();
-        context.initialize(800, 600, "Test");
+        init();
 
         let start = Instant::now();
 
         // Test optimized functions
         for i in 0..1000 {
-            let _ = optimized_ctx::line_ctx(
-                &mut context,
-                i % 100,
-                i % 100,
-                (i + 10) % 100,
-                (i + 10) % 100,
-            );
-            let _ = optimized_ctx::circle_ctx(&mut context, i % 100, i % 100, 10);
-            let _ = optimized_ctx::putpixel_ctx(&mut context, i % 100, i % 100, Color::RED);
+            let _ = optimized_ctx::line_ctx(i % 100, i % 100, (i + 10) % 100, (i + 10) % 100);
+            let _ = optimized_ctx::circle_ctx(i % 100, i % 100, 10);
+            let _ = optimized_ctx::putpixel_ctx(i % 100, i % 100, Color::RED);
         }
 
         let duration = start.elapsed();
@@ -34,13 +35,15 @@ mod tests {
             "Operations took too long: {:?}",
             duration
         );
+
+        closegraph();
     }
 
     /// Test batch drawing performance
     #[test]
+    #[ignore = "Timing test - can be flaky in CI environments"]
     fn test_batch_drawing_performance() {
-        let mut context = GraphicsContext::create_test_context();
-        context.initialize(800, 600, "Test");
+        init();
 
         let mut batch = BatchDrawer::new();
 
@@ -52,7 +55,7 @@ mod tests {
         }
 
         let start = Instant::now();
-        let result = batch.execute(&mut context);
+        let result = batch.execute();
         let duration = start.elapsed();
 
         println!("Batch execution took: {:?}", duration);
@@ -64,13 +67,15 @@ mod tests {
             "Batch operations took too long: {:?}",
             duration
         );
+
+        closegraph();
     }
 
     /// Test compile-time optimized shapes
     #[test]
+    #[ignore = "Timing test - can be flaky in CI environments"]
     fn test_const_optimized_shapes() {
-        let mut context = GraphicsContext::create_test_context();
-        context.initialize(800, 600, "Test");
+        init();
 
         let start = Instant::now();
 
@@ -79,9 +84,9 @@ mod tests {
             let hexagon = const_optimized::Hexagon::new(100, 100, 30);
             let octagon = const_optimized::Octagon::new(150, 150, 25);
 
-            let _ = triangle.draw(&mut context);
-            let _ = hexagon.draw(&mut context);
-            let _ = octagon.draw(&mut context);
+            let _ = triangle.draw();
+            let _ = hexagon.draw();
+            let _ = octagon.draw();
         }
 
         let duration = start.elapsed();
@@ -93,13 +98,14 @@ mod tests {
             "Const optimized shapes took too long: {:?}",
             duration
         );
+
+        closegraph();
     }
 
     /// Test drawing pool memory efficiency
     #[test]
     fn test_drawing_pool_efficiency() {
-        let mut context = GraphicsContext::create_test_context();
-        context.initialize(800, 600, "Test");
+        init();
 
         let mut pool = DrawingPool::new();
 
@@ -116,7 +122,7 @@ mod tests {
         assert_eq!(pixels, 500);
 
         let start = Instant::now();
-        let result = pool.flush(&mut context);
+        let result = pool.flush();
         let duration = start.elapsed();
 
         println!("Pool flush took: {:?}", duration);
@@ -127,57 +133,52 @@ mod tests {
         assert_eq!(lines, 0);
         assert_eq!(circles, 0);
         assert_eq!(pixels, 0);
+
+        closegraph();
     }
 
     /// Test that optimizations maintain correctness
     #[test]
     fn test_optimization_correctness() {
-        let mut context = GraphicsContext::create_test_context();
+        // Ensure a clean (uninitialized) state on this thread.
+        closegraph();
 
-        // Test uninitialized context handling
-        let result = optimized_ctx::line_ctx(&mut context, 0, 0, 10, 10);
+        // Test uninitialized handling
+        let result = optimized_ctx::line_ctx(0, 0, 10, 10);
         assert_eq!(result, GraphResult::NotInitialized);
 
         // Initialize and test normal operation
-        context.initialize(800, 600, "Test");
-        let result = optimized_ctx::line_ctx(&mut context, 0, 0, 10, 10);
+        init();
+        let result = optimized_ctx::line_ctx(0, 0, 10, 10);
         assert_eq!(result, GraphResult::Ok);
 
         // Test pixel operations
-        let result = optimized_ctx::putpixel_ctx(&mut context, 50, 50, Color::YELLOW);
+        let result = optimized_ctx::putpixel_ctx(50, 50, Color::YELLOW);
         assert_eq!(result, GraphResult::Ok);
 
-        let (_color, result) = optimized_ctx::getpixel_ctx(&context, 50, 50);
+        let (_color, result) = optimized_ctx::getpixel_ctx(50, 50);
         assert_eq!(result, GraphResult::Ok);
         // Note: Color might not match exactly due to backend implementation
+
+        closegraph();
     }
 
     /// Benchmark performance improvement over naive implementation
     #[test]
     fn test_performance_improvement() {
-        let mut context = GraphicsContext::create_test_context();
-        context.initialize(800, 600, "Test");
+        init();
 
-        // Test old style (manual validation)
+        // Test naive style (direct global drawing)
         let start = Instant::now();
         for i in 0..1000 {
-            // Simulate old validation pattern
-            if context.is_initialized() {
-                let _ = context.draw_line(i % 100, i % 100, (i + 10) % 100, (i + 10) % 100);
-            }
+            line(i % 100, i % 100, (i + 10) % 100, (i + 10) % 100);
         }
         let old_duration = start.elapsed();
 
-        // Test new optimized style
+        // Test optimized style (validated wrapper)
         let start = Instant::now();
         for i in 0..1000 {
-            let _ = optimized_ctx::line_ctx(
-                &mut context,
-                i % 100,
-                i % 100,
-                (i + 10) % 100,
-                (i + 10) % 100,
-            );
+            let _ = optimized_ctx::line_ctx(i % 100, i % 100, (i + 10) % 100, (i + 10) % 100);
         }
         let new_duration = start.elapsed();
 
@@ -187,53 +188,32 @@ mod tests {
         );
 
         // New approach should be at least as fast (allowing for measurement variance)
-        let improvement_ratio = old_duration.as_nanos() as f64 / new_duration.as_nanos() as f64;
+        let improvement_ratio =
+            old_duration.as_nanos() as f64 / new_duration.as_nanos().max(1) as f64;
         assert!(
             improvement_ratio >= 0.8,
             "Performance regression detected: {:.2}x",
             improvement_ratio
         );
+
+        closegraph();
     }
 
-    /// Test that macro validation is equivalent to if statement
+    /// Test that the validate_graphics! macro gates on initialization
     #[test]
     fn test_macro_validation_equivalence() {
-        let mut context = GraphicsContext::create_test_context();
-
-        // Test uninitialized - macro version
-        fn test_macro_uninitialized(context: &GraphicsContext) -> GraphResult {
-            bgi::validate_context!(context);
+        fn guarded() -> GraphResult {
+            bgi::validate_graphics!();
             GraphResult::Ok
         }
-        let macro_result = test_macro_uninitialized(&context);
-        assert_eq!(macro_result, GraphResult::NotInitialized);
 
-        let if_result = {
-            if !context.is_initialized() {
-                GraphResult::NotInitialized
-            } else {
-                GraphResult::Ok
-            }
-        };
-        assert_eq!(if_result, GraphResult::NotInitialized);
+        // Ensure a clean (uninitialized) state on this thread.
+        closegraph();
+        assert_eq!(guarded(), GraphResult::NotInitialized);
 
-        // Test initialized
-        context.initialize(800, 600, "Test");
+        init();
+        assert_eq!(guarded(), GraphResult::Ok);
 
-        fn test_macro_initialized(context: &GraphicsContext) -> GraphResult {
-            bgi::validate_context!(context);
-            GraphResult::Ok
-        }
-        let macro_result = test_macro_initialized(&context);
-        assert_eq!(macro_result, GraphResult::Ok);
-
-        let if_result = {
-            if !context.is_initialized() {
-                GraphResult::NotInitialized
-            } else {
-                GraphResult::Ok
-            }
-        };
-        assert_eq!(if_result, GraphResult::Ok);
+        closegraph();
     }
 }

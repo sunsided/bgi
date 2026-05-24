@@ -2,154 +2,82 @@
 //!
 //! This module contains zero-cost abstractions and optimizations
 //! to reduce code duplication and improve performance.
+//!
+//! All operations route through the single global `GRAPHICS_STATE`
+//! (see [`crate::graphics`]); there is no separate graphics context.
 
-use crate::{Color, GraphResult, GraphicsContext};
+use crate::{Color, GraphResult};
 
-/// Macro for context validation to eliminate code duplication
+/// Macro for graphics-initialization validation to eliminate code duplication.
+///
+/// Returns [`GraphResult::NotInitialized`] from the enclosing function when the
+/// global graphics state has not been initialized via `initgraph`.
 #[macro_export]
-macro_rules! validate_context {
-    ($context:expr) => {
-        if !$context.is_initialized() {
-            return GraphResult::NotInitialized;
+macro_rules! validate_graphics {
+    () => {
+        if !$crate::is_graphics_initialized() {
+            return $crate::GraphResult::NotInitialized;
         }
     };
 }
 
-/// Helper trait for zero-cost abstractions over graphics operations
-pub trait GraphicsOperation<T> {
-    fn execute(self, context: &mut GraphicsContext) -> GraphResult;
-}
-
-/// Zero-cost abstraction for drawing operations that don't return values
-pub struct DrawingOp<F>
-where
-    F: FnOnce(&mut GraphicsContext) -> Result<(), crate::error::BgiError>,
-{
-    operation: F,
-}
-
-impl<F> DrawingOp<F>
-where
-    F: FnOnce(&mut GraphicsContext) -> Result<(), crate::error::BgiError>,
-{
-    pub fn new(operation: F) -> Self {
-        Self { operation }
-    }
-}
-
-impl<F> GraphicsOperation<()> for DrawingOp<F>
-where
-    F: FnOnce(&mut GraphicsContext) -> Result<(), crate::error::BgiError>,
-{
-    fn execute(self, context: &mut GraphicsContext) -> GraphResult {
-        validate_context!(context);
-
-        match (self.operation)(context) {
-            Ok(()) => GraphResult::Ok,
-            Err(_) => GraphResult::InvalidDriver,
-        }
-    }
-}
-
-/// Zero-cost abstraction for query operations that return values
-pub struct QueryOp<F, T>
-where
-    F: FnOnce(&GraphicsContext) -> Result<T, crate::error::BgiError>,
-{
-    operation: F,
-    _phantom: std::marker::PhantomData<T>,
-}
-
-impl<F, T> QueryOp<F, T>
-where
-    F: FnOnce(&GraphicsContext) -> Result<T, crate::error::BgiError>,
-{
-    pub fn new(operation: F) -> Self {
-        Self {
-            operation,
-            _phantom: std::marker::PhantomData,
-        }
-    }
-}
-
-impl<F, T> GraphicsOperation<T> for QueryOp<F, T>
-where
-    F: FnOnce(&GraphicsContext) -> Result<T, crate::error::BgiError>,
-    T: Default,
-{
-    fn execute(self, context: &mut GraphicsContext) -> GraphResult {
-        validate_context!(context);
-
-        match (self.operation)(context) {
-            Ok(_) => GraphResult::Ok,
-            Err(_) => GraphResult::InvalidDriver,
-        }
-    }
-}
-
-/// Optimized context operations that reduce function call overhead
+/// Optimized drawing operations with a single initialization check.
+///
+/// These mirror the global BGI drawing functions but return a [`GraphResult`]
+/// so callers can detect the uninitialized case. The actual drawing routes
+/// through the global `GRAPHICS_STATE` via [`crate::line`] and friends.
 pub mod optimized_ctx {
     use super::*;
 
-    /// Optimized line drawing with context validation
+    /// Optimized line drawing with initialization validation.
     #[inline]
-    pub fn line_ctx(
-        context: &mut GraphicsContext,
-        x1: i32,
-        y1: i32,
-        x2: i32,
-        y2: i32,
-    ) -> GraphResult {
-        DrawingOp::new(|ctx| ctx.draw_line(x1, y1, x2, y2)).execute(context)
+    pub fn line_ctx(x1: i32, y1: i32, x2: i32, y2: i32) -> GraphResult {
+        crate::validate_graphics!();
+        crate::line(x1, y1, x2, y2);
+        GraphResult::Ok
     }
 
-    /// Optimized circle drawing with context validation
+    /// Optimized circle drawing with initialization validation.
     #[inline]
-    pub fn circle_ctx(context: &mut GraphicsContext, x: i32, y: i32, radius: i32) -> GraphResult {
-        DrawingOp::new(|ctx| ctx.draw_circle(x, y, radius)).execute(context)
+    pub fn circle_ctx(x: i32, y: i32, radius: i32) -> GraphResult {
+        crate::validate_graphics!();
+        crate::circle(x, y, radius);
+        GraphResult::Ok
     }
 
-    /// Optimized rectangle drawing with context validation
+    /// Optimized rectangle drawing with initialization validation.
     #[inline]
-    pub fn rectangle_ctx(
-        context: &mut GraphicsContext,
-        left: i32,
-        top: i32,
-        right: i32,
-        bottom: i32,
-    ) -> GraphResult {
-        DrawingOp::new(|ctx| ctx.draw_rectangle(left, top, right, bottom)).execute(context)
+    pub fn rectangle_ctx(left: i32, top: i32, right: i32, bottom: i32) -> GraphResult {
+        crate::validate_graphics!();
+        crate::rectangle(left, top, right, bottom);
+        GraphResult::Ok
     }
 
-    /// Optimized pixel operations with context validation
+    /// Optimized pixel write with initialization validation.
     #[inline]
-    pub fn putpixel_ctx(
-        context: &mut GraphicsContext,
-        x: i32,
-        y: i32,
-        color: Color,
-    ) -> GraphResult {
-        DrawingOp::new(|ctx| ctx.put_pixel(x, y, color)).execute(context)
+    pub fn putpixel_ctx(x: i32, y: i32, color: Color) -> GraphResult {
+        crate::validate_graphics!();
+        crate::putpixel(x, y, color);
+        GraphResult::Ok
     }
 
-    /// Optimized pixel query with context validation
+    /// Optimized pixel query with initialization validation.
     #[inline]
-    pub fn getpixel_ctx(context: &GraphicsContext, x: i32, y: i32) -> (Color, GraphResult) {
-        if !context.is_initialized() {
+    pub fn getpixel_ctx(x: i32, y: i32) -> (Color, GraphResult) {
+        if !crate::is_graphics_initialized() {
             return (Color::BLACK, GraphResult::NotInitialized);
         }
-
-        match context.get_pixel(x, y) {
-            Ok(color) => (color, GraphResult::Ok),
-            Err(_) => (Color::BLACK, GraphResult::InvalidDriver),
-        }
+        (crate::getpixel(x, y), GraphResult::Ok)
     }
 }
 
 /// A single deferred drawing operation queued in a [`BatchDrawer`].
-type BatchOp = Box<dyn FnOnce(&mut GraphicsContext) -> Result<(), crate::error::BgiError>>;
+type BatchOp = Box<dyn FnOnce()>;
 
-/// Batch operation support for improved performance
+/// Batch operation support for improved performance.
+///
+/// Operations are queued, then executed against the global graphics state in a
+/// single pass after one initialization check.
 pub struct BatchDrawer {
     operations: Vec<BatchOp>,
 }
@@ -163,55 +91,48 @@ impl BatchDrawer {
 
     pub fn add_line(&mut self, x1: i32, y1: i32, x2: i32, y2: i32) {
         self.operations
-            .push(Box::new(move |ctx| ctx.draw_line(x1, y1, x2, y2)));
+            .push(Box::new(move || crate::line(x1, y1, x2, y2)));
     }
 
     pub fn add_circle(&mut self, x: i32, y: i32, radius: i32) {
         self.operations
-            .push(Box::new(move |ctx| ctx.draw_circle(x, y, radius)));
+            .push(Box::new(move || crate::circle(x, y, radius)));
     }
 
     pub fn add_rectangle(&mut self, left: i32, top: i32, right: i32, bottom: i32) {
-        self.operations.push(Box::new(move |ctx| {
-            ctx.draw_rectangle(left, top, right, bottom)
-        }));
+        self.operations
+            .push(Box::new(move || crate::rectangle(left, top, right, bottom)));
     }
 
     pub fn add_pixel(&mut self, x: i32, y: i32, color: Color) {
         self.operations
-            .push(Box::new(move |ctx| ctx.put_pixel(x, y, color)));
+            .push(Box::new(move || crate::putpixel(x, y, color)));
     }
 
-    /// Execute all batched operations with single context validation
-    pub fn execute(self, context: &mut GraphicsContext) -> GraphResult {
-        crate::validate_context!(context);
+    /// Execute all batched operations with a single initialization check.
+    pub fn execute(self) -> GraphResult {
+        crate::validate_graphics!();
 
         for operation in self.operations {
-            if operation(context).is_err() {
-                return GraphResult::InvalidDriver;
-            }
+            operation();
         }
 
         GraphResult::Ok
     }
 
-    /// Execute operations and return count of successful operations
-    pub fn execute_with_count(self, context: &mut GraphicsContext) -> (usize, GraphResult) {
-        if !context.is_initialized() {
+    /// Execute operations and return the count of executed operations.
+    pub fn execute_with_count(self) -> (usize, GraphResult) {
+        if !crate::is_graphics_initialized() {
             return (0, GraphResult::NotInitialized);
         }
 
-        let mut success_count = 0;
-
+        let mut count = 0;
         for operation in self.operations {
-            if operation(context).is_ok() {
-                success_count += 1;
-            } else {
-                return (success_count, GraphResult::InvalidDriver);
-            }
+            operation();
+            count += 1;
         }
 
-        (success_count, GraphResult::Ok)
+        (count, GraphResult::Ok)
     }
 }
 
@@ -242,8 +163,8 @@ pub mod const_optimized {
         }
 
         /// Draw regular polygon with compile-time known number of sides
-        pub fn draw(self, context: &mut GraphicsContext) -> GraphResult {
-            crate::validate_context!(context);
+        pub fn draw(self) -> GraphResult {
+            crate::validate_graphics!();
 
             if SIDES < 3 {
                 return GraphResult::InvalidDriver;
@@ -258,9 +179,7 @@ pub mod const_optimized {
                 let new_x = self.center_x + (self.radius as f64 * angle.cos()) as i32;
                 let new_y = self.center_y + (self.radius as f64 * angle.sin()) as i32;
 
-                if context.draw_line(prev_x, prev_y, new_x, new_y).is_err() {
-                    return GraphResult::InvalidDriver;
-                }
+                crate::line(prev_x, prev_y, new_x, new_y);
 
                 prev_x = new_x;
                 prev_y = new_y;
@@ -312,29 +231,20 @@ impl DrawingPool {
         self.pixel_buffer.push((x, y, color));
     }
 
-    /// Flush all buffered operations to the graphics context
-    pub fn flush(&mut self, context: &mut GraphicsContext) -> GraphResult {
-        crate::validate_context!(context);
+    /// Flush all buffered operations to the global graphics state.
+    pub fn flush(&mut self) -> GraphResult {
+        crate::validate_graphics!();
 
-        // Draw all lines
         for &(x1, y1, x2, y2) in &self.line_buffer {
-            if context.draw_line(x1, y1, x2, y2).is_err() {
-                return GraphResult::InvalidDriver;
-            }
+            crate::line(x1, y1, x2, y2);
         }
 
-        // Draw all circles
         for &(x, y, radius) in &self.circle_buffer {
-            if context.draw_circle(x, y, radius).is_err() {
-                return GraphResult::InvalidDriver;
-            }
+            crate::circle(x, y, radius);
         }
 
-        // Draw all pixels
         for &(x, y, color) in &self.pixel_buffer {
-            if context.put_pixel(x, y, color).is_err() {
-                return GraphResult::InvalidDriver;
-            }
+            crate::putpixel(x, y, color);
         }
 
         // Clear buffers for reuse

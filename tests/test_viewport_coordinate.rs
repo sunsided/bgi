@@ -255,10 +255,16 @@ fn test_cursor_boundary_movement() {
 }
 
 #[test]
-fn test_coordinate_functions_without_graphics() {
-    // Contract: coordinate functions should work without graphics initialization
+fn test_coordinate_functions_after_init() {
+    // Contract (Constitution: Proper Initialization Contract): coordinate
+    // functions operate on the unified GRAPHICS_STATE, which must be set up
+    // via initgraph() first. There is no parallel pre-init fallback state.
+    let mut gd = 0i32;
+    let mut gm = 4i32; // VGA mode
 
-    // Should not crash without initgraph
+    initgraph(&mut gd, &mut gm, "");
+    assert_eq!(graphresult(), GraphResult::Ok);
+
     setviewport(10, 10, 300, 200, true);
     let (left, top, right, bottom) = getviewport();
     assert_eq!(left, 10);
@@ -280,6 +286,8 @@ fn test_coordinate_functions_without_graphics() {
     moverel(25, -25);
     assert_eq!(getx(), 75);
     assert_eq!(gety(), 50);
+
+    closegraph();
 }
 
 #[test]
